@@ -173,7 +173,7 @@ class VQGAN_CLIP_Z_Quantize:
         size = round((area * ratio)**0.5), round((area / ratio)**0.5)
         return image.resize(size, Image.LANCZOS)
 
-    def synth():
+    def synth(self):
         z_q = self.vector_quantize(self.z.movedim(1, 3), model.quantize.embedding.weight).movedim(3, 1)
         return ClampWithGrad.apply(model.decode(z_q).add(1).div(2), 0, 1)
 
