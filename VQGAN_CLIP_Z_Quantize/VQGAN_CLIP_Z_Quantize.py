@@ -88,14 +88,14 @@ class VQGAN_CLIP_Z_Quantize:
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
             pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
-            z, *_ = model.encode(TF.to_tensor(pil_image).to(device).unsqueeze(0) * 2 - 1)
+            self.z, *_ = model.encode(TF.to_tensor(pil_image).to(device).unsqueeze(0) * 2 - 1)
         else:
             one_hot = F.one_hot(torch.randint(n_toks, [toksY * toksX], device=device), n_toks).float()
-            z = one_hot @ model.quantize.embedding.weight
-            z = z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
-        z_orig = z.clone()
-        z.requires_grad_(True)
-        self.opt = optim.Adam([z], lr=self.args.step_size)
+            self.z = one_hot @ model.quantize.embedding.weight
+            self.z = self.z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
+        z_orig = self.z.clone()
+        self.z.requires_grad_(True)
+        self.opt = optim.Adam([self.z], lr=self.args.step_size)
 
         normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
                                          std=[0.26862954, 0.26130258, 0.27577711])
@@ -173,15 +173,15 @@ class VQGAN_CLIP_Z_Quantize:
         size = round((area * ratio)**0.5), round((area / ratio)**0.5)
         return image.resize(size, Image.LANCZOS)
 
-    def synth(z):
-        z_q = self.vector_quantize(z.movedim(1, 3), model.quantize.embedding.weight).movedim(3, 1)
+    def synth():
+        z_q = self.vector_quantize(self.z.movedim(1, 3), model.quantize.embedding.weight).movedim(3, 1)
         return ClampWithGrad.apply(model.decode(z_q).add(1).div(2), 0, 1)
 
     @torch.no_grad()
     def checkin(self, i, losses, name):
         losses_str = ', '.join(f'{loss.item():g}' for loss in losses)
         tqdm.write(f'i: {i}, loss: {sum(losses).item():g}, losses: {losses_str}')
-        out = self.synth(z)
+        out = self.synth()
         sequence_number = i // self.args.display_freq
         outname = path.join(self.args.outdir, name)
         outname = self.image_output_path(outname, sequence_number=sequence_number)
@@ -190,13 +190,13 @@ class VQGAN_CLIP_Z_Quantize:
         display.display(display.Image(str(outname)))
 
     def ascend_txt(self):
-        out = self.synth(z)
+        out = self.synth(self.z)
         iii = perceptor.encode_image(normalize(make_cutouts(out))).float()
 
         result = []
 
         if self.args.init_weight:
-            result.append(F.mse_loss(z, z_orig) * self.args.init_weight / 2)
+            result.append(F.mse_loss(self.z, z_orig) * self.args.init_weight / 2)
 
         for prompt in pMs:
             result.append(prompt(iii))
@@ -212,7 +212,7 @@ class VQGAN_CLIP_Z_Quantize:
         loss.backward()
         self.opt.step()
         with torch.no_grad():
-            z.copy_(z.maximum(z_min).minimum(z_max))
+            self.z.copy_(self.z.maximum(z_min).minimum(z_max))
 
     # Used to set image path if it's a URL
     def get_pil_imagepath(self, imgpath):
