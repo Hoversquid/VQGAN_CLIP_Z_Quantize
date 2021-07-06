@@ -280,7 +280,7 @@ class VQGAN_CLIP_Z_Quantize:
 
     def lanczos(self, x, a):
         cond = torch.logical_and(-a < x, x < a)
-        out = torch.where(cond, sinc(x) * sinc(x/a), x.new_zeros([]))
+        out = torch.where(cond, self.sinc(x) * self.sinc(x/a), x.new_zeros([]))
         return out / out.sum()
 
 
