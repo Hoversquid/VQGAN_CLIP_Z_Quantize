@@ -95,7 +95,7 @@ class VQGAN_CLIP_Z_Quantize:
             z = z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
         z_orig = z.clone()
         z.requires_grad_(True)
-        opt = optim.Adam([z], lr=self.args.step_size)
+        self.opt = optim.Adam([z], lr=self.args.step_size)
 
         normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
                                          std=[0.26862954, 0.26130258, 0.27577711])
@@ -204,13 +204,13 @@ class VQGAN_CLIP_Z_Quantize:
         return result
 
     def train(self, i, name):
-        opt.zero_grad()
+        self.opt.zero_grad()
         lossAll = ascend_txt()
         if i % self.args.display_freq == 0:
             checkin(i, lossAll, name)
         loss = sum(lossAll)
         loss.backward()
-        opt.step()
+        self.opt.step()
         with torch.no_grad():
             z.copy_(z.maximum(z_min).minimum(z_max))
 
