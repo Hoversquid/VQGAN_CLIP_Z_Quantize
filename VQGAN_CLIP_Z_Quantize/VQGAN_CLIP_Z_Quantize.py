@@ -21,6 +21,136 @@ from os.path import isfile
 from CLIP import clip
 
 class VQGAN_CLIP_Z_Quantize:
+    def __init__(self, Other_txt_prompts,
+                Other_img_prompts,
+                Other_noise_seeds,
+                Other_noise_weights,
+                Output_directory,
+                Base_Image, Base_Image_Weight,
+                Image_Prompt1, Image_Prompt2, Image_Prompt3,
+                Text_Prompt1,Text_Prompt2,Text_Prompt3,
+                SizeX, SizeY,
+                Noise_Seed_Number, Noise_Weight, Display_Frequency):
+        try:
+          Noise_Seed_Number = int(Noise_Seed_Number)
+          noise_prompt_seeds = [Noise_Seed_Number] + Other_noise_seeds
+          noise_prompt_weights = [Noise_Weight] + Other_noise_weights
+        except:
+          print("No noise seeds used.")
+          noise_prompt_seeds = Other_noise_seeds
+          noise_prompt_weights = Other_noise_weights
+
+        txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
+        img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
+
+        args = argparse.Namespace(
+            outdir=Output_directory, # this is then name of where your output will go in /content or in /MyDrive
+            init_image=Base_Image,
+            init_weight=Base_Image_Weight,
+            prompts=txt_prompts,
+            image_prompts=img_prompts,
+            noise_prompt_seeds=noise_prompt_seeds,
+            noise_prompt_weights=noise_prompt_weights,
+            size=[SizeX, SizeY],
+            clip_model='ViT-B/32',
+            vqgan_config='vqgan_imagenet_f16_1024.yaml',
+            vqgan_checkpoint='vqgan_imagenet_f16_1024.ckpt',
+            step_size=0.05,
+            cutn=64,
+            cut_pow=1.,
+            display_freq=Display_Frequency,
+            seed=0
+        )
+
+        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        print('Using device:', device)
+
+        model = self.load_vqgan_model(args.vqgan_config, args.vqgan_checkpoint).to(device)
+        perceptor = clip.load(args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
+
+        cut_size = perceptor.visual.input_resolution
+        e_dim = model.quantize.e_dim
+        f = 2**(model.decoder.num_resolutions - 1)
+        make_cutouts = MakeCutouts(cut_size, args.cutn, cut_pow=args.cut_pow)
+        n_toks = model.quantize.n_e
+        toksX, toksY = args.size[0] // f, args.size[1] // f
+        sideX, sideY = toksX * f, toksY * f
+        z_min = model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
+        z_max = model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
+
+        if args.seed is not None:
+            torch.manual_seed(args.seed)
+
+        imgpath = None
+        if not args.init_image in (None, ""):
+          imgpath = self.get_pil_imagepath(args.init_image)
+
+        if imgpath:
+            pil_image = Image.open(imgpath).convert('RGB')
+            pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
+            z, *_ = model.encode(TF.to_tensor(pil_image).to(device).unsqueeze(0) * 2 - 1)
+        else:
+            one_hot = F.one_hot(torch.randint(n_toks, [toksY * toksX], device=device), n_toks).float()
+            z = one_hot @ model.quantize.embedding.weight
+            z = z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
+        z_orig = z.clone()
+        z.requires_grad_(True)
+        opt = optim.Adam([z], lr=args.step_size)
+
+        normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
+                                         std=[0.26862954, 0.26130258, 0.27577711])
+        pMs = []
+
+        filename = ""
+        name_limit = 42
+        for i, prompt in enumerate(args.prompts):
+            name_length = name_limit - len(filename)
+            if name_length > 0:
+              filename += prompt[:name_length]
+              if len(filename) + 2 < name_limit and i + 1 < len(args.prompts):
+                filename += "__"
+
+
+            txt, weight, stop = self.parse_prompt(prompt)
+            embed = perceptor.encode_text(clip.tokenize(txt).to(device)).float()
+            pMs.append(Prompt(embed, weight, stop).to(device))
+
+        if filename == "":
+          filename = "No_Prompts"
+
+        for prompt in args.image_prompts:
+            imgpath, weight, stop = self.parse_prompt(prompt)
+            imgpath = self.get_pil_imagepath(imgpath)
+
+            img = self.resize_image(Image.open(imgpath).convert('RGB'), (sideX, sideY))
+            batch = self.make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
+            embed = perceptor.encode_image(normalize(batch)).float()
+            pMs.append(Prompt(embed, weight, stop).to(device))
+
+        for seed, weight in zip(args.noise_prompt_seeds, args.noise_prompt_weights):
+            gen = torch.Generator().manual_seed(seed)
+            embed = torch.empty([1, perceptor.visual.output_dim]).normal_(generator=gen)
+            pMs.append(Prompt(embed, weight).to(device))
+
+        i = 0
+
+        filename = filename.replace(" ", "_")
+        if not path.exists(args.outdir):
+          mkdir(args.outdir)
+        outname = self.set_valid_filename(args.outdir, filename, 0)
+
+        filelistpath = path.join(args.outdir, outname + ".txt")
+
+        self.write_arg_list(args)
+        try:
+          with tqdm() as pbar:
+            while True:
+                self.train(i, outname)
+                i += 1
+                pbar.update()
+        except KeyboardInterrupt:
+            pass
+
     def load_vqgan_model(self, config_path, checkpoint_path):
         config = OmegaConf.load(config_path)
         if config.model.target == 'taming.models.vqgan.VQModel':
@@ -137,127 +267,6 @@ class VQGAN_CLIP_Z_Quantize:
           txt += f"{str(argname)}={str(argval)},\n"
         txt = f"args = argparse.Namespace(\n{txt})"
         txtfile.write(txt)
-
-    def __init__(self, form):
-        try:
-          Noise_Seed_Number = int(form.Noise_Seed_Number)
-          noise_prompt_seeds = [form.Noise_Seed_Number] + form.Other_noise_seeds
-          noise_prompt_weights = [form.Noise_Weight] + form.Other_noise_weights
-        except:
-          print("No noise seeds used.")
-          noise_prompt_seeds = form.Other_noise_seeds
-          noise_prompt_weights = form.Other_noise_weights
-
-        txt_prompts = self.get_prompt_list(form.Text_Prompt1, form.Text_Prompt2, form.Text_Prompt3, form.Other_txt_prompts)
-        img_prompts = self.get_prompt_list(form.Image_Prompt1, form.Image_Prompt2, form.Image_Prompt3, form.Other_img_prompts)
-
-        args = argparse.Namespace(
-            outdir=form.Output_directory, # this is then name of where your output will go in /content or in /MyDrive
-            init_image=form.Base_Image,
-            init_weight=form.Base_Image_Weight,
-            prompts=txt_prompts,
-            image_prompts=img_prompts,
-            noise_prompt_seeds=noise_prompt_seeds,
-            noise_prompt_weights=noise_prompt_weights,
-            size=[form.SizeX, form.SizeY],
-            clip_model='ViT-B/32',
-            vqgan_config='vqgan_imagenet_f16_1024.yaml',
-            vqgan_checkpoint='vqgan_imagenet_f16_1024.ckpt',
-            step_size=0.05,
-            cutn=64,
-            cut_pow=1.,
-            display_freq=form.Display_Frequency,
-            seed=0
-        )
-
-        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-        print('Using device:', device)
-
-        model = self.load_vqgan_model(args.vqgan_config, args.vqgan_checkpoint).to(device)
-        perceptor = clip.load(args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
-
-        cut_size = perceptor.visual.input_resolution
-        e_dim = model.quantize.e_dim
-        f = 2**(model.decoder.num_resolutions - 1)
-        make_cutouts = MakeCutouts(cut_size, args.cutn, cut_pow=args.cut_pow)
-        n_toks = model.quantize.n_e
-        toksX, toksY = args.size[0] // f, args.size[1] // f
-        sideX, sideY = toksX * f, toksY * f
-        z_min = model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
-        z_max = model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
-
-        if args.seed is not None:
-            torch.manual_seed(args.seed)
-
-        imgpath = None
-        if not args.init_image in (None, ""):
-          imgpath = self.get_pil_imagepath(args.init_image)
-
-        if imgpath:
-            pil_image = Image.open(imgpath).convert('RGB')
-            pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
-            z, *_ = model.encode(TF.to_tensor(pil_image).to(device).unsqueeze(0) * 2 - 1)
-        else:
-            one_hot = F.one_hot(torch.randint(n_toks, [toksY * toksX], device=device), n_toks).float()
-            z = one_hot @ model.quantize.embedding.weight
-            z = z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
-        z_orig = z.clone()
-        z.requires_grad_(True)
-        opt = optim.Adam([z], lr=args.step_size)
-
-        normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
-                                         std=[0.26862954, 0.26130258, 0.27577711])
-        pMs = []
-
-        filename = ""
-        name_limit = 42
-        for i, prompt in enumerate(args.prompts):
-            name_length = name_limit - len(filename)
-            if name_length > 0:
-              filename += prompt[:name_length]
-              if len(filename) + 2 < name_limit and i + 1 < len(args.prompts):
-                filename += "__"
-
-
-            txt, weight, stop = self.parse_prompt(prompt)
-            embed = perceptor.encode_text(clip.tokenize(txt).to(device)).float()
-            pMs.append(Prompt(embed, weight, stop).to(device))
-
-        if filename == "":
-          filename = "No_Prompts"
-
-        for prompt in args.image_prompts:
-            imgpath, weight, stop = self.parse_prompt(prompt)
-            imgpath = self.get_pil_imagepath(imgpath)
-
-            img = self.resize_image(Image.open(imgpath).convert('RGB'), (sideX, sideY))
-            batch = self.make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
-            embed = perceptor.encode_image(normalize(batch)).float()
-            pMs.append(Prompt(embed, weight, stop).to(device))
-
-        for seed, weight in zip(args.noise_prompt_seeds, args.noise_prompt_weights):
-            gen = torch.Generator().manual_seed(seed)
-            embed = torch.empty([1, perceptor.visual.output_dim]).normal_(generator=gen)
-            pMs.append(Prompt(embed, weight).to(device))
-
-        i = 0
-
-        filename = filename.replace(" ", "_")
-        if not path.exists(args.outdir):
-          mkdir(args.outdir)
-        outname = self.set_valid_filename(args.outdir, filename, 0)
-
-        filelistpath = path.join(args.outdir, outname + ".txt")
-
-        self.write_arg_list(args)
-        try:
-          with tqdm() as pbar:
-            while True:
-                self.train(i, outname)
-                i += 1
-                pbar.update()
-        except KeyboardInterrupt:
-            pass
 
     def parse_prompt(self, prompt):
         vals = prompt.rsplit('|', 2)
