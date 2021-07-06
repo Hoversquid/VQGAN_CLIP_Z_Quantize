@@ -205,9 +205,9 @@ class VQGAN_CLIP_Z_Quantize:
 
     def train(self, i, name):
         self.opt.zero_grad()
-        lossAll = ascend_txt()
+        lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0:
-            checkin(i, lossAll, name)
+            self.checkin(i, lossAll, name)
         loss = sum(lossAll)
         loss.backward()
         self.opt.step()
