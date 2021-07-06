@@ -174,23 +174,23 @@ class VQGAN_CLIP_Z_Quantize:
         return image.resize(size, Image.LANCZOS)
 
     def synth(z):
-        z_q = vector_quantize(z.movedim(1, 3), model.quantize.embedding.weight).movedim(3, 1)
+        z_q = self.vector_quantize(z.movedim(1, 3), model.quantize.embedding.weight).movedim(3, 1)
         return ClampWithGrad.apply(model.decode(z_q).add(1).div(2), 0, 1)
 
     @torch.no_grad()
     def checkin(self, i, losses, name):
         losses_str = ', '.join(f'{loss.item():g}' for loss in losses)
         tqdm.write(f'i: {i}, loss: {sum(losses).item():g}, losses: {losses_str}')
-        out = synth(z)
+        out = self.synth(z)
         sequence_number = i // self.args.display_freq
         outname = path.join(self.args.outdir, name)
-        outname = image_output_path(outname, sequence_number=sequence_number)
+        outname = self.image_output_path(outname, sequence_number=sequence_number)
 
         TF.to_pil_image(out[0].cpu()).save(outname)
         display.display(display.Image(str(outname)))
 
     def ascend_txt(self):
-        out = synth(z)
+        out = self.synth(z)
         iii = perceptor.encode_image(normalize(make_cutouts(out))).float()
 
         result = []
