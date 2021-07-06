@@ -65,18 +65,18 @@ class VQGAN_CLIP_Z_Quantize:
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print('Using device:', device)
 
-        model = self.load_vqgan_model(self.args.vqgan_config, self.args.vqgan_checkpoint).to(device)
+        self.model = self.load_vqgan_model(self.args.vqgan_config, self.args.vqgan_checkpoint).to(device)
         perceptor = clip.load(self.args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
 
         cut_size = perceptor.visual.input_resolution
-        e_dim = model.quantize.e_dim
-        f = 2**(model.decoder.num_resolutions - 1)
+        e_dim = self.model.quantize.e_dim
+        f = 2**(self.model.decoder.num_resolutions - 1)
         make_cutouts = MakeCutouts(self, cut_size, self.args.cutn, cut_pow=self.args.cut_pow)
-        n_toks = model.quantize.n_e
+        n_toks = self.model.quantize.n_e
         toksX, toksY = self.args.size[0] // f, self.args.size[1] // f
         sideX, sideY = toksX * f, toksY * f
-        z_min = model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
-        z_max = model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
+        z_min = self.model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
+        z_max = self.model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
 
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
@@ -88,10 +88,10 @@ class VQGAN_CLIP_Z_Quantize:
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
             pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
-            self.z, *_ = model.encode(TF.to_tensor(pil_image).to(device).unsqueeze(0) * 2 - 1)
+            self.z, *_ = self.model.encode(TF.to_tensor(pil_image).to(device).unsqueeze(0) * 2 - 1)
         else:
             one_hot = F.one_hot(torch.randint(n_toks, [toksY * toksX], device=device), n_toks).float()
-            self.z = one_hot @ model.quantize.embedding.weight
+            self.z = one_hot @ self.model.quantize.embedding.weight
             self.z = self.z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
         z_orig = self.z.clone()
         self.z.requires_grad_(True)
@@ -174,8 +174,8 @@ class VQGAN_CLIP_Z_Quantize:
         return image.resize(size, Image.LANCZOS)
 
     def synth(self):
-        z_q = self.vector_quantize(self.z.movedim(1, 3), model.quantize.embedding.weight).movedim(3, 1)
-        return ClampWithGrad.apply(model.decode(z_q).add(1).div(2), 0, 1)
+        z_q = self.vector_quantize(self.z.movedim(1, 3), self.model.quantize.embedding.weight).movedim(3, 1)
+        return ClampWithGrad.apply(self.model.decode(z_q).add(1).div(2), 0, 1)
 
     @torch.no_grad()
     def checkin(self, i, losses, name):
