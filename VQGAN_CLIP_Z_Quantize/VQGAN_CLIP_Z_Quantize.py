@@ -97,9 +97,9 @@ class VQGAN_CLIP_Z_Quantize:
         self.z.requires_grad_(True)
         self.opt = optim.Adam([self.z], lr=self.args.step_size)
 
-        normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
+        self.normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
                                          std=[0.26862954, 0.26130258, 0.27577711])
-        pMs = []
+        self.pMs = []
 
         filename = ""
         name_limit = 42
@@ -113,7 +113,7 @@ class VQGAN_CLIP_Z_Quantize:
 
             txt, weight, stop = self.parse_prompt(prompt)
             embed = self.perceptor.encode_text(clip.tokenize(txt).to(device)).float()
-            pMs.append(Prompt(embed, weight, stop).to(device))
+            self.pMs.append(Prompt(embed, weight, stop).to(device))
 
         if filename == "":
           filename = "No_Prompts"
@@ -124,13 +124,13 @@ class VQGAN_CLIP_Z_Quantize:
 
             img = self.resize_image(Image.open(imgpath).convert('RGB'), (sideX, sideY))
             batch = self.make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
-            embed = self.perceptor.encode_image(normalize(batch)).float()
-            pMs.append(Prompt(embed, weight, stop).to(device))
+            embed = self.perceptor.encode_image(self.normalize(batch)).float()
+            self.pMs.append(Prompt(embed, weight, stop).to(device))
 
         for seed, weight in zip(self.args.noise_prompt_seeds, self.args.noise_prompt_weights):
             gen = torch.Generator().manual_seed(seed)
             embed = torch.empty([1, self.perceptor.visual.output_dim]).normal_(generator=gen)
-            pMs.append(Prompt(embed, weight).to(device))
+            self.pMs.append(Prompt(embed, weight).to(device))
 
         i = 0
 
@@ -191,14 +191,14 @@ class VQGAN_CLIP_Z_Quantize:
 
     def ascend_txt(self):
         out = self.synth()
-        iii = self.perceptor.encode_image(normalize(self.make_cutouts(out))).float()
+        iii = self.perceptor.encode_image(self.normalize(self.make_cutouts(out))).float()
 
         result = []
 
         if self.args.init_weight:
             result.append(F.mse_loss(self.z, self.z_orig) * self.args.init_weight / 2)
 
-        for prompt in pMs:
+        for prompt in self.pMs:
             result.append(prompt(iii))
 
         return result
