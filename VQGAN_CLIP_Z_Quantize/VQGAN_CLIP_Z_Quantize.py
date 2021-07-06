@@ -301,13 +301,13 @@ class VQGAN_CLIP_Z_Quantize:
         input = input.view([n * c, 1, h, w])
 
         if dh < h:
-            kernel_h = lanczos(ramp(dh / h, 2), 2).to(input.device, input.dtype)
+            kernel_h = self.lanczos(ramp(dh / h, 2), 2).to(input.device, input.dtype)
             pad_h = (kernel_h.shape[0] - 1) // 2
             input = F.pad(input, (0, 0, pad_h, pad_h), 'reflect')
             input = F.conv2d(input, kernel_h[None, None, :, None])
 
         if dw < w:
-            kernel_w = lanczos(ramp(dw / w, 2), 2).to(input.device, input.dtype)
+            kernel_w = self.lanczos(ramp(dw / w, 2), 2).to(input.device, input.dtype)
             pad_w = (kernel_w.shape[0] - 1) // 2
             input = F.pad(input, (pad_w, pad_w, 0, 0), 'reflect')
             input = F.conv2d(input, kernel_w[None, None, None, :])
