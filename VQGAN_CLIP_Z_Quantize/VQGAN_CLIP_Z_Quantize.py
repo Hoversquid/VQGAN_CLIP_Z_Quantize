@@ -71,7 +71,7 @@ class VQGAN_CLIP_Z_Quantize:
         cut_size = perceptor.visual.input_resolution
         e_dim = model.quantize.e_dim
         f = 2**(model.decoder.num_resolutions - 1)
-        make_cutouts = MakeCutouts(cut_size, args.cutn, cut_pow=args.cut_pow)
+        make_cutouts = MakeCutouts(cut_size, args.cutn, self, cut_pow=args.cut_pow)
         n_toks = model.quantize.n_e
         toksX, toksY = args.size[0] // f, args.size[1] // f
         sideX, sideY = toksX * f, toksY * f
@@ -359,11 +359,12 @@ class Prompt(nn.Module):
         return self.weight.abs() * ReplaceGrad.apply(dists, torch.maximum(dists, self.stop)).mean()
 
 class MakeCutouts(nn.Module):
-    def __init__(self, cut_size, cutn, cut_pow=1.):
+    def __init__(self, sampler, cut_size, cutn, cut_pow=1.):
         super().__init__()
         self.cut_size = cut_size
         self.cutn = cutn
         self.cut_pow = cut_pow
+        self.sampler = sampler
 
     def forward(self, input):
         sideY, sideX = input.shape[2:4]
@@ -375,5 +376,5 @@ class MakeCutouts(nn.Module):
             offsetx = torch.randint(0, sideX - size + 1, ())
             offsety = torch.randint(0, sideY - size + 1, ())
             cutout = input[:, :, offsety:offsety + size, offsetx:offsetx + size]
-            cutouts.append(self.resample(cutout, (self.cut_size, self.cut_size)))
+            cutouts.append(self.sampler.resample(cutout, (self.cut_size, self.cut_size)))
         return ClampWithGrad.apply(torch.cat(cutouts, dim=0), 0, 1)
