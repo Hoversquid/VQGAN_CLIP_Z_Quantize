@@ -289,6 +289,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Image_Prompt1,Image_Prompt2,Image_Prompt3,\n
                 Text_Prompt1,Text_Prompt2,Text_Prompt3,\n
                 SizeX, SizeY,Noise_Seed_Number,Noise_Weight,Display_Frequency)"""
+
         comments = ["# (strings)",
           "# (strings of links or paths)",
           "# (longs)",
@@ -306,14 +307,14 @@ class VQGAN_CLIP_Z_Quantize:
           "#@param {type:'number'}",
           "#@param {type:'string'}",
           "#@param {type:'slider', min:0, max:1, step:0.01}",
-          "#@param {type:'integer'}",]
-      with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
-        argdict = vars(args)
-        txt = ""
-        for i, argname, argval in enumerate(argdict.items()):
-          txt += f"{str(argname)}={str(argval) {comments[i]}}\n"
+          "#@param {type:'integer'}"]
+        with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
+            argdict = vars(args)
+            txt = ""
+            for i, argname, argval in enumerate(argdict.items()):
+                txt += f"{str(argname)}={str(argval) {comments[i]}}\n"
 
-        txtfile.write(start + txt + end)
+            txtfile.write(start + txt + end)
 
     def parse_prompt(self, prompt):
         vals = prompt.rsplit('|', 2)
