@@ -212,7 +212,7 @@ class VQGAN_CLIP_Z_Quantize:
         loss.backward()
         self.opt.step()
         with torch.no_grad():
-            self.z.copy_(self.z.maximum(z_min).minimum(self.z_max))
+            self.z.copy_(self.z.maximum(self.z_min).minimum(self.z_max))
 
     # Used to set image path if it's a URL
     def get_pil_imagepath(self, imgpath):
