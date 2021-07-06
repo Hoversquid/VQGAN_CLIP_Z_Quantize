@@ -41,9 +41,10 @@ class VQGAN_CLIP_Z_Quantize:
           noise_prompt_seeds = Other_noise_seeds
           noise_prompt_weights = Other_noise_weights
 
-
-        arg_list = {Other_txt_prompts: str(Other_txt_prompts),Other_img_prompts:str(Other_img_prompts),
-                    Other_noise_seeds: str(Other_noise_seeds),Other_noise_weights:str(Other_noise_weights),
+        prompts = [str(Other_txt_prompts), str(Other_img_prompts), str(Other_noise_seeds), str(Other_noise_weights)]
+        for p in prompts:
+            print(p)
+        arg_list = {Other_txt_prompts: prompts[0]),Other_img_prompts:prompts[1],Other_noise_seeds: promtps[2],Other_noise_weights:prompts[3],
                     Output_directory:Output_directory,Base_Image:Base_Image, Base_Image_Weight:Base_Image_Weight,
                     Image_Prompt1:Image_Prompt1, Image_Prompt2:Image_Prompt2, Image_Prompt3:Image_Prompt3,
                     Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3,}
