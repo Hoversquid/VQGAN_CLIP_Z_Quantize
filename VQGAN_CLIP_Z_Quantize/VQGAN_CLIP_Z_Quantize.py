@@ -123,7 +123,7 @@ class VQGAN_CLIP_Z_Quantize:
             imgpath = self.get_pil_imagepath(imgpath)
 
             img = self.resize_image(Image.open(imgpath).convert('RGB'), (sideX, sideY))
-            batch = self.make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
+            batch = make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
             embed = perceptor.encode_image(normalize(batch)).float()
             pMs.append(Prompt(embed, weight, stop).to(device))
 
