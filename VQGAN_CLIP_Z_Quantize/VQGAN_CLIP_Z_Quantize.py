@@ -19,6 +19,7 @@ from tqdm.notebook import tqdm
 from os import chdir, mkdir, path, getcwd, walk
 from os.path import isfile
 from CLIP import clip
+from IPython.display import clear_output
 
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_txt_prompts,
@@ -39,6 +40,14 @@ class VQGAN_CLIP_Z_Quantize:
           print("No noise seeds used.")
           noise_prompt_seeds = Other_noise_seeds
           noise_prompt_weights = Other_noise_weights
+
+
+        arg_list = [Other_txt_prompts,Other_img_prompts,
+                    Other_noise_seeds,Other_noise_weights,
+                    Output_directory,Base_Image, Base_Image_Weight,
+                    Image_Prompt1, Image_Prompt2, Image_Prompt3,
+                    Text_Prompt1,Text_Prompt2,Text_Prompt3,
+                    SizeX, SizeY,Noise_Seed_Number, Noise_Weight, Display_Frequency]
 
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
@@ -141,13 +150,14 @@ class VQGAN_CLIP_Z_Quantize:
 
         self.filelistpath = path.join(self.args.outdir, outname + ".txt")
 
-        self.write_arg_list(self.args)
+        self.write_arg_list(arg_list)
         try:
           with tqdm() as pbar:
             while True:
                 self.train(i, outname)
                 i += 1
                 pbar.update()
+
         except KeyboardInterrupt:
             pass
 
@@ -180,9 +190,10 @@ class VQGAN_CLIP_Z_Quantize:
     @torch.no_grad()
     def checkin(self, i, losses, name):
         losses_str = ', '.join(f'{loss.item():g}' for loss in losses)
-        tqdm.write(f'i: {i}, loss: {sum(losses).item():g}, losses: {losses_str}')
         out = self.synth()
         sequence_number = i // self.args.display_freq
+        tqdm.write(f'file: {name}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
+
         outname = path.join(self.args.outdir, name)
         outname = self.image_output_path(outname, sequence_number=sequence_number)
 
@@ -208,6 +219,11 @@ class VQGAN_CLIP_Z_Quantize:
         lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0:
             self.checkin(i, lossAll, name)
+
+        # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
+        if i % 15:
+            clear_output()
+
         loss = sum(lossAll)
         loss.backward()
         self.opt.step()
@@ -260,13 +276,46 @@ class VQGAN_CLIP_Z_Quantize:
       return prompt_list
 
     def write_arg_list(self,args):
+        start = """# Running this cell will generate images based on the form inputs ->\n
+                # It will also copy the contents of this cell and save it as a text file\n
+                # Copy the text from the file and paste it here to reuse the form inputs\n
+                from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize\n\n
+                # If you want to add more text and image prompts,\n
+                # add them in a comma separated list in the brackets below\n"""
+
+        end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,\n
+                Other_noise_seeds,Other_noise_weights,\n
+                Output_directory,Base_Image,Base_Image_Weight,\n
+                Image_Prompt1,Image_Prompt2,Image_Prompt3,\n
+                Text_Prompt1,Text_Prompt2,Text_Prompt3,\n
+                SizeX, SizeY,Noise_Seed_Number,Noise_Weight,Display_Frequency)"""
+        comments = [
+          "# (strings)",
+          "# (strings of links or paths)",
+          "# (longs)",
+          "# (decimals)",
+          "#@param {type:'string'}",
+          "#@param {type:'string'}",
+          "#@param {type:'slider', min:0, max:1, step:0.01}",
+          "#@param {type:'string'}",
+          "#@param {type:'string'}",
+          "#@param {type:'string'}",
+          "#@param {type:'string'}",
+          "#@param {type:'string'}",
+          "#@param {type:'string'}",
+          "#@param {type:'number'}",
+          "#@param {type:'number'}",
+          "#@param {type:'string'}",
+          "#@param {type:'slider', min:0, max:1, step:0.01}",
+          "#@param {type:'integer'}",
+          ]
       with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
         argdict = vars(args)
         txt = ""
-        for argname, argval in argdict.items():
-          txt += f"{str(argname)}={str(argval)},\n"
-        txt = f"args = argparse.Namespace(\n{txt})"
-        txtfile.write(txt)
+        for i, argname, argval in enumerate(argdict.items()):
+          txt += f"{str(argname)}={str(argval) {comments[i]}}\n"
+
+        txtfile.write(start + txt + end)
 
     def parse_prompt(self, prompt):
         vals = prompt.rsplit('|', 2)
