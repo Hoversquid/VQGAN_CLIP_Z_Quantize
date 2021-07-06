@@ -190,7 +190,7 @@ class VQGAN_CLIP_Z_Quantize:
         display.display(display.Image(str(outname)))
 
     def ascend_txt(self):
-        out = self.synth(self.z)
+        out = self.synth()
         iii = perceptor.encode_image(normalize(make_cutouts(out))).float()
 
         result = []
