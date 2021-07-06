@@ -139,7 +139,7 @@ class VQGAN_CLIP_Z_Quantize:
           mkdir(self.args.outdir)
         outname = self.set_valid_filename(self.args.outdir, filename, 0)
 
-        filelistpath = path.join(self.args.outdir, outname + ".txt")
+        self.filelistpath = path.join(self.args.outdir, outname + ".txt")
 
         self.write_arg_list(self.args)
         try:
@@ -260,7 +260,7 @@ class VQGAN_CLIP_Z_Quantize:
       return prompt_list
 
     def write_arg_list(self,args):
-      with open(filelistpath, "w", encoding="utf-8") as txtfile:
+      with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
         argdict = vars(args)
         txt = ""
         for argname, argval in argdict.items():
