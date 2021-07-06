@@ -312,7 +312,8 @@ class VQGAN_CLIP_Z_Quantize:
             argdict = vars(args)
             txt = ""
             for i, argname, argval in enumerate(argdict.items()):
-                txt += f"{str(argname)}={str(argval) {comments[i]}{"\n"}"
+                txt += f"{str(argname)}={str(argval) {comments[i]}"
+                txt += "\n"
 
             txtfile.write(start + txt + end)
 
