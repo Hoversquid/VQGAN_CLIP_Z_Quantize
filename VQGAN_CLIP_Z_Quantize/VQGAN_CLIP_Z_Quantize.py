@@ -375,5 +375,5 @@ class MakeCutouts(nn.Module):
             offsetx = torch.randint(0, sideX - size + 1, ())
             offsety = torch.randint(0, sideY - size + 1, ())
             cutout = input[:, :, offsety:offsety + size, offsetx:offsetx + size]
-            cutouts.append(resample(cutout, (self.cut_size, self.cut_size)))
+            cutouts.append(self.resample(cutout, (self.cut_size, self.cut_size)))
         return ClampWithGrad.apply(torch.cat(cutouts, dim=0), 0, 1)
