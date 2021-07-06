@@ -43,7 +43,7 @@ class VQGAN_CLIP_Z_Quantize:
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
 
-        args = argparse.Namespace(
+        self.args = argparse.Namespace(
             outdir=Output_directory, # this is then name of where your output will go in /content or in /MyDrive
             init_image=Base_Image,
             init_weight=Base_Image_Weight,
@@ -65,25 +65,25 @@ class VQGAN_CLIP_Z_Quantize:
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print('Using device:', device)
 
-        model = self.load_vqgan_model(args.vqgan_config, args.vqgan_checkpoint).to(device)
-        perceptor = clip.load(args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
+        model = self.load_vqgan_model(self.args.vqgan_config, self.args.vqgan_checkpoint).to(device)
+        perceptor = clip.load(self.args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
 
         cut_size = perceptor.visual.input_resolution
         e_dim = model.quantize.e_dim
         f = 2**(model.decoder.num_resolutions - 1)
-        make_cutouts = MakeCutouts(self, cut_size, args.cutn, cut_pow=args.cut_pow)
+        make_cutouts = MakeCutouts(self, cut_size, self.args.cutn, cut_pow=self.args.cut_pow)
         n_toks = model.quantize.n_e
-        toksX, toksY = args.size[0] // f, args.size[1] // f
+        toksX, toksY = self.args.size[0] // f, self.args.size[1] // f
         sideX, sideY = toksX * f, toksY * f
         z_min = model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
         z_max = model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
 
-        if args.seed is not None:
-            torch.manual_seed(args.seed)
+        if self.args.seed is not None:
+            torch.manual_seed(self.args.seed)
 
         imgpath = None
-        if not args.init_image in (None, ""):
-          imgpath = self.get_pil_imagepath(args.init_image)
+        if not self.args.init_image in (None, ""):
+          imgpath = self.get_pil_imagepath(self.args.init_image)
 
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
@@ -95,7 +95,7 @@ class VQGAN_CLIP_Z_Quantize:
             z = z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
         z_orig = z.clone()
         z.requires_grad_(True)
-        opt = optim.Adam([z], lr=args.step_size)
+        opt = optim.Adam([z], lr=self.args.step_size)
 
         normalize = transforms.Normalize(mean=[0.48145466, 0.4578275, 0.40821073],
                                          std=[0.26862954, 0.26130258, 0.27577711])
@@ -103,11 +103,11 @@ class VQGAN_CLIP_Z_Quantize:
 
         filename = ""
         name_limit = 42
-        for i, prompt in enumerate(args.prompts):
+        for i, prompt in enumerate(self.args.prompts):
             name_length = name_limit - len(filename)
             if name_length > 0:
               filename += prompt[:name_length]
-              if len(filename) + 2 < name_limit and i + 1 < len(args.prompts):
+              if len(filename) + 2 < name_limit and i + 1 < len(self.args.prompts):
                 filename += "__"
 
 
@@ -118,7 +118,7 @@ class VQGAN_CLIP_Z_Quantize:
         if filename == "":
           filename = "No_Prompts"
 
-        for prompt in args.image_prompts:
+        for prompt in self.args.image_prompts:
             imgpath, weight, stop = self.parse_prompt(prompt)
             imgpath = self.get_pil_imagepath(imgpath)
 
@@ -127,7 +127,7 @@ class VQGAN_CLIP_Z_Quantize:
             embed = perceptor.encode_image(normalize(batch)).float()
             pMs.append(Prompt(embed, weight, stop).to(device))
 
-        for seed, weight in zip(args.noise_prompt_seeds, args.noise_prompt_weights):
+        for seed, weight in zip(self.args.noise_prompt_seeds, self.args.noise_prompt_weights):
             gen = torch.Generator().manual_seed(seed)
             embed = torch.empty([1, perceptor.visual.output_dim]).normal_(generator=gen)
             pMs.append(Prompt(embed, weight).to(device))
@@ -135,13 +135,13 @@ class VQGAN_CLIP_Z_Quantize:
         i = 0
 
         filename = filename.replace(" ", "_")
-        if not path.exists(args.outdir):
-          mkdir(args.outdir)
-        outname = self.set_valid_filename(args.outdir, filename, 0)
+        if not path.exists(self.args.outdir):
+          mkdir(self.args.outdir)
+        outname = self.set_valid_filename(self.args.outdir, filename, 0)
 
-        filelistpath = path.join(args.outdir, outname + ".txt")
+        filelistpath = path.join(self.args.outdir, outname + ".txt")
 
-        self.write_arg_list(args)
+        self.write_arg_list(self.args)
         try:
           with tqdm() as pbar:
             while True:
@@ -182,8 +182,8 @@ class VQGAN_CLIP_Z_Quantize:
         losses_str = ', '.join(f'{loss.item():g}' for loss in losses)
         tqdm.write(f'i: {i}, loss: {sum(losses).item():g}, losses: {losses_str}')
         out = synth(z)
-        sequence_number = i // args.display_freq
-        outname = path.join(args.outdir, name)
+        sequence_number = i // self.args.display_freq
+        outname = path.join(self.args.outdir, name)
         outname = image_output_path(outname, sequence_number=sequence_number)
 
         TF.to_pil_image(out[0].cpu()).save(outname)
@@ -195,8 +195,8 @@ class VQGAN_CLIP_Z_Quantize:
 
         result = []
 
-        if args.init_weight:
-            result.append(F.mse_loss(z, z_orig) * args.init_weight / 2)
+        if self.args.init_weight:
+            result.append(F.mse_loss(z, z_orig) * self.args.init_weight / 2)
 
         for prompt in pMs:
             result.append(prompt(iii))
@@ -206,7 +206,7 @@ class VQGAN_CLIP_Z_Quantize:
     def train(self, i, name):
         opt.zero_grad()
         lossAll = ascend_txt()
-        if i % args.display_freq == 0:
+        if i % self.args.display_freq == 0:
             checkin(i, lossAll, name)
         loss = sum(lossAll)
         loss.backward()
@@ -241,7 +241,7 @@ class VQGAN_CLIP_Z_Quantize:
             newname = basename
 
         unique_name = True
-        for root, dir, files in walk(args.outdir):
+        for root, dir, files in walk(self.args.outdir):
             for f in files:
               if path.splitext(f)[0] == newname:
                 unique_name = False
