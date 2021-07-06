@@ -66,17 +66,17 @@ class VQGAN_CLIP_Z_Quantize:
         print('Using device:', device)
 
         self.model = self.load_vqgan_model(self.args.vqgan_config, self.args.vqgan_checkpoint).to(device)
-        perceptor = clip.load(self.args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
+        self.perceptor = clip.load(self.args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
 
-        cut_size = perceptor.visual.input_resolution
+        cut_size = self.perceptor.visual.input_resolution
         e_dim = self.model.quantize.e_dim
         f = 2**(self.model.decoder.num_resolutions - 1)
-        make_cutouts = MakeCutouts(self, cut_size, self.args.cutn, cut_pow=self.args.cut_pow)
+        self.make_cutouts = MakeCutouts(self, cut_size, self.args.cutn, cut_pow=self.args.cut_pow)
         n_toks = self.model.quantize.n_e
         toksX, toksY = self.args.size[0] // f, self.args.size[1] // f
         sideX, sideY = toksX * f, toksY * f
-        z_min = self.model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
-        z_max = self.model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
+        self.z_min = self.model.quantize.embedding.weight.min(dim=0).values[None, :, None, None]
+        self.z_max = self.model.quantize.embedding.weight.max(dim=0).values[None, :, None, None]
 
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
@@ -93,7 +93,7 @@ class VQGAN_CLIP_Z_Quantize:
             one_hot = F.one_hot(torch.randint(n_toks, [toksY * toksX], device=device), n_toks).float()
             self.z = one_hot @ self.model.quantize.embedding.weight
             self.z = self.z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
-        z_orig = self.z.clone()
+        self.z_orig = self.z.clone()
         self.z.requires_grad_(True)
         self.opt = optim.Adam([self.z], lr=self.args.step_size)
 
@@ -112,7 +112,7 @@ class VQGAN_CLIP_Z_Quantize:
 
 
             txt, weight, stop = self.parse_prompt(prompt)
-            embed = perceptor.encode_text(clip.tokenize(txt).to(device)).float()
+            embed = self.perceptor.encode_text(clip.tokenize(txt).to(device)).float()
             pMs.append(Prompt(embed, weight, stop).to(device))
 
         if filename == "":
@@ -123,13 +123,13 @@ class VQGAN_CLIP_Z_Quantize:
             imgpath = self.get_pil_imagepath(imgpath)
 
             img = self.resize_image(Image.open(imgpath).convert('RGB'), (sideX, sideY))
-            batch = make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
-            embed = perceptor.encode_image(normalize(batch)).float()
+            batch = self.make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
+            embed = self.perceptor.encode_image(normalize(batch)).float()
             pMs.append(Prompt(embed, weight, stop).to(device))
 
         for seed, weight in zip(self.args.noise_prompt_seeds, self.args.noise_prompt_weights):
             gen = torch.Generator().manual_seed(seed)
-            embed = torch.empty([1, perceptor.visual.output_dim]).normal_(generator=gen)
+            embed = torch.empty([1, self.perceptor.visual.output_dim]).normal_(generator=gen)
             pMs.append(Prompt(embed, weight).to(device))
 
         i = 0
@@ -191,12 +191,12 @@ class VQGAN_CLIP_Z_Quantize:
 
     def ascend_txt(self):
         out = self.synth()
-        iii = perceptor.encode_image(normalize(make_cutouts(out))).float()
+        iii = self.perceptor.encode_image(normalize(self.make_cutouts(out))).float()
 
         result = []
 
         if self.args.init_weight:
-            result.append(F.mse_loss(self.z, z_orig) * self.args.init_weight / 2)
+            result.append(F.mse_loss(self.z, self.z_orig) * self.args.init_weight / 2)
 
         for prompt in pMs:
             result.append(prompt(iii))
@@ -212,7 +212,7 @@ class VQGAN_CLIP_Z_Quantize:
         loss.backward()
         self.opt.step()
         with torch.no_grad():
-            self.z.copy_(self.z.maximum(z_min).minimum(z_max))
+            self.z.copy_(self.z.maximum(z_min).minimum(self.z_max))
 
     # Used to set image path if it's a URL
     def get_pil_imagepath(self, imgpath):
