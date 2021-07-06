@@ -71,7 +71,7 @@ class VQGAN_CLIP_Z_Quantize:
         cut_size = perceptor.visual.input_resolution
         e_dim = model.quantize.e_dim
         f = 2**(model.decoder.num_resolutions - 1)
-        make_cutouts = MakeCutouts(cut_size, args.cutn, self, cut_pow=args.cut_pow)
+        make_cutouts = MakeCutouts(self, cut_size, args.cutn, cut_pow=args.cut_pow)
         n_toks = model.quantize.n_e
         toksX, toksY = args.size[0] // f, args.size[1] // f
         sideX, sideY = toksX * f, toksY * f
