@@ -33,6 +33,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Text_Prompt1,Text_Prompt2,Text_Prompt3,
                 SizeX, SizeY,
                 Noise_Seed_Number, Noise_Weight, Display_Frequency):
+
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
           noise_prompt_seeds = [Noise_Seed_Number] + Other_noise_seeds
@@ -52,8 +53,8 @@ class VQGAN_CLIP_Z_Quantize:
                     Base_Image_Weight:Base_Image_Weight,
                     Image_Prompt1:Image_Prompt1,Image_Prompt2:Image_Prompt2,Image_Prompt3:Image_Prompt3,
                     Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3,
-                    SizeX:SizeX, SizeY:SizeY,Noise_Seed_Number:Noise_Seed_Number,
-                    Noise_Weight:Noise_Weight, Display_Frequency:Display_Frequency}
+                    SizeX:SizeX,SizeY:SizeY,Noise_Seed_Number:Noise_Seed_Number,
+                    Noise_Weight:Noise_Weight,Display_Frequency:Display_Frequency}
 
         prompts.update(arg_list)
 
@@ -164,7 +165,7 @@ class VQGAN_CLIP_Z_Quantize:
             while True:
                 self.train(i, outname)
                 i += 1
-                pbar.update()
+                pbar.update()!
 
         except KeyboardInterrupt:
             pass
@@ -200,12 +201,15 @@ class VQGAN_CLIP_Z_Quantize:
         losses_str = ', '.join(f'{loss.item():g}' for loss in losses)
         out = self.synth()
         sequence_number = i // self.args.display_freq
-        tqdm.write(f'file: {name}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
 
         outname = path.join(self.args.outdir, name)
         outname = self.image_output_path(outname, sequence_number=sequence_number)
 
         TF.to_pil_image(out[0].cpu()).save(outname)
+        # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
+        if sequence_number % 10 == 0:
+            clear_output()
+        tqdm.write(f'file: {name}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
         display.display(display.Image(str(outname)))
 
     def ascend_txt(self):
@@ -223,15 +227,11 @@ class VQGAN_CLIP_Z_Quantize:
         return result
 
     def train(self, i, name):
-        # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
 
         self.opt.zero_grad()
         lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0:
-            if i % (self.args.display_freq * 5) == 0:
-                clear_output()
             self.checkin(i, lossAll, name)
-
 
         loss = sum(lossAll)
         loss.backward()
