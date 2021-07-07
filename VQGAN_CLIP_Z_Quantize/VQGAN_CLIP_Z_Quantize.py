@@ -294,7 +294,8 @@ class VQGAN_CLIP_Z_Quantize:
 # Copy the text from the file and paste it here to reuse the form inputs
 from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
 # If you want to add more text and image prompts,
-# add them in a comma separated list in the brackets below"""
+# add them in a comma separated list in the brackets below
+"""
 
         end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
 Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
