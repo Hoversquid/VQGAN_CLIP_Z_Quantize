@@ -157,7 +157,10 @@ class VQGAN_CLIP_Z_Quantize:
           mkdir(self.args.outdir)
         outname = self.set_valid_filename(self.args.outdir, filename, 0)
 
-        self.filelistpath = path.join(self.args.outdir, outname + ".txt")
+        saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts")
+        if not path.exists(saved_prompts_dir):
+            mkdir(saved_prompts_dir)
+        self.filelistpath = path.join(saved_prompts_dir, outname + ".txt")
 
         self.write_arg_list(prompts)
         try:
@@ -207,9 +210,9 @@ class VQGAN_CLIP_Z_Quantize:
 
         TF.to_pil_image(out[0].cpu()).save(outname)
         # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
-        if sequence_number % 10 == 0:
+        if sequence_number % 70 == 0:
             clear_output()
-        tqdm.write(f'file: {name}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
+        tqdm.write(f'file: {path.basename(name)}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
         display.display(display.Image(str(outname)))
 
     def ascend_txt(self):
