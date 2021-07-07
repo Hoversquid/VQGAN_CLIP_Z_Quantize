@@ -53,7 +53,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         arg_list = {Output_directory:Output_directory,Base_Image:Base_Image, Base_Image_Weight:Base_Image_Weight,
                     Image_Prompt1:Image_Prompt1, Image_Prompt2:Image_Prompt2, Image_Prompt3:Image_Prompt3,
-                    Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3}
+                    Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3,
                     SizeX:SizeX, SizeY:SizeY,Noise_Seed_Number:Noise_Seed_Number, Noise_Weight:Noise_Weight, Display_Frequency:Display_Frequency}
         prompts.update(arg_list)
 
