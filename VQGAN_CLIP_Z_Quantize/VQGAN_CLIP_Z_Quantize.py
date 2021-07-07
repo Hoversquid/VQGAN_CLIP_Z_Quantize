@@ -32,7 +32,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Image_Prompt1, Image_Prompt2, Image_Prompt3,
                 Text_Prompt1,Text_Prompt2,Text_Prompt3,
                 SizeX, SizeY,
-                Noise_Seed_Number, Noise_Weight, Display_Frequency):
+                Noise_Seed_Number, Noise_Weight, Display_Frequency, Clear_Interval):
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -54,7 +54,7 @@ class VQGAN_CLIP_Z_Quantize:
                     "Image_Prompt1":Image_Prompt1,"Image_Prompt2":Image_Prompt2,"Image_Prompt3":Image_Prompt3,
                     "Text_Prompt1":Text_Prompt1,"Text_Prompt2":Text_Prompt2,"Text_Prompt3":Text_Prompt3,
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
-                    "Noise_Weight":Noise_Weight,"Display_Frequency":Display_Frequency}
+                    "Noise_Weight":Noise_Weight,"Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval}
 
         prompts.update(arg_list)
 
@@ -85,7 +85,10 @@ class VQGAN_CLIP_Z_Quantize:
 
         self.model = self.load_vqgan_model(self.args.vqgan_config, self.args.vqgan_checkpoint).to(device)
         self.perceptor = clip.load(self.args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
-
+        try:
+            self.clear_interval = int(Clear_Interval)
+        except:
+            self.clear_interval = 0
         cut_size = self.perceptor.visual.input_resolution
         e_dim = self.model.quantize.e_dim
         f = 2**(self.model.decoder.num_resolutions - 1)
@@ -161,7 +164,6 @@ class VQGAN_CLIP_Z_Quantize:
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + path.basename(outname) + ".txt"
-        print(f"saved prompted dir: {saved_prompts_dir}")
         self.write_arg_list(prompts)
         try:
           with tqdm() as pbar:
@@ -210,7 +212,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         TF.to_pil_image(out[0].cpu()).save(outname)
         # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
-        if i > 0 and sequence_number % 70 == 0:
+        if i > 0 and sequence_number % self.clear_interval == 0:
             clear_output()
         display.display(display.Image(str(outname)))
         tqdm.write(f'file: {path.basename(name)}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
@@ -287,19 +289,19 @@ class VQGAN_CLIP_Z_Quantize:
       return prompt_list
 
     def write_arg_list(self,args):
-        start = """# Running this cell will generate images based on the form inputs ->\n
-                # It will also copy the contents of this cell and save it as a text file\n
-                # Copy the text from the file and paste it here to reuse the form inputs\n
-                from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize\n\n
-                # If you want to add more text and image prompts,\n
-                # add them in a comma separated list in the brackets below\n"""
+        start = """# Running this cell will generate images based on the form inputs ->
+                # It will also copy the contents of this cell and save it as a text file
+                # Copy the text from the file and paste it here to reuse the form inputs
+                from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
+                # If you want to add more text and image prompts,
+                # add them in a comma separated list in the brackets below"""
 
-        end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,\n
-                Other_noise_seeds,Other_noise_weights,\n
-                Output_directory,Base_Image,Base_Image_Weight,\n
-                Image_Prompt1,Image_Prompt2,Image_Prompt3,\n
-                Text_Prompt1,Text_Prompt2,Text_Prompt3,\n
-                SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Display_Frequency)"""
+        end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                Other_noise_seeds,Other_noise_weights,
+                Output_directory,Base_Image,Base_Image_Weight,
+                Image_Prompt1,Image_Prompt2,Image_Prompt3,
+                Text_Prompt1,Text_Prompt2,Text_Prompt3,
+                SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Display_Frequency,Clear_Interval)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
@@ -318,6 +320,7 @@ class VQGAN_CLIP_Z_Quantize:
           "#@param {type:'number'}",
           "#@param {type:'string'}",
           "#@param {type:'slider', min:0, max:1, step:0.01}",
+          "#@param {type:'integer'}",
           "#@param {type:'integer'}"]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
