@@ -157,11 +157,11 @@ class VQGAN_CLIP_Z_Quantize:
           mkdir(self.args.outdir)
         outname = self.set_valid_filename(self.args.outdir, filename, 0)
 
-        saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts")
+        saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
-        # self.filelistpath = path.join(saved_prompts_dir, outname + ".txt")
-        self.filelistpath = path.join(self.args.outdir, "Saved_Prompts", outname + ".txt")
+        self.filelistpath = path.join(saved_prompts_dir, outname + ".txt")
+        # self.filelistpath = path.join(self.args.outdir, "Saved_Prompts", outname + ".txt")
         print(f"saved prompted dir: {saved_prompts_dir}")
         self.write_arg_list(prompts)
         try:
