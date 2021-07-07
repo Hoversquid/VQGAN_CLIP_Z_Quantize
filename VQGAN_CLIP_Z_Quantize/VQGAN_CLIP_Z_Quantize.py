@@ -49,12 +49,12 @@ class VQGAN_CLIP_Z_Quantize:
         prompts["Other_noise_seeds"] = Other_noise_seeds
         prompts["Other_noise_weights"] = Other_noise_weights
 
-        arg_list = {Output_directory:Output_directory,Base_Image:Base_Image,
-                    Base_Image_Weight:Base_Image_Weight,
-                    Image_Prompt1:Image_Prompt1,Image_Prompt2:Image_Prompt2,Image_Prompt3:Image_Prompt3,
-                    Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3,
-                    SizeX:SizeX,SizeY:SizeY,Noise_Seed_Number:Noise_Seed_Number,
-                    Noise_Weight:Noise_Weight,Display_Frequency:Display_Frequency}
+        arg_list = {"Output_directory":Output_directory,"Base_Image":Base_Image,
+                    "Base_Image_Weight":Base_Image_Weight,
+                    "Image_Prompt1":Image_Prompt1,"Image_Prompt2":Image_Prompt2,"Image_Prompt3":Image_Prompt3,
+                    "Text_Prompt1":Text_Prompt1,"Text_Prompt2":Text_Prompt2,"Text_Prompt3":Text_Prompt3,
+                    "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
+                    "Noise_Weight":Noise_Weight,"Display_Frequency":Display_Frequency}
 
         prompts.update(arg_list)
 
@@ -210,10 +210,10 @@ class VQGAN_CLIP_Z_Quantize:
 
         TF.to_pil_image(out[0].cpu()).save(outname)
         # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
-        if sequence_number % 70 == 0:
+        if i > 0 and sequence_number % 70 == 0:
             clear_output()
-        tqdm.write(f'file: {path.basename(name)}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
         display.display(display.Image(str(outname)))
+        tqdm.write(f'file: {path.basename(name)}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
 
     def ascend_txt(self):
         out = self.synth()
@@ -230,7 +230,6 @@ class VQGAN_CLIP_Z_Quantize:
         return result
 
     def train(self, i, name):
-
         self.opt.zero_grad()
         lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0:
