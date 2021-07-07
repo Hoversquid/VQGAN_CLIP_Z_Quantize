@@ -165,7 +165,7 @@ class VQGAN_CLIP_Z_Quantize:
             while True:
                 self.train(i, outname)
                 i += 1
-                pbar.update()!
+                pbar.update()
 
         except KeyboardInterrupt:
             pass
