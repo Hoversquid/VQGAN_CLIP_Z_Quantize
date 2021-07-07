@@ -289,19 +289,18 @@ class VQGAN_CLIP_Z_Quantize:
       return prompt_list
 
     def write_arg_list(self,args):
-        start = """# Running this cell will generate images based on the form inputs ->
-                # It will also copy the contents of this cell and save it as a text file
-                # Copy the text from the file and paste it here to reuse the form inputs
-                from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
-                # If you want to add more text and image prompts,
-                # add them in a comma separated list in the brackets below"""
+        start = """
+        # Running this cell will generate images based on the form inputs ->
+        # It will also copy the contents of this cell and save it as a text file
+        # Copy the text from the file and paste it here to reuse the form inputs
+        from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
+        # If you want to add more text and image prompts,
+        # add them in a comma separated list in the brackets below"""
 
-        end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
-                Other_noise_seeds,Other_noise_weights,
-                Output_directory,Base_Image,Base_Image_Weight,
-                Image_Prompt1,Image_Prompt2,Image_Prompt3,
-                Text_Prompt1,Text_Prompt2,Text_Prompt3,
-                SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Display_Frequency,Clear_Interval)"""
+        end = """
+        VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
+        Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+        Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Display_Frequency,Clear_Interval)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
