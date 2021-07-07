@@ -41,20 +41,20 @@ class VQGAN_CLIP_Z_Quantize:
           print("No noise seeds used.")
           noise_prompt_seeds = Other_noise_seeds
           noise_prompt_weights = Other_noise_weights
+
         prompts = OrderedDict()
         prompts["Other_txt_prompts"] = Other_txt_prompts
         prompts["Other_img_prompts"] = Other_img_prompts
         prompts["Other_noise_seeds"] = Other_noise_seeds
         prompts["Other_noise_weights"] = Other_noise_weights
 
-        # arg_list2 = {Output_directory=Output_directory,Base_Image:Base_Image, Base_Image_Weight:Base_Image_Weight,
-        #             Image_Prompt1:Image_Prompt1, Image_Prompt2:Image_Prompt2, Image_Prompt3:Image_Prompt3,
-        #             Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3}
-
-        arg_list = {Output_directory:Output_directory,Base_Image:Base_Image, Base_Image_Weight:Base_Image_Weight,
-                    Image_Prompt1:Image_Prompt1, Image_Prompt2:Image_Prompt2, Image_Prompt3:Image_Prompt3,
+        arg_list = {Output_directory:Output_directory,Base_Image:Base_Image,
+                    Base_Image_Weight:Base_Image_Weight,
+                    Image_Prompt1:Image_Prompt1,Image_Prompt2:Image_Prompt2,Image_Prompt3:Image_Prompt3,
                     Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3,
-                    SizeX:SizeX, SizeY:SizeY,Noise_Seed_Number:Noise_Seed_Number, Noise_Weight:Noise_Weight, Display_Frequency:Display_Frequency}
+                    SizeX:SizeX, SizeY:SizeY,Noise_Seed_Number:Noise_Seed_Number,
+                    Noise_Weight:Noise_Weight, Display_Frequency:Display_Frequency}
+
         prompts.update(arg_list)
 
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
@@ -296,7 +296,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Output_directory,Base_Image,Base_Image_Weight,\n
                 Image_Prompt1,Image_Prompt2,Image_Prompt3,\n
                 Text_Prompt1,Text_Prompt2,Text_Prompt3,\n
-                SizeX, SizeY,Noise_Seed_Number,Noise_Weight,Display_Frequency)"""
+                SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Display_Frequency)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
@@ -317,10 +317,11 @@ class VQGAN_CLIP_Z_Quantize:
           "#@param {type:'slider', min:0, max:1, step:0.01}",
           "#@param {type:'integer'}"]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
-            txt = ""
-            for i, argname, argval in enumerate(args.items()):
+            i, txt = 0, ""
+            for argname, argval in args.items():
                 txt += f"{str(argname)}={str(argval)} {comments[i]}"
                 txt += "\n"
+                i+=1
 
             txtfile.write(start + txt + end)
 
