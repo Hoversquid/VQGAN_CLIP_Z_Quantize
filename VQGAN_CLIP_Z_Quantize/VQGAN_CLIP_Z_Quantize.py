@@ -224,12 +224,14 @@ class VQGAN_CLIP_Z_Quantize:
 
     def train(self, i, name):
         # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
+
         self.opt.zero_grad()
         lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0:
-            if i % (self.args.display_freq * 2) == 0:
+            if i % (self.args.display_freq * 5) == 0:
                 clear_output()
             self.checkin(i, lossAll, name)
+
 
         loss = sum(lossAll)
         loss.backward()
