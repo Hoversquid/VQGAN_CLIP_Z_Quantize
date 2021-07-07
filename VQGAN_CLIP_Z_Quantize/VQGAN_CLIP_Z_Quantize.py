@@ -20,6 +20,7 @@ from os import chdir, mkdir, path, getcwd, walk
 from os.path import isfile
 from CLIP import clip
 from IPython.display import clear_output
+from collections import OrderedDict
 
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_txt_prompts,
@@ -40,15 +41,21 @@ class VQGAN_CLIP_Z_Quantize:
           print("No noise seeds used.")
           noise_prompt_seeds = Other_noise_seeds
           noise_prompt_weights = Other_noise_weights
+        prompts = OrderedDict()
+        prompts["Other_txt_prompts"] = Other_txt_prompts
+        prompts["Other_img_prompts"] = Other_img_prompts
+        prompts["Other_noise_seeds"] = Other_noise_seeds
+        prompts["Other_noise_weights"] = Other_noise_weights
 
-        prompts = [str(Other_txt_prompts), str(Other_img_prompts), str(Other_noise_seeds), str(Other_noise_weights)]
-        for p in prompts:
-            print(p)
-        arg_list = {Other_txt_prompts: prompts[0],Other_img_prompts:prompts[1],Other_noise_seeds: prompts[2],Other_noise_weights:prompts[3],
-                    Output_directory:Output_directory,Base_Image:Base_Image, Base_Image_Weight:Base_Image_Weight,
+        # arg_list2 = {Output_directory=Output_directory,Base_Image:Base_Image, Base_Image_Weight:Base_Image_Weight,
+        #             Image_Prompt1:Image_Prompt1, Image_Prompt2:Image_Prompt2, Image_Prompt3:Image_Prompt3,
+        #             Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3}
+
+        arg_list = {Output_directory:Output_directory,Base_Image:Base_Image, Base_Image_Weight:Base_Image_Weight,
                     Image_Prompt1:Image_Prompt1, Image_Prompt2:Image_Prompt2, Image_Prompt3:Image_Prompt3,
-                    Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3,}
-                    # SizeX:SizeX, SizeY:SizeY,Noise_Seed_Number:Noise_Seed_Number, Noise_Weight:Noise_Weight, Display_Frequency:Display_Frequency}
+                    Text_Prompt1:Text_Prompt1,Text_Prompt2:Text_Prompt2,Text_Prompt3:Text_Prompt3}
+                    SizeX:SizeX, SizeY:SizeY,Noise_Seed_Number:Noise_Seed_Number, Noise_Weight:Noise_Weight, Display_Frequency:Display_Frequency}
+        prompts.update(arg_list)
 
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
@@ -151,7 +158,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         self.filelistpath = path.join(self.args.outdir, outname + ".txt")
 
-        self.write_arg_list(arg_list)
+        self.write_arg_list(prompts)
         try:
           with tqdm() as pbar:
             while True:
@@ -310,9 +317,8 @@ class VQGAN_CLIP_Z_Quantize:
           "#@param {type:'slider', min:0, max:1, step:0.01}",
           "#@param {type:'integer'}"]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
-            argdict = vars(args)
             txt = ""
-            for i, argname, argval in enumerate(argdict.items()):
+            for i, argname, argval in enumerate(args.items()):
                 txt += f"{str(argname)}={str(argval)} {comments[i]}"
                 txt += "\n"
 
