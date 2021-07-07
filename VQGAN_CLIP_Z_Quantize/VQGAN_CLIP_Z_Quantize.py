@@ -326,7 +326,7 @@ class VQGAN_CLIP_Z_Quantize:
                 txt += f"{str(argname)}={str(argval)} {comments[i]}"
                 txt += "\n"
                 i+=1
-
+            print(f"writing settings to {self.filelistpath}")
             txtfile.write(start + txt + end)
 
     def parse_prompt(self, prompt):
