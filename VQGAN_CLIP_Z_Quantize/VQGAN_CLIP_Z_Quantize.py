@@ -166,7 +166,6 @@ class VQGAN_CLIP_Z_Quantize:
           mkdir(self.args.outdir)
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, path.splitext(filename)[0], 0)
-        print(f"using outname: {outpath}")
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
@@ -270,7 +269,6 @@ class VQGAN_CLIP_Z_Quantize:
         Sequence number left padded with 6 zeroes is appended if `save_every` is set.
         :rtype: Path
         """
-        print(f"output_path: {output_path}")
         split = path.splitext(output_path)[0]
         base = path.basename(output_path)
         if sequence_number:
@@ -310,25 +308,19 @@ class VQGAN_CLIP_Z_Quantize:
 
         if len(dirs) < 1:
             new_path = path.join(self.args.outdir, newname)
-            print(f"new_path: {new_path}")
             mkdir(new_path)
             return new_path
         for dir in dirs:
-            print(f"Checking for: {newname}")
-            print(f"Dir basename: {path.basename(dir)}")
             if path.basename(dir) == newname:
-                print(f"{dir} == {newname}")
                 unique_dir_name = False
                 break
 
         if unique_dir_name:
             new_path = path.join(self.args.outdir, newname)
-            print(f"new_path: {new_path}")
 
             mkdir(new_path)
             return new_path
 
-        print(f"Setting new dirname with i: {i}")
         return self.set_valid_dirname(dirs, basename, i + 1)
 
     def get_prompt_list(self, first, second, third, rest):
