@@ -305,17 +305,20 @@ class VQGAN_CLIP_Z_Quantize:
 
         if len(dirs) < 1:
             new_path = path.join(self.args.outdir, newname)
+            print(f"new_path: {new_path}")
             mkdir(new_path)
-            return path.join(self.args.outdir, newname)
+            return new_path
         for dir in dirs:
             if path.basename(dir) == newname:
                 unique_dir_name = False
                 break
 
         if unique_dir_name:
-            new_dir = path.join(self.args.outdir, newname)
-            mkdir(new_dir)
-            return new_dir
+            new_path = path.join(self.args.outdir, newname)
+            print(f"new_path: {new_path}")
+
+            mkdir(new_path)
+            return new_path
 
         return self.set_valid_dirname(basename, i + 1)
 
