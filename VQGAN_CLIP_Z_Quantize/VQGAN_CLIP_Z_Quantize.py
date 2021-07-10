@@ -303,22 +303,20 @@ class VQGAN_CLIP_Z_Quantize:
             newname = basename
 
         unique_dir_name = True
-        for root, dirs, files in walk(self.args.outdir):
-            for dir in dirs:
-                if path.basename(dir) == newname:
-                    unique_dir_name = False
-                    break
-
-                dir_name = dir
-
-            if not unique_dir_name:
+        dirs = [d for d in os.listdir(self.args.outdir)]
+        if len(dirs) < 1:
+            return path.join(self.args.outdir, newname)
+        for dir in dirs:
+            if path.basename(dir) == newname:
+                unique_dir_name = False
                 break
+
+            dir_name = path.basename(dir)
 
         if unique_dir_name:
             new_dir = path.join(path.dirname(dir_name), newname)
             mkdir(new_dir)
             return new_dir
-          # return path.join(filename, newname)
 
         return self.set_valid_dirname(filename, basename, i + 1)
 
