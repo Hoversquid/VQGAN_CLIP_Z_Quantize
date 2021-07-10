@@ -311,10 +311,10 @@ class VQGAN_CLIP_Z_Quantize:
                 unique_dir_name = False
                 break
 
-            dir_name = path.basename(dir)
+            last_dir = dir
 
         if unique_dir_name:
-            new_dir = path.join(path.dirname(dir_name), newname)
+            new_dir = path.join(path.dirname(last_dir), newname)
             mkdir(new_dir)
             return new_dir
 
