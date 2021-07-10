@@ -16,7 +16,7 @@ from torch.nn import functional as F
 from torchvision import transforms
 from torchvision.transforms import functional as TF
 from tqdm.notebook import tqdm
-from os import chdir, mkdir, path, getcwd, walk
+from os import chdir, mkdir, path, getcwd, walk, listdir
 from os.path import isfile
 from CLIP import clip
 from IPython.display import clear_output
@@ -303,7 +303,7 @@ class VQGAN_CLIP_Z_Quantize:
             newname = basename
 
         unique_dir_name = True
-        dirs = [d for d in os.listdir(self.args.outdir)]
+        dirs = [d for d in listdir(self.args.outdir)]
         if len(dirs) < 1:
             return path.join(self.args.outdir, newname)
         for dir in dirs:
