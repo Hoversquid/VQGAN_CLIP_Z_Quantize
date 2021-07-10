@@ -359,7 +359,8 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
           "#@param {type:'string'}",
           "#@param {type:'slider', min:0, max:1, step:0.01}",
           "#@param {type:'integer'}",
-          "#@param {type:'integer'}"]
+          "#@param {type:'integer'}",
+          "#@param {type:'string'}"]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
             for argname, argval in args.items():
