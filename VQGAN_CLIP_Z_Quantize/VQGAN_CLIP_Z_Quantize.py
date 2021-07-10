@@ -32,7 +32,8 @@ class VQGAN_CLIP_Z_Quantize:
                 Image_Prompt1, Image_Prompt2, Image_Prompt3,
                 Text_Prompt1,Text_Prompt2,Text_Prompt3,
                 SizeX, SizeY,
-                Noise_Seed_Number, Noise_Weight, Display_Frequency, Clear_Interval):
+                Noise_Seed_Number, Noise_Weight, Seed,
+                Display_Frequency, Clear_Interval):
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -42,6 +43,11 @@ class VQGAN_CLIP_Z_Quantize:
           print("No noise seeds used.")
           noise_prompt_seeds = Other_noise_seeds
           noise_prompt_weights = Other_noise_weights
+
+        try:
+            Seed = int(Seed)
+        except:
+            Seed = 0
 
         prompts = OrderedDict()
         prompts["Other_txt_prompts"] = Other_txt_prompts
@@ -54,7 +60,7 @@ class VQGAN_CLIP_Z_Quantize:
                     "Image_Prompt1":Image_Prompt1,"Image_Prompt2":Image_Prompt2,"Image_Prompt3":Image_Prompt3,
                     "Text_Prompt1":Text_Prompt1,"Text_Prompt2":Text_Prompt2,"Text_Prompt3":Text_Prompt3,
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
-                    "Noise_Weight":Noise_Weight,"Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval}
+                    "Noise_Weight":Noise_Weight,"Seed":Seed,"Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval}
 
         prompts.update(arg_list)
 
@@ -77,7 +83,7 @@ class VQGAN_CLIP_Z_Quantize:
             cutn=64,
             cut_pow=1.,
             display_freq=Display_Frequency,
-            seed=0
+            seed=Seed
         )
 
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
