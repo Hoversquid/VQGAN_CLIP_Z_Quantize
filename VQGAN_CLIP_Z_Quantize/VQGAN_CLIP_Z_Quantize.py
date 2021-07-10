@@ -164,7 +164,8 @@ class VQGAN_CLIP_Z_Quantize:
         filename = filename.replace(" ", "_")
         if not path.exists(self.args.outdir):
           mkdir(self.args.outdir)
-        outpath = self.set_valid_dirname(path.splitext(filename)[0], 0)
+        dirs = [x[0] for x in os.walk(self.args.outdir)]
+        outpath = self.set_valid_dirname(dirs, path.splitext(filename)[0], 0)
         print(f"using outname: {outpath}")
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
@@ -293,16 +294,14 @@ class VQGAN_CLIP_Z_Quantize:
 
         return self.set_valid_filename(self.args.outdir, basename, i + 1)
 
-    def set_valid_dirname(self, basename, i):
+    def set_valid_dirname(self, dirs, basename, i):
         if i > 0:
             newname = "%s(%d)" % (basename, i)
         else:
             newname = basename
 
         unique_dir_name = True
-        dirs = [d for d in listdir(self.args.outdir) if isdir(d)]
-        print(f"Looking for duplicate named directories in : {dirs}")
-
+        
         if len(dirs) < 1:
             new_path = path.join(self.args.outdir, newname)
             print(f"new_path: {new_path}")
@@ -324,7 +323,7 @@ class VQGAN_CLIP_Z_Quantize:
             return new_path
 
         print(f"Setting new dirname with i: {i}")
-        return self.set_valid_dirname(basename, i + 1)
+        return self.set_valid_dirname(dirs, basename, i + 1)
 
     def get_prompt_list(self, first, second, third, rest):
       param_list = [first, second, third]
