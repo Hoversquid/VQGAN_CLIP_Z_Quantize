@@ -165,7 +165,7 @@ class VQGAN_CLIP_Z_Quantize:
         if not path.exists(self.args.outdir):
           mkdir(self.args.outdir)
         # outname = self.set_valid_filename(self.args.outdir, filename, 0)
-        outname = self.set_valid_dirname(self.args.outdir, filename, 0)
+        outname = self.set_valid_dirname(path.splitext(filename)[0], 0)
 
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
@@ -277,7 +277,7 @@ class VQGAN_CLIP_Z_Quantize:
             output_path = f"{output_path}.{sequence_number_left_padded}"
         return Path(f"{output_path}.png")
 
-    def set_valid_filename(self, filename, basename, i):
+    def set_valid_filename(self, basename, i):
         if i > 0:
             newname = "%s(%d)" % (basename, i)
         else:
@@ -292,11 +292,11 @@ class VQGAN_CLIP_Z_Quantize:
             if not unique_name: break
 
         if unique_name:
-          return path.join(filename, newname)
+          return path.join(self.args.outdir, newname)
 
-        return self.set_valid_filename(filename, basename, i + 1)
+        return self.set_valid_filename(self.args.outdir, basename, i + 1)
 
-    def set_valid_dirname(self, filename, basename, i):
+    def set_valid_dirname(self, basename, i):
         if i > 0:
             newname = "%s(%d)" % (basename, i)
         else:
@@ -321,7 +321,7 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(new_dir)
             return new_dir
 
-        return self.set_valid_dirname(filename, basename, i + 1)
+        return self.set_valid_dirname(self.args.outdir, basename, i + 1)
 
     def get_prompt_list(self, first, second, third, rest):
       param_list = [first, second, third]
