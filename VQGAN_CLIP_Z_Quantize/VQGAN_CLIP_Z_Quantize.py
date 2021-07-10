@@ -222,9 +222,9 @@ class VQGAN_CLIP_Z_Quantize:
         sequence_number = i // self.args.display_freq
 
         outname = self.image_output_path(outpath, sequence_number=sequence_number)
-
         TF.to_pil_image(out[0].cpu()).save(outname)
-        # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
+        # stops the notebook file from getting too big by clearing the previous images from the output
+        # (they are still saved)
         if i > 0 and sequence_number % self.clear_interval == 0:
             clear_output()
         display.display(display.Image(str(outname)))
@@ -272,7 +272,7 @@ class VQGAN_CLIP_Z_Quantize:
         """
         if sequence_number:
             sequence_number_left_padded = str(sequence_number).zfill(6)
-            output_path = f"{path.basename(path.splitext(output_path)[0])}.{sequence_number_left_padded}"
+            output_path = f"{path.splitext(output_path)[0]}.{sequence_number_left_padded}"
         return Path(f"{output_path}.png")
 
     def set_valid_filename(self, basename, i):
