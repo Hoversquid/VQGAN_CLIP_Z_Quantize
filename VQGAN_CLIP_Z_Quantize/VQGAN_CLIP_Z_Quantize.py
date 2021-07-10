@@ -164,7 +164,7 @@ class VQGAN_CLIP_Z_Quantize:
         filename = filename.replace(" ", "_")
         if not path.exists(self.args.outdir):
           mkdir(self.args.outdir)
-        dirs = [x[0] for x in os.walk(self.args.outdir)]
+        dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, path.splitext(filename)[0], 0)
         print(f"using outname: {outpath}")
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
@@ -301,7 +301,7 @@ class VQGAN_CLIP_Z_Quantize:
             newname = basename
 
         unique_dir_name = True
-        
+
         if len(dirs) < 1:
             new_path = path.join(self.args.outdir, newname)
             print(f"new_path: {new_path}")
