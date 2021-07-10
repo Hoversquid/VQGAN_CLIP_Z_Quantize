@@ -279,6 +279,7 @@ class VQGAN_CLIP_Z_Quantize:
             output_path = f"{split}.{sequence_number_left_padded}"
         # opath = Path(f"{output_path}.png")
         opath = path.join(output_path, base)
+        opath = Path(f"{opath}.png")
         print(f"returning: {opath}")
         return opath
     def set_valid_filename(self, basename, i):
