@@ -314,6 +314,7 @@ class VQGAN_CLIP_Z_Quantize:
             last_dir = dir
 
         if unique_dir_name:
+            print(f"Using: {new_dir}")
             new_dir = path.join(path.dirname(last_dir), newname)
             mkdir(new_dir)
             return new_dir
