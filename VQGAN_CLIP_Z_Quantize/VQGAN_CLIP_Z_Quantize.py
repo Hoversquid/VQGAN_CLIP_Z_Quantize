@@ -62,7 +62,7 @@ class VQGAN_CLIP_Z_Quantize:
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
 
         self.args = argparse.Namespace(
-            outdir=Output_directory, # this is then name of where your output will go in /content or in /MyDrive
+            outdir=Output_directory, # this is the name of where your output will go
             init_image=Base_Image,
             init_weight=Base_Image_Weight,
             prompts=txt_prompts,
@@ -158,7 +158,8 @@ class VQGAN_CLIP_Z_Quantize:
         filename = filename.replace(" ", "_")
         if not path.exists(self.args.outdir):
           mkdir(self.args.outdir)
-        outname = self.set_valid_filename(self.args.outdir, filename, 0)
+        # outname = self.set_valid_filename(self.args.outdir, filename, 0)
+        outname = self.set_valid_dirname(self.args.outdir, filename, 0)
 
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
@@ -174,6 +175,13 @@ class VQGAN_CLIP_Z_Quantize:
 
         except KeyboardInterrupt:
             pass
+
+    def set_sorted_folder(self, diroutname, filetype):
+        diroutpath = path.join(self.content_output_path, diroutname)
+        if not path.exists(diroutpath):
+            # print("Creating sorted folder for " + str(diroutpath))
+            mkdir(diroutpath)
+        return diroutpath
 
     def load_vqgan_model(self, config_path, checkpoint_path):
         config = OmegaConf.load(config_path)
@@ -281,6 +289,28 @@ class VQGAN_CLIP_Z_Quantize:
           return path.join(filename, newname)
 
         return self.set_valid_filename(filename, basename, i + 1)
+
+    def set_valid_dirname(self, filename, basename, i):
+        if i > 0:
+            newname = "%s(%d)" % (basename, i)
+        else:
+            newname = basename
+
+        unique_dir_name = True
+        for root, dir, files in walk(self.args.outdir):
+            if path.basename(dir) == newname:
+                unique_dir_name = False
+                break
+
+            dir_name = dir
+
+        if unique_dir_name:
+            new_dir = path.join(path.dirname(dir_name, newname))
+            mkdir(new_dir)
+            return new_dir
+          # return path.join(filename, newname)
+
+        return self.set_valid_dirname(filename, basename, i + 1)
 
     def get_prompt_list(self, first, second, third, rest):
       param_list = [first, second, third]
