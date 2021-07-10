@@ -270,11 +270,12 @@ class VQGAN_CLIP_Z_Quantize:
         Sequence number left padded with 6 zeroes is appended if `save_every` is set.
         :rtype: Path
         """
+        base = path.splitext(output_path)[0]}
         print(f"From output_path: {output_path}")
-        print(f"Output_path split: {path.splitext(output_path)[0]}")
+        print(f"Output_path split: {base}")
         if sequence_number:
             sequence_number_left_padded = str(sequence_number).zfill(6)
-            output_path = f"{path.splitext(output_path)[0]}.{sequence_number_left_padded}"
+            output_path = f"{p.{sequence_number_left_padded}"
         path = Path(f"{output_path}.png")
         print(f"returning: {path}")
         return path
