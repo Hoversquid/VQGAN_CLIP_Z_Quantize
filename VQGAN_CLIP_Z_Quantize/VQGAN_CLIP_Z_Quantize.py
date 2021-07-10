@@ -275,7 +275,7 @@ class VQGAN_CLIP_Z_Quantize:
         print(f"Output_path split: {base}")
         if sequence_number:
             sequence_number_left_padded = str(sequence_number).zfill(6)
-            output_path = f"{p.{sequence_number_left_padded}"
+            output_path = f"{base}.{sequence_number_left_padded}"
         path = Path(f"{output_path}.png")
         print(f"returning: {path}")
         return path
