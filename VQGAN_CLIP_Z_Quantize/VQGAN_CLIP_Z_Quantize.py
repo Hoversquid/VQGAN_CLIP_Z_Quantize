@@ -164,17 +164,17 @@ class VQGAN_CLIP_Z_Quantize:
         filename = filename.replace(" ", "_")
         if not path.exists(self.args.outdir):
           mkdir(self.args.outdir)
-        outname = self.set_valid_dirname(path.splitext(filename)[0], 0)
-        print(f"using outname: {outname}")
+        outpath = self.set_valid_dirname(path.splitext(filename)[0], 0)
+        print(f"using outname: {outpath}")
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
-        self.filelistpath = saved_prompts_dir + path.basename(outname) + ".txt"
+        self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
         self.write_arg_list(prompts)
         try:
           with tqdm() as pbar:
             while True:
-                self.train(i, outname)
+                self.train(i, outpath)
                 i += 1
                 pbar.update()
 
@@ -215,20 +215,19 @@ class VQGAN_CLIP_Z_Quantize:
         return ClampWithGrad.apply(self.model.decode(z_q).add(1).div(2), 0, 1)
 
     @torch.no_grad()
-    def checkin(self, i, losses, name):
+    def checkin(self, i, losses, outpath):
         losses_str = ', '.join(f'{loss.item():g}' for loss in losses)
         out = self.synth()
         sequence_number = i // self.args.display_freq
 
-        outname = path.join(self.args.outdir, name)
-        outname = self.image_output_path(outname, sequence_number=sequence_number)
+        outname = self.image_output_path(outpath, sequence_number=sequence_number)
 
         TF.to_pil_image(out[0].cpu()).save(outname)
         # stops the notebook file from getting too big by clearing the previous images from the output (they are still saved)
         if i > 0 and sequence_number % self.clear_interval == 0:
             clear_output()
         display.display(display.Image(str(outname)))
-        tqdm.write(f'file: {path.basename(name)}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
+        tqdm.write(f'file: {path.basename(outpath)}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
 
     def ascend_txt(self):
         out = self.synth()
@@ -244,11 +243,11 @@ class VQGAN_CLIP_Z_Quantize:
 
         return result
 
-    def train(self, i, name):
+    def train(self, i, outpath):
         self.opt.zero_grad()
         lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0:
-            self.checkin(i, lossAll, name)
+            self.checkin(i, lossAll, outpath)
 
         loss = sum(lossAll)
         loss.backward()
@@ -270,10 +269,9 @@ class VQGAN_CLIP_Z_Quantize:
         Sequence number left padded with 6 zeroes is appended if `save_every` is set.
         :rtype: Path
         """
-        # output_path = self.textpath
         if sequence_number:
             sequence_number_left_padded = str(sequence_number).zfill(6)
-            output_path = f"{output_path}.{sequence_number_left_padded}"
+            output_path = f"{path.basename(path.splitext(output_path)[0])}.{sequence_number_left_padded}"
         return Path(f"{output_path}.png")
 
     def set_valid_filename(self, basename, i):
