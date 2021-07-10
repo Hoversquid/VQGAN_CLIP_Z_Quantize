@@ -297,6 +297,7 @@ class VQGAN_CLIP_Z_Quantize:
         return self.set_valid_filename(filename, basename, i + 1)
 
     def set_valid_dirname(self, filename, basename, i):
+        print(f"Checking outdir: {self.args.outdir}")
         if i > 0:
             newname = "%s(%d)" % (basename, i)
         else:
