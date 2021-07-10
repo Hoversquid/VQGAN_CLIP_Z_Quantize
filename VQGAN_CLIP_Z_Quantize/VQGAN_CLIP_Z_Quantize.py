@@ -323,7 +323,7 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(new_dir)
             return new_dir
 
-        return self.set_valid_dirname(self.args.outdir, basename, i + 1)
+        return self.set_valid_dirname(basename, i + 1)
 
     def get_prompt_list(self, first, second, third, rest):
       param_list = [first, second, third]
