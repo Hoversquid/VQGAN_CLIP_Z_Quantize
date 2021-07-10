@@ -309,6 +309,8 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(new_path)
             return new_path
         for dir in dirs:
+            print(f"Checking for: {newname}")
+            print(f"Dir basename: {path.basename(dir)}")
             if path.basename(dir) == newname:
                 unique_dir_name = False
                 break
