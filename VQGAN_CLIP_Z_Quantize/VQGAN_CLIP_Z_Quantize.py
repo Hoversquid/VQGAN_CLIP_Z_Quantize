@@ -303,11 +303,12 @@ class VQGAN_CLIP_Z_Quantize:
 
         unique_dir_name = True
         dirs = [d for d in listdir(self.args.outdir) if isdir(d)]
+        print(f"Looking for duplicate named directories: {self.args.outdir}")
+        
         if len(dirs) < 1:
             new_path = path.join(self.args.outdir, newname)
-            print(f"New_path: {new_path}")
+            mkdir(new_path)
             return path.join(self.args.outdir, newname)
-        print(f"Looking for duplicate named directories: {self.args.outdir}")
         for dir in dirs:
             if path.basename(dir) == newname:
                 unique_dir_name = False
