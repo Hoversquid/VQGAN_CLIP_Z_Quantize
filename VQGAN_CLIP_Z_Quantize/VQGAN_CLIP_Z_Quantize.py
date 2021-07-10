@@ -275,9 +275,9 @@ class VQGAN_CLIP_Z_Quantize:
             print(f"Output_path split: {path.splitext(output_path)[0]}")
             sequence_number_left_padded = str(sequence_number).zfill(6)
             output_path = f"{path.splitext(output_path)[0]}.{sequence_number_left_padded}"
-            print(f"returning: {Path(f"{output_path}.png")}")
-        return Path(f"{output_path}.png")
-
+            path = Path(f"{output_path}.png")
+            print(f"returning: {path}")
+        return path
     def set_valid_filename(self, basename, i):
         if i > 0:
             newname = "%s(%d)" % (basename, i)
