@@ -271,17 +271,11 @@ class VQGAN_CLIP_Z_Quantize:
         :rtype: Path
         """
         split = path.splitext(output_path)[0]
-        base = path.basename(output_path)
-        print(f"From output_path: {output_path}")
-        print(f"Base: {base}")
         if sequence_number:
             sequence_number_left_padded = str(sequence_number).zfill(6)
-            output_path = f"{split}.{sequence_number_left_padded}"
-        # opath = Path(f"{output_path}.png")
-        opath = path.join(output_path, base)
-        opath = Path(f"{opath}.png")
-        print(f"returning: {opath}")
-        return opath
+            split = f"{split}.{sequence_number_left_padded}"
+        output_path = path.join(split, path.basename(output_path))
+        return Path(f"{output_path}.png")
     def set_valid_filename(self, basename, i):
         if i > 0:
             newname = "%s(%d)" % (basename, i)
