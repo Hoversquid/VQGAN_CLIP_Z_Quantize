@@ -165,7 +165,7 @@ class VQGAN_CLIP_Z_Quantize:
         if not path.exists(self.args.outdir):
           mkdir(self.args.outdir)
         outname = self.set_valid_dirname(path.splitext(filename)[0], 0)
-
+        print(f"using outname: {outname}")
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
@@ -304,7 +304,7 @@ class VQGAN_CLIP_Z_Quantize:
         unique_dir_name = True
         dirs = [d for d in listdir(self.args.outdir) if isdir(d)]
         print(f"Looking for duplicate named directories: {self.args.outdir}")
-        
+
         if len(dirs) < 1:
             new_path = path.join(self.args.outdir, newname)
             mkdir(new_path)
