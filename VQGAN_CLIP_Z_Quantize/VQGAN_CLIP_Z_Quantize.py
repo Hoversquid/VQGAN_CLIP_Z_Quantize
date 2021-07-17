@@ -33,6 +33,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Text_Prompt1,Text_Prompt2,Text_Prompt3,
                 SizeX, SizeY,
                 Noise_Seed_Number, Noise_Weight, Seed,
+                Image_Model, CLIP_Model,
                 Display_Frequency, Clear_Interval):
 
         try:
@@ -60,7 +61,9 @@ class VQGAN_CLIP_Z_Quantize:
                     "Image_Prompt1":Image_Prompt1,"Image_Prompt2":Image_Prompt2,"Image_Prompt3":Image_Prompt3,
                     "Text_Prompt1":Text_Prompt1,"Text_Prompt2":Text_Prompt2,"Text_Prompt3":Text_Prompt3,
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
-                    "Noise_Weight":Noise_Weight,"Seed":Seed,"Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval}
+                    "Noise_Weight":Noise_Weight,"Seed":Seed,
+                    "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
+                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval}
 
         prompts.update(arg_list)
 
@@ -76,9 +79,9 @@ class VQGAN_CLIP_Z_Quantize:
             noise_prompt_seeds=noise_prompt_seeds,
             noise_prompt_weights=noise_prompt_weights,
             size=[SizeX, SizeY],
-            clip_model='ViT-B/32',
-            vqgan_config='vqgan_imagenet_f16_1024.yaml',
-            vqgan_checkpoint='vqgan_imagenet_f16_1024.ckpt',
+            clip_model=CLIP_Model,
+            vqgan_config=f'{Image_Model}.yaml',
+            vqgan_checkpoint=f'{Image_Model}.ckpt',
             step_size=0.05,
             cutn=64,
             cut_pow=1.,
@@ -340,7 +343,7 @@ from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
 
         end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
 Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Display_Frequency,Clear_Interval)"""
+Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
@@ -360,6 +363,8 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
           "#@param {type:'string'}",
           "#@param {type:'slider', min:0, max:1, step:0.01}",
           "#@param {type:'integer'}",
+          "#@param ['vqgan_imagenet_f16_1024', 'vqgan_imagenet_f16_16384']",
+          "#@param ['RN50', 'RN101', 'RN50x4', 'ViT-B/32']"
           "#@param {type:'integer'}",
           "#@param {type:'string'}"]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
