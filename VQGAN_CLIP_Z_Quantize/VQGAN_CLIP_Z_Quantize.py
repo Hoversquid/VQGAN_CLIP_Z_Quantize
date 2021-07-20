@@ -169,7 +169,7 @@ class VQGAN_CLIP_Z_Quantize:
           mkdir(self.args.outdir)
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, path.splitext(filename)[0], 0)
-        Combined_Dir = self.set_valid_dirname(dirs, path.basename(Combined_Dir))
+        Combined_Dir = self.set_valid_dirname(dirs, path.basename(Combined_Dir), 0)
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
