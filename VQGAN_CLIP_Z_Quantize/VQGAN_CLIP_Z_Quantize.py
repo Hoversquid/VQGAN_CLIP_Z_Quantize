@@ -34,7 +34,7 @@ class VQGAN_CLIP_Z_Quantize:
                 SizeX, SizeY,
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
-                Display_Frequency, Clear_Interval):
+                Display_Frequency, Clear_Interval, Max_Iterations):
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -63,7 +63,7 @@ class VQGAN_CLIP_Z_Quantize:
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
                     "Noise_Weight":Noise_Weight,"Seed":Seed,
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
-                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval}
+                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations}
 
         prompts.update(arg_list)
 
@@ -174,12 +174,23 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
         self.write_arg_list(prompts)
+        def train_and_update():
+            self.train(i, outpath)
+            i += 1
+            pbar.update()
+
         try:
-          with tqdm() as pbar:
-            while True:
-                self.train(i, outpath)
-                i += 1
-                pbar.update()
+            with tqdm() as pbar:
+                if Max_Iterations > 0:
+                    j = 0
+                    while j < Max_Iterations:
+                        train_and_update()
+                        j += 1
+                else:
+                    while True:
+                        train_and_update()
+
+
 
         except KeyboardInterrupt:
             pass
