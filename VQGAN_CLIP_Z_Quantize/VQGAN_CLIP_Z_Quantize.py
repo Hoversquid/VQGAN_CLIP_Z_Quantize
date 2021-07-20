@@ -17,7 +17,7 @@ from torchvision import transforms
 from torchvision.transforms import functional as TF
 from tqdm.notebook import tqdm
 from os import chdir, mkdir, path, getcwd, walk, listdir
-from os.path import isfile, isdir
+from os.path import isfile, isdir, exists
 from CLIP import clip
 from IPython.display import clear_output
 from collections import OrderedDict
@@ -34,7 +34,7 @@ class VQGAN_CLIP_Z_Quantize:
                 SizeX, SizeY,
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
-                Display_Frequency, Clear_Interval, Max_Iterations):
+                Display_Frequency, Clear_Interval, Max_Iterations, Combined_Dir):
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -63,7 +63,7 @@ class VQGAN_CLIP_Z_Quantize:
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
                     "Noise_Weight":Noise_Weight,"Seed":Seed,
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
-                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations}
+                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations,"Combined_Dir":Combined_Dir}
 
         prompts.update(arg_list)
 
@@ -169,13 +169,15 @@ class VQGAN_CLIP_Z_Quantize:
           mkdir(self.args.outdir)
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, path.splitext(filename)[0], 0)
+        Combined_Dir = self.set_valid_dirname(dirs, path.basename(Combined_Dir))
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
         self.write_arg_list(prompts)
-        def train_and_update(i):
-            self.train(i, outpath)
+
+        def train_and_update(i, outpath=outpath, last_image=False):
+            self.train(i, outpath, last_image)
             i += 1
             pbar.update()
             return i
@@ -184,9 +186,12 @@ class VQGAN_CLIP_Z_Quantize:
             with tqdm() as pbar:
                 if Max_Iterations > 0:
                     j = 0
-                    while j < Max_Iterations:
-                        i = train_and_update(i)
+                    while j < Max_Iterations - 1:
+                        i = train_and_update(i, last_image=False)
                         j += 1
+                    train_and_update(i, outpath=Combined_Dir, last_image=True)
+
+
                 else:
                     while True:
                         i = train_and_update(i)
@@ -258,10 +263,10 @@ class VQGAN_CLIP_Z_Quantize:
 
         return result
 
-    def train(self, i, outpath):
+    def train(self, i, outpath, override=False):
         self.opt.zero_grad()
         lossAll = self.ascend_txt()
-        if i % self.args.display_freq == 0:
+        if i % self.args.display_freq == 0 or override:
             self.checkin(i, lossAll, outpath)
 
         loss = sum(lossAll)
@@ -355,7 +360,7 @@ from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
 
         end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
 Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations)"""
+Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations,Combined_Dir)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
@@ -379,7 +384,9 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
           "#@param ['RN50', 'RN101', 'RN50x4', 'ViT-B/32']",
           "#@param {type:'integer'}",
           "#@param {type:'string'}",
-          "#@param {type:'integer'}"]
+          "#@param {type:'integer'}",
+          "#@param {type:'string'}"
+          ]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
             for argname, argval in args.items():
