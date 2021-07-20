@@ -174,21 +174,22 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
         self.write_arg_list(prompts)
-        def train_and_update():
+        def train_and_update(i):
             self.train(i, outpath)
             i += 1
             pbar.update()
+            return i
 
         try:
             with tqdm() as pbar:
                 if Max_Iterations > 0:
                     j = 0
                     while j < Max_Iterations:
-                        train_and_update()
+                        i = train_and_update(i)
                         j += 1
                 else:
                     while True:
-                        train_and_update()
+                        i = train_and_update(i)
 
 
 
