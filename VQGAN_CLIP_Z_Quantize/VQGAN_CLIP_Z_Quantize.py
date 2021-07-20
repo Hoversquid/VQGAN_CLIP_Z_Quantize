@@ -382,6 +382,7 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
             for argname, argval in args.items():
+                print(argname, argval, comments[i])
                 if comments[i] == "#@param {type:'string'}":
                     txt += f"{str(argname)}=\"{str(argval)}\" {comments[i]}"
                 else:
