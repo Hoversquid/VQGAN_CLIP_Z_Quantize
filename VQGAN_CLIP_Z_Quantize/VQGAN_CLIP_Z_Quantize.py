@@ -354,7 +354,7 @@ from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
 
         end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
 Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval)"""
+Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
@@ -377,7 +377,8 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
           "#@param ['vqgan_imagenet_f16_1024', 'vqgan_imagenet_f16_16384']",
           "#@param ['RN50', 'RN101', 'RN50x4', 'ViT-B/32']",
           "#@param {type:'integer'}",
-          "#@param {type:'string'}"]
+          "#@param {type:'string'}",
+          "#@param {type:'integer'}"]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
             for argname, argval in args.items():
