@@ -198,9 +198,10 @@ class VQGAN_CLIP_Z_Quantize:
                         if not path.exists(Combined_Dir):
                             mkdir(Combined_Dir)
 
-                        combined_outpath = path.join(Combined_Dir, base_name + ".png")
-                        files = [f for f in listdir(combined_outpath) if isfile(f)]
+                        files = [f for f in listdir(Combined_Dir) if isfile(f)]
                         seq_num = len(files)+1
+
+                        combined_outpath = path.join(Combined_Dir, base_name + ".png")
                         final_image_outpath = self.image_output_path(combined_outpath, sequence_number=seq_num)
                         i = train_and_update(i, outpath=final_image_outpath, last_image=True)
                         return
