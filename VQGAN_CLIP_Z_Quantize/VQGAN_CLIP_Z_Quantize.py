@@ -200,9 +200,10 @@ class VQGAN_CLIP_Z_Quantize:
 
                         files = [f for f in listdir(Combined_Dir) if isfile(f)]
                         seq_num = len(files)+1
-
-                        combined_outpath = path.join(Combined_Dir, base_name + ".png")
-                        final_image_outpath = self.image_output_path(combined_outpath, sequence_number=seq_num)
+                        sequence_number_left_padded = str(seq_num).zfill(6)
+                        newname = f"{base_name}.{sequence_number_left_padded}.png"
+                        combined_outpath = path.join(Combined_Dir,newname)
+                        # final_image_outpath = self.image_output_path(combined_outpath, sequence_number=seq_num)
                         i = train_and_update(i, outpath=final_image_outpath, last_image=True)
                         return
 
@@ -404,7 +405,6 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
             for argname, argval in args.items():
-                print(argname, argval, comments[i])
                 if comments[i] == "#@param {type:'string'}":
                     txt += f"{str(argname)}=\"{str(argval)}\" {comments[i]}"
                 else:
