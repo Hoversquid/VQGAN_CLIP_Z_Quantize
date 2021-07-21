@@ -201,7 +201,7 @@ class VQGAN_CLIP_Z_Quantize:
                         combined_outpath = path.join(Combined_Dir, base_name)
                         files = [f for f in listdir(combined_outpath) if isfile(f)]
                         final_image_outpath = self.image_output_path(combined_outpath, sequence_number=len(files))
-                        i = train_and_update(i, outpath=, last_image=True)
+                        i = train_and_update(i, outpath=final_image_outpath, last_image=True)
                         return
 
                     train_and_update(i, last_image=True)
