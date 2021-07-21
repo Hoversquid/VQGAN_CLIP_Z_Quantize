@@ -34,7 +34,8 @@ class VQGAN_CLIP_Z_Quantize:
                 SizeX, SizeY,
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
-                Display_Frequency, Clear_Interval, Max_Iterations, Combined_Dir):
+                Display_Frequency, Clear_Interval, Max_Iterations,
+                Combined_Dir):
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -168,8 +169,10 @@ class VQGAN_CLIP_Z_Quantize:
         if not path.exists(self.args.outdir):
           mkdir(self.args.outdir)
         dirs = [x[0] for x in walk(self.args.outdir)]
-        outpath = self.set_valid_dirname(dirs, path.splitext(filename)[0], 0)
-        Combined_Dir = self.set_valid_dirname(dirs, path.basename(Combined_Dir), 0)
+        base_name = path.splitext(filename)[0]
+        outpath = self.set_valid_dirname(dirs, base_name, 0)
+        # Combined_Dir = self.set_valid_dirname(dirs, path.basename(Combined_Dir), 0)
+
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
@@ -186,17 +189,26 @@ class VQGAN_CLIP_Z_Quantize:
             with tqdm() as pbar:
                 if Max_Iterations > 0:
                     j = 0
+
                     while j < Max_Iterations - 1:
                         i = train_and_update(i, last_image=False)
                         j += 1
-                    train_and_update(i, outpath=Combined_Dir, last_image=True)
 
+                    if not Combined_Dir in ("", None):
+                        if not path.exists(Combined_Dir):
+                            mkdir(Combined_Dir)
+
+                        combined_outpath = path.join(Combined_Dir, base_name)
+                        files = [f for f in listdir(combined_outpath) if isfile(f)]
+                        final_image_outpath = self.image_output_path(combined_outpath, sequence_number=len(files))
+                        i = train_and_update(i, outpath=, last_image=True)
+                        return
+
+                    train_and_update(i, last_image=True)
 
                 else:
                     while True:
                         i = train_and_update(i)
-
-
 
         except KeyboardInterrupt:
             pass
