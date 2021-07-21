@@ -202,7 +202,7 @@ class VQGAN_CLIP_Z_Quantize:
                         seq_num = len(files)+1
                         sequence_number_left_padded = str(seq_num).zfill(6)
                         base = path.basename(Combined_Dir)
-                        newname = f"{base}.{sequence_number_left_padded}.png"
+                        newname = f"{base}.{sequence_number_left_padded}"
                         combined_outpath = path.join(Combined_Dir,newname)
                         # final_image_outpath = self.image_output_path(combined_outpath, sequence_number=seq_num)
                         i = train_and_update(i, outpath=combined_outpath, last_image=True)
