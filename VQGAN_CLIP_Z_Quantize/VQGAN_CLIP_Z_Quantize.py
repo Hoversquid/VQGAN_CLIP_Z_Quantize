@@ -21,6 +21,7 @@ from os.path import isfile, isdir, exists
 from CLIP import clip
 from IPython.display import clear_output
 from collections import OrderedDict
+from shutil import copyfile
 
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_txt_prompts,
@@ -72,11 +73,6 @@ class VQGAN_CLIP_Z_Quantize:
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
 
-        initial_base_name = path.basename(Base_Image)[0]
-        initial_file_type = path.splitext(Base_Image)[1]
-        if initial_file_type in ('.mp4', '.gif'):
-            new_dir = self.set_valid_filename(initial_base_name, )
-            ['ffmpeg', '-i', Base_Image,
             # ffmpeg -i 3x.gif /content/GIF_frames/img.%04d.png
         self.args = argparse.Namespace(
             outdir=Output_directory, # this is the name of where your output will go
@@ -170,15 +166,16 @@ class VQGAN_CLIP_Z_Quantize:
             embed = torch.empty([1, self.perceptor.visual.output_dim]).normal_(generator=gen)
             self.pMs.append(Prompt(embed, weight).to(device))
 
-        i = 0
-
-        filename = filename.replace(" ", "_")
         if not path.exists(self.args.outdir):
-          mkdir(self.args.outdir)
-        dirs = [x[0] for x in walk(self.args.outdir)]
+            mkdir(self.args.outdir)
+
+
+        base_type = path.splitext(Base_Image)[1]
         base_name = path.splitext(filename)[0]
+        dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, base_name, 0)
-        # Combined_Dir = self.set_valid_dirname(dirs, path.basename(Combined_Dir), 0)
+        filename = filename.replace(" ", "_")
+        i = 0
 
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
@@ -192,6 +189,35 @@ class VQGAN_CLIP_Z_Quantize:
 
         try:
             with tqdm() as pbar:
+                if base_type in ('.mp4', '.gif'):
+                    final_frame_dir_name = f"{base_name}_{base_type}_final_frames"
+                    frames_dir = self.set_valid_dirname(dirs, final_frame_dir_name, 0)
+                    cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir + ".%06d" + base_type]
+                    subprocess.call(cmdargs)
+                    imgs = [f for f in listdir(final_frame_dir_name) if isfile(join(final_frame_dir_name, f))]
+                    sorted_imgs = sorted(imgs, key=lambda f: get_file_num(f, len(imgs)))
+                    for img in sorted_imgs:
+                        if Max_Iterations > 0:
+
+                            j = 0
+                            base_dir = self.args.outdir
+                            while j < Max_Iterations:
+                                dir_name = f"{base_name}_frame_{j}"
+                                self.args.outdir = path.join(base_dir, dir_name)
+                                train_and_update(i, last_image=False)
+                                i += 1
+                                j += 1
+                            final_dir = path.join(base_dir, final_frame_dir_name)
+                            files = [f for f in listdir(final_dir) if isfile(f)]
+                            seq_num = len(files)+1
+                            sequence_number_left_padded = str(seq_num).zfill(6)
+                            newname = f"{base_name}.{sequence_number_left_padded}"
+                            final_out = path.join(final_dir, newname)
+                            # train_and_update(i, outpath=final_out, last_image=True)
+                            # train_and_update(i, outpath=combined_outpath, last_image=True)
+                            copyfile(path.join(self.args.outdir, dirname), final_out)
+                            return
+
                 if Max_Iterations > 0:
                     j = 0
 
@@ -256,6 +282,11 @@ class VQGAN_CLIP_Z_Quantize:
     def synth(self):
         z_q = self.vector_quantize(self.z.movedim(1, 3), self.model.quantize.embedding.weight).movedim(3, 1)
         return ClampWithGrad.apply(self.model.decode(z_q).add(1).div(2), 0, 1)
+
+    def get_file_num(f, lastnum):
+        namestr = f.split(".")
+        if namestr[-2].isnumeric():
+            return int(namestr[-2])
 
     @torch.no_grad()
     def checkin(self, i, losses, outpath):
