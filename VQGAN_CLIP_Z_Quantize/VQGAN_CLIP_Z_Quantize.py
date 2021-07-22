@@ -181,9 +181,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         def train_and_update(i, outpath=outpath, last_image=False):
             self.train(i, outpath, last_image)
-            i += 1
             pbar.update()
-            return i
 
         try:
             with tqdm() as pbar:
@@ -191,7 +189,8 @@ class VQGAN_CLIP_Z_Quantize:
                     j = 0
 
                     while j < Max_Iterations - 1:
-                        i = train_and_update(i, last_image=False)
+                        train_and_update(i, last_image=False)
+                        i += 1
                         j += 1
 
                     if not Combined_Dir in ("", None):
@@ -205,14 +204,17 @@ class VQGAN_CLIP_Z_Quantize:
                         newname = f"{base}.{sequence_number_left_padded}"
                         combined_outpath = path.join(Combined_Dir,newname)
                         # final_image_outpath = self.image_output_path(combined_outpath, sequence_number=seq_num)
-                        i = train_and_update(i, outpath=combined_outpath, last_image=True)
+                        train_and_update(i, outpath=combined_outpath, last_image=True)
+                        i += 1
                         return
 
                     train_and_update(i, last_image=True)
 
                 else:
                     while True:
-                        i = train_and_update(i)
+                        train_and_update(i)
+                        i += 1
+
 
         except KeyboardInterrupt:
             pass
