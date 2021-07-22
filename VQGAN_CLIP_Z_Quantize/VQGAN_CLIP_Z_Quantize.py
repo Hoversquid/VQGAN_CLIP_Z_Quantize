@@ -64,13 +64,20 @@ class VQGAN_CLIP_Z_Quantize:
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
                     "Noise_Weight":Noise_Weight,"Seed":Seed,
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
-                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations,"Combined_Dir":Combined_Dir}
+                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations}
+
+
 
         prompts.update(arg_list)
-
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
 
+        initial_base_name = path.basename(Base_Image)[0]
+        initial_file_type = path.splitext(Base_Image)[1]
+        if initial_file_type in ('.mp4', '.gif'):
+            new_dir = self.set_valid_filename(initial_base_name, )
+            ['ffmpeg', '-i', Base_Image,
+            # ffmpeg -i 3x.gif /content/GIF_frames/img.%04d.png
         self.args = argparse.Namespace(
             outdir=Output_directory, # this is the name of where your output will go
             init_image=Base_Image,
@@ -203,7 +210,6 @@ class VQGAN_CLIP_Z_Quantize:
                         base = path.basename(Combined_Dir)
                         newname = f"{base}.{sequence_number_left_padded}"
                         combined_outpath = path.join(Combined_Dir,newname)
-                        # final_image_outpath = self.image_output_path(combined_outpath, sequence_number=seq_num)
                         train_and_update(i, outpath=combined_outpath, last_image=True)
                         i += 1
                         return
@@ -214,7 +220,6 @@ class VQGAN_CLIP_Z_Quantize:
                     while True:
                         train_and_update(i)
                         i += 1
-
 
         except KeyboardInterrupt:
             pass
