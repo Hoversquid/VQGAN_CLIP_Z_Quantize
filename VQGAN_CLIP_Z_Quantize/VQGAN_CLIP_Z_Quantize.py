@@ -222,12 +222,11 @@ class VQGAN_CLIP_Z_Quantize:
                             mkdir(self.args.outdir)
 
                             while i < Max_Iterations:
-
+                                i += 1
                                 if i == Max_Iterations:
                                     last_image = True
 
                                 frame_path = train_and_update(i, last_image=last_image)
-                                i += 1
 
                             final_frame_dir_name = f"{base_out}_final_frames"
                             final_dir = path.join(base_dir, final_frame_dir_name)
