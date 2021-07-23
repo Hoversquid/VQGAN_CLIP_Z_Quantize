@@ -22,6 +22,7 @@ from CLIP import clip
 from IPython.display import clear_output
 from collections import OrderedDict
 from shutil import copyfile
+import subprocess
 
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_txt_prompts,
