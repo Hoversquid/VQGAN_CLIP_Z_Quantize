@@ -230,12 +230,15 @@ class VQGAN_CLIP_Z_Quantize:
 
                             final_frame_dir_name = f"{filename}_final_frames"
                             final_dir = path.join(base_dir, final_frame_dir_name)
+                            if exists(final_dir):
+                                mkdir(final_dir)
                             files = [f for f in listdir(final_dir) if isfile(f)]
                             seq_num = len(files)+1
                             sequence_number_left_padded = str(seq_num).zfill(6)
                             newname = f"{filename}.{sequence_number_left_padded}"
                             final_out = path.join(final_dir, newname)
                             copyfile(frame_path, final_out)
+
 
                     return
 
