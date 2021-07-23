@@ -209,20 +209,20 @@ class VQGAN_CLIP_Z_Quantize:
                     subprocess.call(cmdargs)
                     imgs = [f for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                     sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
-
+                    i, j = 0
                     for img in sorted_imgs:
                         # using an animated file requires a max amount per frame
                         if Max_Iterations > 0:
                             i = 0
-                            j = 0
+                            # j = 0
                             last_image = False
+                            dir_name = f"{base_out}_frame_{j}"
+                            j += 1
+                            self.args.outdir = path.join(base_dir, dir_name)
+                            mkdir(self.args.outdir)
 
                             while j < Max_Iterations:
-                                dir_name = f"{base_out}_frame_{j}"
-                                j += 1
 
-                                self.args.outdir = path.join(base_dir, dir_name)
-                                mkdir(self.args.outdir)
                                 if j == Max_Iterations:
                                     last_image = True
 
