@@ -337,6 +337,7 @@ class VQGAN_CLIP_Z_Quantize:
         lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0 or override:
             new_filepath = self.checkin(i, lossAll, outpath)
+        else: new_filepath = None
 
         loss = sum(lossAll)
         loss.backward()
