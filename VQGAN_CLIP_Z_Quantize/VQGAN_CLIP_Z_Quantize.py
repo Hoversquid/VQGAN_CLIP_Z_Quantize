@@ -305,7 +305,7 @@ class VQGAN_CLIP_Z_Quantize:
         z_q = self.vector_quantize(self.z.movedim(1, 3), self.model.quantize.embedding.weight).movedim(3, 1)
         return ClampWithGrad.apply(self.model.decode(z_q).add(1).div(2), 0, 1)
 
-    def get_file_num(f, lastnum):
+    def get_file_num(self, f, lastnum):
         namestr = f.split(".")
         if namestr[-2].isnumeric():
             return int(namestr[-2])
