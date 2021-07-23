@@ -200,10 +200,7 @@ class VQGAN_CLIP_Z_Quantize:
                     frames_dir = join(base_dir, split_frames_dirname)
                     if not exists(frames_dir):
                         mkdir(frames_dir)
-                    # frames_dir = self.set_valid_dirname(dirs, split_frames_dirname, 0)
-                    print(f"Frames Dir: {frames_dir}")
                     imgname = f"{base_name}.%06d.png"
-                    # frames_dir = path.join(base_dir, frames_dir_name)
                     frames_dir_arg = path.join(frames_dir, imgname)
                     cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
                     subprocess.call(cmdargs)
@@ -219,8 +216,6 @@ class VQGAN_CLIP_Z_Quantize:
                             j += 1
                             new_frame_dir = path.join(base_dir, dir_name)
                             mkdir(new_frame_dir)
-                            # self.args.outdir = path.join(base_dir, dir_name)
-                            # mkdir(self.args.outdir)
 
                             while i <= Max_Iterations:
 
@@ -228,7 +223,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     frame_path = train_and_update(i, outpath=new_frame_dir, last_image=True)
                                     break
 
-                                frame_path = train_and_update(i, outpath=new_frame_dir, last_image=False)
+                                train_and_update(i, outpath=new_frame_dir, last_image=False)
                                 i += 1
 
                             final_frame_dir_name = f"{base_out}_final_frames"
@@ -256,23 +251,6 @@ class VQGAN_CLIP_Z_Quantize:
 
                     return
 
-                    # if not Combined_Dir in ("", None):
-
-                    # if not path.exists(Combined_Dir):
-                    #     mkdir(Combined_Dir)
-                    #
-                    # files = [f for f in listdir(Combined_Dir) if isfile(f)]
-                    # seq_num = len(files)+1
-                    # sequence_number_left_padded = str(seq_num).zfill(6)
-                    # base = path.basename(Combined_Dir)
-                    # newname = f"{base}.{sequence_number_left_padded}"
-                    # combined_outpath = path.join(Combined_Dir,newname)
-                    # train_and_update(i, outpath=combined_outpath, last_image=True)
-                    # i += 1
-                    # return
-                    #
-                    # train_and_update(i, last_image=True)
-
                 else:
                     while True:
                         train_and_update(i)
@@ -284,7 +262,6 @@ class VQGAN_CLIP_Z_Quantize:
     def set_sorted_folder(self, diroutname, filetype):
         diroutpath = path.join(self.content_output_path, diroutname)
         if not path.exists(diroutpath):
-            # print("Creating sorted folder for " + str(diroutpath))
             mkdir(diroutpath)
         return diroutpath
 
