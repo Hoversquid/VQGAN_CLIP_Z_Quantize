@@ -231,7 +231,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                             final_frame_dir_name = f"{base_out}_final_frames"
                             final_dir = path.join(base_dir, final_frame_dir_name)
-                            if exists(final_dir):
+                            if not exists(final_dir):
                                 mkdir(final_dir)
                             files = [f for f in listdir(final_dir) if isfile(f)]
                             seq_num = len(files)+1
