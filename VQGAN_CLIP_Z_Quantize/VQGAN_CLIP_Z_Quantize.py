@@ -197,7 +197,10 @@ class VQGAN_CLIP_Z_Quantize:
                 # splits an animated file into frames and runs each one separately
                 if base_type in ('.mp4', '.gif'):
                     split_frames_dirname = f"{base_name}_split_frames"
-                    frames_dir = self.set_valid_dirname(dirs, split_frames_dirname, 0)
+                    frames_dir = join(base_dir, split_frames_dirname)
+                    if exists(frames_dir):
+                        mkdir(frames_dir)
+                    # frames_dir = self.set_valid_dirname(dirs, split_frames_dirname, 0)
                     print(f"Frames Dir: {frames_dir}")
                     imgname = f"{base_name}.%06d.png"
                     # frames_dir = path.join(base_dir, frames_dir_name)
