@@ -113,7 +113,25 @@ class VQGAN_CLIP_Z_Quantize:
 
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
-            
+
+
+        filename = ""
+        name_limit = 42
+        for i, prompt in enumerate(self.args.prompts):
+            name_length = name_limit - len(filename)
+            if name_length > 0:
+              filename += prompt[:name_length]
+              if len(filename) + 2 < name_limit and i + 1 < len(self.args.prompts):
+                filename += "__"
+
+
+            txt, weight, stop = self.parse_prompt(prompt)
+            embed = self.perceptor.encode_text(clip.tokenize(txt).to(device)).float()
+            self.pMs.append(Prompt(embed, weight, stop).to(device))
+
+        if filename == "":
+          filename = "No_Prompts"
+
         filename = filename.replace(" ", "_")
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, filename, 0)
@@ -162,22 +180,7 @@ class VQGAN_CLIP_Z_Quantize:
                                          std=[0.26862954, 0.26130258, 0.27577711])
         self.pMs = []
 
-        filename = ""
-        name_limit = 42
-        for i, prompt in enumerate(self.args.prompts):
-            name_length = name_limit - len(filename)
-            if name_length > 0:
-              filename += prompt[:name_length]
-              if len(filename) + 2 < name_limit and i + 1 < len(self.args.prompts):
-                filename += "__"
 
-
-            txt, weight, stop = self.parse_prompt(prompt)
-            embed = self.perceptor.encode_text(clip.tokenize(txt).to(device)).float()
-            self.pMs.append(Prompt(embed, weight, stop).to(device))
-
-        if filename == "":
-          filename = "No_Prompts"
 
         for prompt in self.args.image_prompts:
             imgpath, weight, stop = self.parse_prompt(prompt)
