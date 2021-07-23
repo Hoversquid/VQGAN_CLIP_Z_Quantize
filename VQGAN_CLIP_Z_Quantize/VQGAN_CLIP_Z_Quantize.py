@@ -73,7 +73,6 @@ class VQGAN_CLIP_Z_Quantize:
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
 
-            # ffmpeg -i 3x.gif /content/GIF_frames/img.%04d.png
         self.args = argparse.Namespace(
             outdir=Output_directory, # this is the name of where your output will go
             init_image=Base_Image,
@@ -90,8 +89,7 @@ class VQGAN_CLIP_Z_Quantize:
             cutn=64,
             cut_pow=1.,
             display_freq=Display_Frequency,
-            seed=Seed
-        )
+            seed=Seed)
 
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print('Using device:', device)
