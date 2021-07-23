@@ -241,7 +241,7 @@ class VQGAN_CLIP_Z_Quantize:
                             sequence_number_left_padded = str(seq_num).zfill(6)
                             newname = f"{base_out}.{sequence_number_left_padded}.png"
                             final_out = path.join(final_dir, newname)
-                            print(f"Sending last frame to {final_out}")
+                            print(f"Sending last frame to {final_dir} as {newname}")
                             copyfile(frame_path, final_out)
 
 
