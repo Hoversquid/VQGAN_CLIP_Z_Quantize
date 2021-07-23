@@ -17,7 +17,7 @@ from torchvision import transforms
 from torchvision.transforms import functional as TF
 from tqdm.notebook import tqdm
 from os import chdir, mkdir, path, getcwd, walk, listdir
-from os.path import isfile, isdir, exists
+from os.path import isfile, isdir, exists, join
 from CLIP import clip
 from IPython.display import clear_output
 from collections import OrderedDict
