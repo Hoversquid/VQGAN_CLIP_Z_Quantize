@@ -182,65 +182,79 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
         self.write_arg_list(prompts)
-
-        def train_and_update(i, outpath=outpath, last_image=False):
-            self.train(i, outpath, last_image)
-            pbar.update()
+        base_dir = self.args.outdir
 
         try:
             with tqdm() as pbar:
+
+                def train_and_update(i, outpath=outpath, last_image=False):
+                    new_filepath = self.train(i, outpath, last_image)
+                    pbar.update()
+                    return new_filepath
+
+                # splits an animated file into frames and runs each one separately
                 if base_type in ('.mp4', '.gif'):
-                    final_frame_dir_name = f"{base_name}_{base_type}_final_frames"
-                    frames_dir = self.set_valid_dirname(dirs, final_frame_dir_name, 0)
+                    split_frames = f"{base_name}_{base_type}_split_frames"
+                    frames_dir = self.set_valid_dirname(dirs, split_frames, 0)
                     cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir + ".%06d" + base_type]
                     subprocess.call(cmdargs)
-                    imgs = [f for f in listdir(final_frame_dir_name) if isfile(join(final_frame_dir_name, f))]
+                    imgs = [f for f in listdir(split_frames) if isfile(join(split_frames, f))]
                     sorted_imgs = sorted(imgs, key=lambda f: get_file_num(f, len(imgs)))
+
                     for img in sorted_imgs:
                         if Max_Iterations > 0:
 
                             j = 0
-                            base_dir = self.args.outdir
+                            last_image = False
+
                             while j < Max_Iterations:
                                 dir_name = f"{base_name}_frame_{j}"
-                                self.args.outdir = path.join(base_dir, dir_name)
-                                train_and_update(i, last_image=False)
-                                i += 1
                                 j += 1
+
+                                self.args.outdir = path.join(base_dir, dir_name)
+                                if j == Max_Iterations:
+                                    last_image = True
+
+                                frame_path = train_and_update(i, last_image=last_image)
+                                i += 1
+
+                            final_frame_dir_name = f"{base_name}_{base_type}_final_frames"
                             final_dir = path.join(base_dir, final_frame_dir_name)
                             files = [f for f in listdir(final_dir) if isfile(f)]
                             seq_num = len(files)+1
                             sequence_number_left_padded = str(seq_num).zfill(6)
                             newname = f"{base_name}.{sequence_number_left_padded}"
                             final_out = path.join(final_dir, newname)
-                            # train_and_update(i, outpath=final_out, last_image=True)
-                            # train_and_update(i, outpath=combined_outpath, last_image=True)
-                            copyfile(path.join(self.args.outdir, dirname), final_out)
+                            copyfile(frame_path, final_out)
                             return
 
+                # Set to -1 to run forever
                 if Max_Iterations > 0:
                     j = 0
 
-                    while j < Max_Iterations - 1:
-                        train_and_update(i, last_image=False)
+                    while j < Max_Iterations:
+                        train_and_update(i)
                         i += 1
                         j += 1
 
-                    if not Combined_Dir in ("", None):
-                        if not path.exists(Combined_Dir):
-                            mkdir(Combined_Dir)
+                    return
 
-                        files = [f for f in listdir(Combined_Dir) if isfile(f)]
-                        seq_num = len(files)+1
-                        sequence_number_left_padded = str(seq_num).zfill(6)
-                        base = path.basename(Combined_Dir)
-                        newname = f"{base}.{sequence_number_left_padded}"
-                        combined_outpath = path.join(Combined_Dir,newname)
-                        train_and_update(i, outpath=combined_outpath, last_image=True)
-                        i += 1
-                        return
+                    # if not Combined_Dir in ("", None):
 
-                    train_and_update(i, last_image=True)
+                    # if not path.exists(Combined_Dir):
+                    #     mkdir(Combined_Dir)
+                    #
+                    # files = [f for f in listdir(Combined_Dir) if isfile(f)]
+                    # seq_num = len(files)+1
+                    # sequence_number_left_padded = str(seq_num).zfill(6)
+                    # base = path.basename(Combined_Dir)
+                    # newname = f"{base}.{sequence_number_left_padded}"
+                    # combined_outpath = path.join(Combined_Dir,newname)
+                    # train_and_update(i, outpath=combined_outpath, last_image=True)
+                    # i += 1
+                    # return
+                    #
+                    # train_and_update(i, last_image=True)
 
                 else:
                     while True:
@@ -302,6 +316,7 @@ class VQGAN_CLIP_Z_Quantize:
             clear_output()
         display.display(display.Image(str(outname)))
         tqdm.write(f'file: {path.basename(outpath)}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
+        return outname
 
     def ascend_txt(self):
         out = self.synth()
@@ -321,13 +336,15 @@ class VQGAN_CLIP_Z_Quantize:
         self.opt.zero_grad()
         lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0 or override:
-            self.checkin(i, lossAll, outpath)
+            new_filepath = self.checkin(i, lossAll, outpath)
 
         loss = sum(lossAll)
         loss.backward()
         self.opt.step()
         with torch.no_grad():
             self.z.copy_(self.z.maximum(self.z_min).minimum(self.z_max))
+
+        return new_filepath
 
     # Used to set image path if it's a URL
     def get_pil_imagepath(self, imgpath):
