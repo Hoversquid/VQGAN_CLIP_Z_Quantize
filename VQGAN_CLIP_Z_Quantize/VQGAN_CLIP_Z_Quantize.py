@@ -196,7 +196,7 @@ class VQGAN_CLIP_Z_Quantize:
                 if base_type in ('.mp4', '.gif'):
                     split_frames_dirname = f"{base_name}_split_frames"
                     frames_dir = self.set_valid_dirname(dirs, split_frames_dirname, 0)
-                    cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir + ".%06d" + base_type]
+                    cmdargs = ['ffmpeg', '-i', Base_Image, f"{frames_dir}.%06d.png"]
                     subprocess.call(cmdargs)
                     imgs = [f for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                     sorted_imgs = sorted(imgs, key=lambda f: get_file_num(f, len(imgs)))
