@@ -116,8 +116,28 @@ class VQGAN_CLIP_Z_Quantize:
             torch.manual_seed(self.args.seed)
 
         imgpath = None
+        sorted_imgs = [] # used for animated files
         if not self.args.init_image in (None, ""):
-          imgpath = self.get_pil_imagepath(self.args.init_image)
+            if base_type in ('.mp4', '.gif'):
+                split_frames_dirname = f"{base_name}_split_frames"
+                frames_dir = join(base_dir, split_frames_dirname)
+                if not exists(frames_dir):
+                    mkdir(frames_dir)
+                imgname = f"{base_name}.%06d.png"
+                frames_dir_arg = path.join(frames_dir, imgname)
+                cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
+                subprocess.call(cmdargs)
+                imgs = [f for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
+                sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
+
+                if len(sorted_imgs) > 0:
+                    imgpath = self.get_pil_imagepath(sorted_imgs[0])
+                else:
+                    print("Failed to get frames from animated file\nCheck to make sure the file is valid.")
+                    return
+
+            else:
+                imgpath = self.get_pil_imagepath(self.args.init_image)
 
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
@@ -193,22 +213,11 @@ class VQGAN_CLIP_Z_Quantize:
 
                 # splits an animated file into frames and runs each one separately
                 if base_type in ('.mp4', '.gif'):
-                    split_frames_dirname = f"{base_name}_split_frames"
-                    frames_dir = join(base_dir, split_frames_dirname)
-                    if not exists(frames_dir):
-                        mkdir(frames_dir)
-                    imgname = f"{base_name}.%06d.png"
-                    frames_dir_arg = path.join(frames_dir, imgname)
-                    cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
-                    subprocess.call(cmdargs)
-                    imgs = [f for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
-                    sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
                     j = 1
                     for img in sorted_imgs:
                         # using an animated file requires a max amount per frame
                         if Max_Iterations > 0:
                             i = 0
-                            last_image = False
                             dir_name = f"{base_out}_frame_{j}"
                             j += 1
                             new_frame_dir = path.join(base_dir, dir_name)
