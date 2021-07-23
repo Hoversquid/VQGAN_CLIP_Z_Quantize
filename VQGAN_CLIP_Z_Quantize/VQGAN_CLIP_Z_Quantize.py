@@ -170,13 +170,10 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(self.args.outdir)
 
         filename = filename.replace(" ", "_")
-        # base_name = path.splitext(Base_Image)[0]
         base_name = path.basename(path.splitext(Base_Image)[0])
         base_type = path.splitext(Base_Image)[1]
-        # filename_base = path.splitext(filename)[0]
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, filename, 0)
-        # outpath = self.set_valid_dirname(dirs, filename_base, 0)
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         base_out = path.basename(outpath)
 
@@ -236,7 +233,6 @@ class VQGAN_CLIP_Z_Quantize:
                             newname = f"{base_out}.{sequence_number_left_padded}.png"
                             final_out = path.join(final_dir, newname)
                             copyfile(frame_path, final_out)
-
 
                     return
 
