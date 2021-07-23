@@ -229,7 +229,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     frame_path = train_and_update(i, outpath=new_frame_dir, last_image=True)
                                     break
 
-                                frame_path = train_and_update(i, outpath=new_frame_dir last_image=False)
+                                frame_path = train_and_update(i, outpath=new_frame_dir, last_image=False)
                                 i += 1
 
                             final_frame_dir_name = f"{base_out}_final_frames"
