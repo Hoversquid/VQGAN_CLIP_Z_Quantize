@@ -177,7 +177,6 @@ class VQGAN_CLIP_Z_Quantize:
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, filename, 0)
         # outpath = self.set_valid_dirname(dirs, filename_base, 0)
-        i = 0
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
         base_out = path.basename(outpath)
 
@@ -214,7 +213,7 @@ class VQGAN_CLIP_Z_Quantize:
                     for img in sorted_imgs:
                         # using an animated file requires a max amount per frame
                         if Max_Iterations > 0:
-
+                            i = 0
                             j = 0
                             last_image = False
 
@@ -236,7 +235,7 @@ class VQGAN_CLIP_Z_Quantize:
                             files = [f for f in listdir(final_dir) if isfile(f)]
                             seq_num = len(files)+1
                             sequence_number_left_padded = str(seq_num).zfill(6)
-                            newname = f"{base_out}.{sequence_number_left_padded}"
+                            newname = f"{base_out}.{sequence_number_left_padded}.png"
                             final_out = path.join(final_dir, newname)
                             copyfile(frame_path, final_out)
 
