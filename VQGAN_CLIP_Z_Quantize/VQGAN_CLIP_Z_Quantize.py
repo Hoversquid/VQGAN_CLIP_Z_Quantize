@@ -169,12 +169,11 @@ class VQGAN_CLIP_Z_Quantize:
         if not path.exists(self.args.outdir):
             mkdir(self.args.outdir)
 
-
+        filename = filename.replace(" ", "_")
         base_type = path.splitext(Base_Image)[1]
         base_name = path.splitext(filename)[0]
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, base_name, 0)
-        filename = filename.replace(" ", "_")
         i = 0
 
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
@@ -196,13 +195,15 @@ class VQGAN_CLIP_Z_Quantize:
                 if base_type in ('.mp4', '.gif'):
                     split_frames_dirname = f"{base_name}_split_frames"
                     frames_dir_name = self.set_valid_dirname(dirs, split_frames_dirname, 0)
-                    frames_dir = path.join(base_dir, frames_dir_name, f"{frames_dir_name}.%06d.png")
-                    cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir]
+                    frames_dir = path.join(base_dir, frames_dir_name)
+                    frames_dir_arg = path.join(frames_dir, f"{frames_dir}.%06d.png")
+                    cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
                     subprocess.call(cmdargs)
                     imgs = [f for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                     sorted_imgs = sorted(imgs, key=lambda f: get_file_num(f, len(imgs)))
 
                     for img in sorted_imgs:
+                        # using an animated file requires a max amount per frame
                         if Max_Iterations > 0:
 
                             j = 0
@@ -227,7 +228,8 @@ class VQGAN_CLIP_Z_Quantize:
                             newname = f"{base_name}.{sequence_number_left_padded}"
                             final_out = path.join(final_dir, newname)
                             copyfile(frame_path, final_out)
-                            return
+
+                    return
 
                 # Set to -1 to run forever
                 if Max_Iterations > 0:
