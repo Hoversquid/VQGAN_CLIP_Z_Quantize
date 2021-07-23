@@ -194,11 +194,11 @@ class VQGAN_CLIP_Z_Quantize:
 
                 # splits an animated file into frames and runs each one separately
                 if base_type in ('.mp4', '.gif'):
-                    split_frames = f"{base_name}_{base_type}_split_frames"
-                    frames_dir = self.set_valid_dirname(dirs, split_frames, 0)
+                    split_frames_dir = f"{base_name}_split_frames"
+                    frames_dir = self.set_valid_dirname(dirs, split_frames_dir, 0)
                     cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir + ".%06d" + base_type]
                     subprocess.call(cmdargs)
-                    imgs = [f for f in listdir(split_frames) if isfile(join(split_frames, f))]
+                    imgs = [f for f in listdir(split_frames_dir) if isfile(join(split_frames_dir, f))]
                     sorted_imgs = sorted(imgs, key=lambda f: get_file_num(f, len(imgs)))
 
                     for img in sorted_imgs:
