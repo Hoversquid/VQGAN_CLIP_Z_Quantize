@@ -170,7 +170,8 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(self.args.outdir)
 
         filename = filename.replace(" ", "_")
-        base_name = path.splitext(Base_Image)[0]
+        # base_name = path.splitext(Base_Image)[0]
+        base_name = path.basename(path.splitext(Base_Image)[0])
         base_type = path.splitext(Base_Image)[1]
         # filename_base = path.splitext(filename)[0]
         dirs = [x[0] for x in walk(self.args.outdir)]
@@ -198,8 +199,9 @@ class VQGAN_CLIP_Z_Quantize:
                     split_frames_dirname = f"{base_name}_split_frames"
                     frames_dir = self.set_valid_dirname(dirs, split_frames_dirname, 0)
                     print(f"Frames Dir: {frames_dir}")
+                    imgname = f"{base_name}.%06d.png"
                     # frames_dir = path.join(base_dir, frames_dir_name)
-                    frames_dir_arg = path.join(frames_dir, f"{base_name}.%06d.png")
+                    frames_dir_arg = path.join(frames_dir, imgname)
                     cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
                     subprocess.call(cmdargs)
                     imgs = [f for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
