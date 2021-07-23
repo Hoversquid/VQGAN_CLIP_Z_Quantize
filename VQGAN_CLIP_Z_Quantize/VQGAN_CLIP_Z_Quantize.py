@@ -113,11 +113,18 @@ class VQGAN_CLIP_Z_Quantize:
 
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
+            
+        filename = filename.replace(" ", "_")
+        dirs = [x[0] for x in walk(self.args.outdir)]
+        outpath = self.set_valid_dirname(dirs, filename, 0)
+        saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
 
         imgpath = None
+        base_out = path.basename(outpath)
         sorted_imgs = [] # used for animated files
         if not self.args.init_image in (None, ""):
             if base_type in ('.mp4', '.gif'):
+                base_dir = join(self.args.outdir, base_out)
                 base_name = path.basename(path.splitext(Base_Image)[0])
                 split_frames_dirname = f"{base_name}_split_frames"
                 frames_dir = join(base_dir, split_frames_dirname)
@@ -189,12 +196,6 @@ class VQGAN_CLIP_Z_Quantize:
         if not path.exists(self.args.outdir):
             mkdir(self.args.outdir)
 
-        filename = filename.replace(" ", "_")
-        dirs = [x[0] for x in walk(self.args.outdir)]
-        outpath = self.set_valid_dirname(dirs, filename, 0)
-        saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
-        base_out = path.basename(outpath)
-
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
@@ -211,7 +212,6 @@ class VQGAN_CLIP_Z_Quantize:
                 # splits an animated file into frames and runs each one separately
                 if base_type in ('.mp4', '.gif'):
                     j = 1
-                    base_dir = join(self.args.outdir, base_out)
 
                     for img in sorted_imgs:
                         # using an animated file requires a max amount per frame
