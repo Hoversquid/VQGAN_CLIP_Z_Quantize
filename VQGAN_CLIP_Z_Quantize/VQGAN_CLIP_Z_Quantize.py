@@ -68,6 +68,7 @@ class VQGAN_CLIP_Z_Quantize:
                     "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations}
 
 
+        base_type = path.splitext(Base_Image)[1]
 
         prompts.update(arg_list)
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
@@ -189,7 +190,6 @@ class VQGAN_CLIP_Z_Quantize:
 
         filename = filename.replace(" ", "_")
         base_name = path.basename(path.splitext(Base_Image)[0])
-        base_type = path.splitext(Base_Image)[1]
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, filename, 0)
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
@@ -199,7 +199,6 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
         self.write_arg_list(prompts)
-        base_dir = self.args.outdir
 
         try:
             with tqdm() as pbar:
@@ -212,6 +211,8 @@ class VQGAN_CLIP_Z_Quantize:
                 # splits an animated file into frames and runs each one separately
                 if base_type in ('.mp4', '.gif'):
                     j = 1
+                    base_dir = join(self.args.outdir, base_out)
+
                     for img in sorted_imgs:
                         # using an animated file requires a max amount per frame
                         if Max_Iterations > 0:
