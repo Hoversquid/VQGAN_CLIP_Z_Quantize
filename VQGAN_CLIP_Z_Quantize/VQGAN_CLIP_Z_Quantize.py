@@ -218,17 +218,18 @@ class VQGAN_CLIP_Z_Quantize:
                             dir_name = f"{base_out}_frame_{j}"
                             print(f"Dir_Name:{dir_name}")
                             j += 1
-                            self.args.outdir = path.join(base_dir, dir_name)
-                            mkdir(self.args.outdir)
+                            new_frame_dir = path.join(base_dir, dir_name)
+                            mkdir(new_frame_dir)
+                            # self.args.outdir = path.join(base_dir, dir_name)
+                            # mkdir(self.args.outdir)
 
                             while i <= Max_Iterations:
 
                                 if i == Max_Iterations:
-                                    frame_path = train_and_update(i, last_image=True)
-                                    print(f"Sending last frame to {frame_path}")
+                                    frame_path = train_and_update(i, outpath=new_frame_dir, last_image=True)
                                     break
 
-                                frame_path = train_and_update(i, last_image=False)
+                                frame_path = train_and_update(i, outpath=new_frame_dir last_image=False)
                                 i += 1
 
                             final_frame_dir_name = f"{base_out}_final_frames"
@@ -240,6 +241,7 @@ class VQGAN_CLIP_Z_Quantize:
                             sequence_number_left_padded = str(seq_num).zfill(6)
                             newname = f"{base_out}.{sequence_number_left_padded}.png"
                             final_out = path.join(final_dir, newname)
+                            print(f"Sending last frame to {final_out}")
                             copyfile(frame_path, final_out)
 
 
