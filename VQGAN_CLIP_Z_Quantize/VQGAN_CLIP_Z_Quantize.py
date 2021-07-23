@@ -198,7 +198,7 @@ class VQGAN_CLIP_Z_Quantize:
                 if base_type in ('.mp4', '.gif'):
                     split_frames_dirname = f"{base_name}_split_frames"
                     frames_dir = join(base_dir, split_frames_dirname)
-                    if exists(frames_dir):
+                    if not exists(frames_dir):
                         mkdir(frames_dir)
                     # frames_dir = self.set_valid_dirname(dirs, split_frames_dirname, 0)
                     print(f"Frames Dir: {frames_dir}")
