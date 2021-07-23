@@ -235,7 +235,7 @@ class VQGAN_CLIP_Z_Quantize:
                             final_dir = path.join(base_dir, final_frame_dir_name)
                             if not exists(final_dir):
                                 mkdir(final_dir)
-                            files = [f for f in listdir(final_dir) if isfile(join(final_dir, f)]
+                            files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
                             seq_num = int(len(files))+1
                             sequence_number_left_padded = str(seq_num).zfill(6)
                             newname = f"{base_out}.{sequence_number_left_padded}.png"
