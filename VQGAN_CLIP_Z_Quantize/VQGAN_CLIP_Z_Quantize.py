@@ -222,6 +222,7 @@ class VQGAN_CLIP_Z_Quantize:
                                 j += 1
 
                                 self.args.outdir = path.join(base_dir, dir_name)
+                                mkdir(self.args.outdir)
                                 if j == Max_Iterations:
                                     last_image = True
 
