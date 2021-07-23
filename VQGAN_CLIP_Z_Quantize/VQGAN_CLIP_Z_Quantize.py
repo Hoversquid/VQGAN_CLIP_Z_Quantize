@@ -221,7 +221,7 @@ class VQGAN_CLIP_Z_Quantize:
                             self.args.outdir = path.join(base_dir, dir_name)
                             mkdir(self.args.outdir)
 
-                            while i < Max_Iterations:
+                            while i <= Max_Iterations:
 
                                 if i == Max_Iterations:
                                     frame_path = train_and_update(i, last_image=True)
