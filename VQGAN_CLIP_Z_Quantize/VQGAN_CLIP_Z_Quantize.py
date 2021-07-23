@@ -178,8 +178,9 @@ class VQGAN_CLIP_Z_Quantize:
         outpath = self.set_valid_dirname(dirs, filename, 0)
         # outpath = self.set_valid_dirname(dirs, filename_base, 0)
         i = 0
-
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
+        base_out = path.basename(outpath)
+
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
@@ -218,7 +219,7 @@ class VQGAN_CLIP_Z_Quantize:
                             last_image = False
 
                             while j < Max_Iterations:
-                                dir_name = f"{filename}_frame_{j}"
+                                dir_name = f"{base_out}_frame_{j}"
                                 j += 1
 
                                 self.args.outdir = path.join(base_dir, dir_name)
@@ -228,14 +229,14 @@ class VQGAN_CLIP_Z_Quantize:
                                 frame_path = train_and_update(i, last_image=last_image)
                                 i += 1
 
-                            final_frame_dir_name = f"{filename}_final_frames"
+                            final_frame_dir_name = f"{base_out}_final_frames"
                             final_dir = path.join(base_dir, final_frame_dir_name)
                             if exists(final_dir):
                                 mkdir(final_dir)
                             files = [f for f in listdir(final_dir) if isfile(f)]
                             seq_num = len(files)+1
                             sequence_number_left_padded = str(seq_num).zfill(6)
-                            newname = f"{filename}.{sequence_number_left_padded}"
+                            newname = f"{base_out}.{sequence_number_left_padded}"
                             final_out = path.join(final_dir, newname)
                             copyfile(frame_path, final_out)
 
