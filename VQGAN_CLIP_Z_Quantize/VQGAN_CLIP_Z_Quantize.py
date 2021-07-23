@@ -118,6 +118,7 @@ class VQGAN_CLIP_Z_Quantize:
         sorted_imgs = [] # used for animated files
         if not self.args.init_image in (None, ""):
             if base_type in ('.mp4', '.gif'):
+                base_name = path.basename(path.splitext(Base_Image)[0])
                 split_frames_dirname = f"{base_name}_split_frames"
                 frames_dir = join(base_dir, split_frames_dirname)
                 if not exists(frames_dir):
@@ -189,7 +190,6 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(self.args.outdir)
 
         filename = filename.replace(" ", "_")
-        base_name = path.basename(path.splitext(Base_Image)[0])
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, filename, 0)
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
