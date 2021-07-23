@@ -170,10 +170,12 @@ class VQGAN_CLIP_Z_Quantize:
             mkdir(self.args.outdir)
 
         filename = filename.replace(" ", "_")
+        base_name = path.splitext(Base_Image)[0]
         base_type = path.splitext(Base_Image)[1]
-        base_name = path.splitext(filename)[0]
+        # filename_base = path.splitext(filename)[0]
         dirs = [x[0] for x in walk(self.args.outdir)]
-        outpath = self.set_valid_dirname(dirs, base_name, 0)
+        outpath = self.set_valid_dirname(dirs, filename, 0)
+        # outpath = self.set_valid_dirname(dirs, filename_base, 0)
         i = 0
 
         saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
@@ -196,7 +198,7 @@ class VQGAN_CLIP_Z_Quantize:
                     split_frames_dirname = f"{base_name}_split_frames"
                     frames_dir = self.set_valid_dirname(dirs, split_frames_dirname, 0)
                     # frames_dir = path.join(base_dir, frames_dir_name)
-                    frames_dir_arg = path.join(frames_dir, f"{frames_dir}.%06d.png")
+                    frames_dir_arg = path.join(frames_dir, f"{base_name}.%06d.png")
                     cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
                     subprocess.call(cmdargs)
                     imgs = [f for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
@@ -210,7 +212,7 @@ class VQGAN_CLIP_Z_Quantize:
                             last_image = False
 
                             while j < Max_Iterations:
-                                dir_name = f"{base_name}_frame_{j}"
+                                dir_name = f"{filename}_frame_{j}"
                                 j += 1
 
                                 self.args.outdir = path.join(base_dir, dir_name)
@@ -220,12 +222,12 @@ class VQGAN_CLIP_Z_Quantize:
                                 frame_path = train_and_update(i, last_image=last_image)
                                 i += 1
 
-                            final_frame_dir_name = f"{base_name}_{base_type}_final_frames"
+                            final_frame_dir_name = f"{filename}_final_frames"
                             final_dir = path.join(base_dir, final_frame_dir_name)
                             files = [f for f in listdir(final_dir) if isfile(f)]
                             seq_num = len(files)+1
                             sequence_number_left_padded = str(seq_num).zfill(6)
-                            newname = f"{base_name}.{sequence_number_left_padded}"
+                            newname = f"{filename}.{sequence_number_left_padded}"
                             final_out = path.join(final_dir, newname)
                             copyfile(frame_path, final_out)
 
