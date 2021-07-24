@@ -36,7 +36,8 @@ class VQGAN_CLIP_Z_Quantize:
                 SizeX, SizeY,
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
-                Display_Frequency, Clear_Interval, Max_Iterations):
+                Display_Frequency, Clear_Interval, Max_Iterations,
+                Step_Size, CutN, Cut_Pow):
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -65,7 +66,7 @@ class VQGAN_CLIP_Z_Quantize:
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
                     "Noise_Weight":Noise_Weight,"Seed":Seed,
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
-                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations}
+                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow}
 
 
         base_type = path.splitext(Base_Image)[1]
@@ -86,9 +87,9 @@ class VQGAN_CLIP_Z_Quantize:
             clip_model=CLIP_Model,
             vqgan_config=f'{Image_Model}.yaml',
             vqgan_checkpoint=f'{Image_Model}.ckpt',
-            step_size=0.05,
-            cutn=64,
-            cut_pow=1.,
+            step_size=Step_Size,
+            cutn=Cut_N,
+            cut_pow=Cut_Pow,
             display_freq=Display_Frequency,
             seed=Seed)
 
@@ -123,11 +124,6 @@ class VQGAN_CLIP_Z_Quantize:
               filename += prompt[:name_length]
               if len(filename) + 2 < name_limit and i + 1 < len(self.args.prompts):
                 filename += "__"
-
-
-            # txt, weight, stop = self.parse_prompt(prompt)
-            # embed = self.perceptor.encode_text(clip.tokenize(txt).to(device)).float()
-            # self.pMs.append(Prompt(embed, weight, stop).to(device))
 
         if filename == "":
           filename = "No_Prompts"
@@ -229,7 +225,7 @@ class VQGAN_CLIP_Z_Quantize:
                             j += 1
                             new_frame_dir = path.join(base_dir, dir_name)
                             mkdir(new_frame_dir)
-
+                            self.args.outdir = new_frame_dir
                             while i <= Max_Iterations:
 
                                 if i == Max_Iterations:
@@ -438,7 +434,7 @@ from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
 
         end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
 Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations)"""
+Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,CutN,Cut_Pow)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
@@ -462,7 +458,10 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
           "#@param ['RN50', 'RN101', 'RN50x4', 'ViT-B/32']",
           "#@param {type:'integer'}",
           "#@param {type:'string'}",
-          "#@param {type:'integer'}"
+          "#@param {type:'integer'}",
+          "#@param {type:'number'}",
+          "#@param {type:'integer'}",
+          "#@param {type:'number'}",
           ]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
