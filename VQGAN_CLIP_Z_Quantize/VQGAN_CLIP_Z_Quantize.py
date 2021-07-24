@@ -156,7 +156,7 @@ class VQGAN_CLIP_Z_Quantize:
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
 
                 if len(sorted_imgs) > 0:
-                    imgpath = self.get_pil_imagepath(sorted_imgs[0])
+                    imgpath = self.get_pil_imagepath(join(frames_dir, sorted_imgs[0]))
                 else:
                     print("Failed to get frames from animated file\nCheck to make sure the file is valid.")
                     return
