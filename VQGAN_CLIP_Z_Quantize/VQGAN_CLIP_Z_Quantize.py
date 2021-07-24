@@ -125,9 +125,9 @@ class VQGAN_CLIP_Z_Quantize:
                 filename += "__"
 
 
-            txt, weight, stop = self.parse_prompt(prompt)
-            embed = self.perceptor.encode_text(clip.tokenize(txt).to(device)).float()
-            self.pMs.append(Prompt(embed, weight, stop).to(device))
+            # txt, weight, stop = self.parse_prompt(prompt)
+            # embed = self.perceptor.encode_text(clip.tokenize(txt).to(device)).float()
+            # self.pMs.append(Prompt(embed, weight, stop).to(device))
 
         if filename == "":
           filename = "No_Prompts"
@@ -172,6 +172,7 @@ class VQGAN_CLIP_Z_Quantize:
             one_hot = F.one_hot(torch.randint(n_toks, [toksY * toksX], device=device), n_toks).float()
             self.z = one_hot @ self.model.quantize.embedding.weight
             self.z = self.z.view([-1, toksY, toksX, e_dim]).permute(0, 3, 1, 2)
+
         self.z_orig = self.z.clone()
         self.z.requires_grad_(True)
         self.opt = optim.Adam([self.z], lr=self.args.step_size)
@@ -180,6 +181,10 @@ class VQGAN_CLIP_Z_Quantize:
                                          std=[0.26862954, 0.26130258, 0.27577711])
         self.pMs = []
 
+        for i, prompt in enumerate(self.args.prompts):
+            txt, weight, stop = self.parse_prompt(prompt)
+            embed = self.perceptor.encode_text(clip.tokenize(txt).to(device)).float()
+            self.pMs.append(Prompt(embed, weight, stop).to(device))
 
 
         for prompt in self.args.image_prompts:
