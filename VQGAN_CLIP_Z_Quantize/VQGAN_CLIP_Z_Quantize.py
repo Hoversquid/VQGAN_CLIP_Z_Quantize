@@ -37,8 +37,10 @@ class VQGAN_CLIP_Z_Quantize:
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
                 Display_Frequency, Clear_Interval, Max_Iterations,
-                Step_Size, Cut_N, Cut_Pow):
+                Step_Size, Cut_N, Cut_Pow, Is_Frame=False):
 
+        if not path.exists(Output_directory):
+            mkdir(Output_directory)
         prompts = OrderedDict()
         prompts["Other_txt_prompts"] = Other_txt_prompts
         prompts["Other_img_prompts"] = Other_img_prompts
@@ -79,7 +81,6 @@ class VQGAN_CLIP_Z_Quantize:
         base_type = path.splitext(Base_Image)[1]
 
 
-
         if not Base_Image in (None, ""):
             if base_type in ('.mp4', '.gif'):
                 base_dir = join(Output_directory, base_out)
@@ -97,6 +98,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                 if len(sorted_imgs) > 0 and Max_Iterations > 0:
                     j = 1
+                    self.write_args_file(Output_directory, base_out, prompts)
                     for img in sorted_imgs:
                         dir_name = f"{base_out}_frame_{j}"
                         j += 1
@@ -107,7 +109,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                    Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow)
+                                    Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,Is_Frame=True)
 
                         final_frame_dir_name = f"{base_out}_final_frames"
                         final_dir = path.join(base_dir, final_frame_dir_name)
@@ -128,6 +130,9 @@ class VQGAN_CLIP_Z_Quantize:
                     return
 
             else:
+                if Is_Frame:
+                    self.write_args_file(Output_directory, base_out, prompts)
+
                 imgpath = self.get_pil_imagepath(Base_Image)
 
         try:
@@ -219,15 +224,6 @@ class VQGAN_CLIP_Z_Quantize:
             gen = torch.Generator().manual_seed(seed)
             embed = torch.empty([1, self.perceptor.visual.output_dim]).normal_(generator=gen)
             self.pMs.append(Prompt(embed, weight).to(device))
-
-        if not path.exists(self.args.outdir):
-            mkdir(self.args.outdir)
-
-        saved_prompts_dir = path.join(self.args.outdir, "Saved_Prompts/")
-        if not path.exists(saved_prompts_dir):
-            mkdir(saved_prompts_dir)
-        self.filelistpath = saved_prompts_dir + path.basename(outpath) + ".txt"
-        self.write_arg_list(prompts)
 
         try:
             with tqdm() as pbar:
@@ -415,6 +411,14 @@ class VQGAN_CLIP_Z_Quantize:
     #       return path.join(self.args.outdir, newname)
     #
     #     return self.set_valid_filename(self.args.outdir, basename, i + 1)
+
+    def write_args_file(self, out, base, prompts):
+        saved_prompts_dir = path.join(out, "Saved_Prompts/")
+        if not path.exists(saved_prompts_dir):
+            mkdir(saved_prompts_dir)
+        self.filelistpath = saved_prompts_dir + base + ".txt"
+        self.write_arg_list(prompts)
+
 
     def set_valid_dirname(self, dirs, out, basename, i):
         if i > 0:
