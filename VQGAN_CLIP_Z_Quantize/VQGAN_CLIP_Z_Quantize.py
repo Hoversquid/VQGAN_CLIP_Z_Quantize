@@ -128,12 +128,12 @@ class VQGAN_CLIP_Z_Quantize:
 
                 if len(sorted_imgs) > 0 and Max_Iterations > 0:
                     for img in sorted_imgs:
-                        VQGAN_CLIP_Z_Quantize(self, Other_txt_prompts,Other_img_prompts,
+                        VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
                                     Other_noise_seeds,Other_noise_weights,Output_directory,
-                                    img, Base_Image_Weight,Image_Prompt1, Image_Prompt2, Image_Prompt3,
-                                    Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX, SizeY,
-                                    Noise_Seed_Number, Noise_Weight, Seed,Image_Model, CLIP_Model,
-                                    Display_Frequency, Clear_Interval, Max_Iterations, Step_Size, Cut_N, Cut_Pow)
+                                    img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+                                    Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
+                                    Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
+                                    Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow)
                     return
 
                     # imgpath = self.get_pil_imagepath(join(frames_dir, sorted_imgs[0]))
