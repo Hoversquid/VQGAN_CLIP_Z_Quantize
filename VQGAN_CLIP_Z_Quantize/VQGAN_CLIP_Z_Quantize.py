@@ -72,7 +72,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         filename = filename.replace(" ", "_")
         dirs = [x[0] for x in walk(Output_directory)]
-        outpath = self.set_valid_dirname(dirs, filename, 0)
+        outpath = self.set_valid_dirname(dirs, Output_directory, filename, 0)
         imgpath = None
 
         base_out = path.basename(outpath)
@@ -397,26 +397,26 @@ class VQGAN_CLIP_Z_Quantize:
         output_path = path.join(split, newname)
         return Path(f"{output_path}.png")
 
-    def set_valid_filename(self, basename, i):
-        if i > 0:
-            newname = "%s(%d)" % (basename, i)
-        else:
-            newname = basename
+    # def set_valid_filename(self, basename, i):
+    #     if i > 0:
+    #         newname = "%s(%d)" % (basename, i)
+    #     else:
+    #         newname = basename
+    #
+    #     unique_name = True
+    #     for root, dir, files in walk(self.args.outdir):
+    #         for f in files:
+    #           if path.splitext(f)[0] == newname:
+    #             unique_name = False
+    #             break
+    #         if not unique_name: break
+    #
+    #     if unique_name:
+    #       return path.join(self.args.outdir, newname)
+    #
+    #     return self.set_valid_filename(self.args.outdir, basename, i + 1)
 
-        unique_name = True
-        for root, dir, files in walk(self.args.outdir):
-            for f in files:
-              if path.splitext(f)[0] == newname:
-                unique_name = False
-                break
-            if not unique_name: break
-
-        if unique_name:
-          return path.join(self.args.outdir, newname)
-
-        return self.set_valid_filename(self.args.outdir, basename, i + 1)
-
-    def set_valid_dirname(self, dirs, basename, i):
+    def set_valid_dirname(self, dirs, out, basename, i):
         if i > 0:
             newname = "%s(%d)" % (basename, i)
         else:
@@ -425,7 +425,7 @@ class VQGAN_CLIP_Z_Quantize:
         unique_dir_name = True
 
         if len(dirs) < 1:
-            new_path = path.join(self.args.outdir, newname)
+            new_path = path.join(out, newname)
             mkdir(new_path)
             return new_path
         for dir in dirs:
@@ -434,12 +434,12 @@ class VQGAN_CLIP_Z_Quantize:
                 break
 
         if unique_dir_name:
-            new_path = path.join(self.args.outdir, newname)
+            new_path = path.join(out, newname)
 
             mkdir(new_path)
             return new_path
 
-        return self.set_valid_dirname(dirs, basename, i + 1)
+        return self.set_valid_dirname(dirs, out, basename, i + 1)
 
     def get_prompt_list(self, first, second, third, rest):
       param_list = [first, second, third]
