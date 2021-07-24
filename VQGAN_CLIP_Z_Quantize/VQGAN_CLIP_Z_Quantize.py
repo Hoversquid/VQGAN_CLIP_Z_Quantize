@@ -1,4 +1,4 @@
-import argparse
+'import argparse
 import math
 from pathlib import Path
 import sys
@@ -454,7 +454,7 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
           "#@param {type:'string'}",
           "#@param {type:'slider', min:0, max:1, step:0.01}",
           "#@param {type:'integer'}",
-          "#@param ['vqgan_imagenet_f16_1024', 'vqgan_imagenet_f16_16384']",
+          "#@param ['drive/MyDrive/colab/coco', 'vqgan_imagenet_f16_1024', 'vqgan_imagenet_f16_16384', 'coco', 'wikiart_16384', 'wikiart_1024', 'sflickr', 'faceshq']",
           "#@param ['RN50', 'RN101', 'RN50x4', 'ViT-B/32']",
           "#@param {type:'integer'}",
           "#@param {type:'string'}",
