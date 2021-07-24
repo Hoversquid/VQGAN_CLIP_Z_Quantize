@@ -123,7 +123,7 @@ class VQGAN_CLIP_Z_Quantize:
                 frames_dir_arg = path.join(frames_dir, imgname)
                 cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
                 subprocess.call(cmdargs)
-                imgs = [f for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
+                imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
 
                 if len(sorted_imgs) > 0 and Max_Iterations > 0:
@@ -138,7 +138,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                     # imgpath = self.get_pil_imagepath(join(frames_dir, sorted_imgs[0]))
                 else:
-                    print("Failed to get frames from animated file\nCheck to make sure the file is valid.")
+                    print("Failed to get frames from animated file.\nCheck to make sure the file is valid.")
                     return
 
             else:
