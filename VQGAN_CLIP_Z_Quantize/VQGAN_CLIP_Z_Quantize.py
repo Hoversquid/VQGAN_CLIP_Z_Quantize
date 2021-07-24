@@ -37,7 +37,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
                 Display_Frequency, Clear_Interval, Max_Iterations,
-                Step_Size, CutN, Cut_Pow):
+                Step_Size, Cut_N, Cut_Pow):
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
