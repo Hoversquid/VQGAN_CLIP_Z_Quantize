@@ -39,23 +39,6 @@ class VQGAN_CLIP_Z_Quantize:
                 Display_Frequency, Clear_Interval, Max_Iterations,
                 Step_Size, Cut_N, Cut_Pow):
 
-        filename = ""
-        name_limit = 42
-        for i, prompt in enumerate(self.args.prompts):
-            name_length = name_limit - len(filename)
-            if name_length > 0:
-              filename += prompt[:name_length]
-              if len(filename) + 2 < name_limit and i + 1 < len(self.args.prompts):
-                filename += "__"
-
-        if filename == "":
-          filename = "No_Prompts"
-
-        filename = filename.replace(" ", "_")
-        dirs = [x[0] for x in walk(self.args.outdir)]
-        outpath = self.set_valid_dirname(dirs, filename, 0)
-        imgpath = None
-
         prompts = OrderedDict()
         prompts["Other_txt_prompts"] = Other_txt_prompts
         prompts["Other_img_prompts"] = Other_img_prompts
@@ -71,12 +54,31 @@ class VQGAN_CLIP_Z_Quantize:
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
                     "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow}
 
-        base_out = path.basename(outpath)
-        base_type = path.splitext(Base_Image)[1]
-
         prompts.update(arg_list)
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
+
+        filename = ""
+        name_limit = 42
+        for i, prompt in enumerate(txt_prompts):
+            name_length = name_limit - len(filename)
+            if name_length > 0:
+              filename += prompt[:name_length]
+              if len(filename) + 2 < name_limit and i + 1 < len(txt_prompts):
+                filename += "__"
+
+        if filename == "":
+          filename = "No_Prompts"
+
+        filename = filename.replace(" ", "_")
+        dirs = [x[0] for x in walk(Output_directory)]
+        outpath = self.set_valid_dirname(dirs, filename, 0)
+        imgpath = None
+
+        base_out = path.basename(outpath)
+        base_type = path.splitext(Base_Image)[1]
+
+
 
         if not Base_Image in (None, ""):
             if base_type in ('.mp4', '.gif'):
@@ -126,7 +128,7 @@ class VQGAN_CLIP_Z_Quantize:
                     return
 
             else:
-                imgpath = self.get_pil_imagepath(self.args.init_image)
+                imgpath = self.get_pil_imagepath(Base_Image)
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
