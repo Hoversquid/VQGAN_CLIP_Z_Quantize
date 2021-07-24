@@ -108,6 +108,8 @@ class VQGAN_CLIP_Z_Quantize:
         filename = filename.replace(" ", "_")
         dirs = [x[0] for x in walk(self.args.outdir)]
         outpath = self.set_valid_dirname(dirs, filename, 0)
+        base_out = path.basename(outpath)
+        imgpath = None
 
         if not self.args.init_image in (None, ""):
             if base_type in ('.mp4', '.gif'):
@@ -131,7 +133,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     img, Base_Image_Weight,Image_Prompt1, Image_Prompt2, Image_Prompt3,
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX, SizeY,
                                     Noise_Seed_Number, Noise_Weight, Seed,Image_Model, CLIP_Model,
-                                    Display_Frequency, Clear_Interval, Max_Iterations, Step_Size, CutN, Cut_Pow)
+                                    Display_Frequency, Clear_Interval, Max_Iterations, Step_Size, Cut_N, Cut_Pow)
                     return
 
                     # imgpath = self.get_pil_imagepath(join(frames_dir, sorted_imgs[0]))
@@ -163,9 +165,6 @@ class VQGAN_CLIP_Z_Quantize:
 
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
-
-        imgpath = None
-        base_out = path.basename(outpath)
 
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
