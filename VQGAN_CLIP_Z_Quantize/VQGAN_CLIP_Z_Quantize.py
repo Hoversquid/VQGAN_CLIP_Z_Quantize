@@ -460,7 +460,7 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
           "#@param {type:'string'}",
           "#@param {type:'integer'}",
           "#@param {type:'number'}",
-          "#@param {type:'integer'}",
+          "#@param {type:'number'}",
           "#@param {type:'number'}",
           ]
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
