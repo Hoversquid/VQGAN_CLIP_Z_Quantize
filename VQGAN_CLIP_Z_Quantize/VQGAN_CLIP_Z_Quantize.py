@@ -130,7 +130,7 @@ class VQGAN_CLIP_Z_Quantize:
                     return
 
             else:
-                if Is_Frame:
+                if not Is_Frame:
                     self.write_args_file(Output_directory, base_out, prompts)
 
                 imgpath = self.get_pil_imagepath(Base_Image)
