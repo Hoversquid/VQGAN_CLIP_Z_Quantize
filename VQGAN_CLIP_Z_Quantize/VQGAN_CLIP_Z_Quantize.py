@@ -39,19 +39,22 @@ class VQGAN_CLIP_Z_Quantize:
                 Display_Frequency, Clear_Interval, Max_Iterations,
                 Step_Size, Cut_N, Cut_Pow):
 
-        try:
-          Noise_Seed_Number = int(Noise_Seed_Number)
-          noise_prompt_seeds = [Noise_Seed_Number] + Other_noise_seeds
-          noise_prompt_weights = [Noise_Weight] + Other_noise_weights
-        except:
-          print("No noise seeds used.")
-          noise_prompt_seeds = Other_noise_seeds
-          noise_prompt_weights = Other_noise_weights
+        filename = ""
+        name_limit = 42
+        for i, prompt in enumerate(self.args.prompts):
+            name_length = name_limit - len(filename)
+            if name_length > 0:
+              filename += prompt[:name_length]
+              if len(filename) + 2 < name_limit and i + 1 < len(self.args.prompts):
+                filename += "__"
 
-        try:
-            Seed = int(Seed)
-        except:
-            Seed = 0
+        if filename == "":
+          filename = "No_Prompts"
+
+        filename = filename.replace(" ", "_")
+        dirs = [x[0] for x in walk(self.args.outdir)]
+        outpath = self.set_valid_dirname(dirs, filename, 0)
+        imgpath = None
 
         prompts = OrderedDict()
         prompts["Other_txt_prompts"] = Other_txt_prompts
@@ -68,12 +71,76 @@ class VQGAN_CLIP_Z_Quantize:
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
                     "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow}
 
-
+        base_out = path.basename(outpath)
         base_type = path.splitext(Base_Image)[1]
 
         prompts.update(arg_list)
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
+
+        if not Base_Image in (None, ""):
+            if base_type in ('.mp4', '.gif'):
+                base_dir = join(Output_directory, base_out)
+                base_name = path.basename(path.splitext(Base_Image)[0])
+                split_frames_dirname = f"{base_name}_split_frames"
+                frames_dir = join(base_dir, split_frames_dirname)
+                if not exists(frames_dir):
+                    mkdir(frames_dir)
+                imgname = f"{base_name}.%06d.png"
+                frames_dir_arg = path.join(frames_dir, imgname)
+                cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
+                subprocess.call(cmdargs)
+                imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
+                sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
+
+                if len(sorted_imgs) > 0 and Max_Iterations > 0:
+                    j = 1
+                    for img in sorted_imgs:
+                        dir_name = f"{base_out}_frame_{j}"
+                        j += 1
+                        new_frame_dir = path.join(base_dir, dir_name)
+                        mkdir(new_frame_dir)
+                        VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                                    Other_noise_seeds,Other_noise_weights,new_frame_dir,
+                                    img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+                                    Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
+                                    Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
+                                    Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow)
+
+                        final_frame_dir_name = f"{base_out}_final_frames"
+                        final_dir = path.join(base_dir, final_frame_dir_name)
+                        if not exists(final_dir):
+                            mkdir(final_dir)
+
+                        files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
+                        seq_num = int(len(files))+1
+                        sequence_number_left_padded = str(seq_num).zfill(6)
+                        newname = f"{base_out}.{sequence_number_left_padded}.png"
+                        final_out = path.join(final_dir, newname)
+                        copyfile(frame_path, final_out)
+
+                    return
+
+                else:
+                    print("Failed to get frames from animated file.\nCheck to make sure the file is valid.")
+                    return
+
+            else:
+                imgpath = self.get_pil_imagepath(self.args.init_image)
+
+        try:
+          Noise_Seed_Number = int(Noise_Seed_Number)
+          noise_prompt_seeds = [Noise_Seed_Number] + Other_noise_seeds
+          noise_prompt_weights = [Noise_Weight] + Other_noise_weights
+        except:
+          print("No noise seeds used.")
+          noise_prompt_seeds = Other_noise_seeds
+          noise_prompt_weights = Other_noise_weights
+
+        try:
+            Seed = int(Seed)
+        except:
+            Seed = 0
 
         self.args = argparse.Namespace(
             outdir=Output_directory, # this is the name of where your output will go
@@ -92,57 +159,6 @@ class VQGAN_CLIP_Z_Quantize:
             cut_pow=Cut_Pow,
             display_freq=Display_Frequency,
             seed=Seed)
-
-        filename = ""
-        name_limit = 42
-        for i, prompt in enumerate(self.args.prompts):
-            name_length = name_limit - len(filename)
-            if name_length > 0:
-              filename += prompt[:name_length]
-              if len(filename) + 2 < name_limit and i + 1 < len(self.args.prompts):
-                filename += "__"
-
-        if filename == "":
-          filename = "No_Prompts"
-
-        filename = filename.replace(" ", "_")
-        dirs = [x[0] for x in walk(self.args.outdir)]
-        outpath = self.set_valid_dirname(dirs, filename, 0)
-        base_out = path.basename(outpath)
-        imgpath = None
-
-        if not self.args.init_image in (None, ""):
-            if base_type in ('.mp4', '.gif'):
-                base_dir = join(self.args.outdir, base_out)
-                base_name = path.basename(path.splitext(Base_Image)[0])
-                split_frames_dirname = f"{base_name}_split_frames"
-                frames_dir = join(base_dir, split_frames_dirname)
-                if not exists(frames_dir):
-                    mkdir(frames_dir)
-                imgname = f"{base_name}.%06d.png"
-                frames_dir_arg = path.join(frames_dir, imgname)
-                cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
-                subprocess.call(cmdargs)
-                imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
-                sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
-
-                if len(sorted_imgs) > 0 and Max_Iterations > 0:
-                    for img in sorted_imgs:
-                        VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
-                                    Other_noise_seeds,Other_noise_weights,Output_directory,
-                                    img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-                                    Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
-                                    Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                    Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow)
-                    return
-
-                    # imgpath = self.get_pil_imagepath(join(frames_dir, sorted_imgs[0]))
-                else:
-                    print("Failed to get frames from animated file.\nCheck to make sure the file is valid.")
-                    return
-
-            else:
-                imgpath = self.get_pil_imagepath(self.args.init_image)
 
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print('Using device:', device)
