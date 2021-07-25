@@ -37,7 +37,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
                 Display_Frequency, Clear_Interval, Max_Iterations,
-                Step_Size, Cut_N, Cut_Pow, Is_Frame=False, Last_Frame=False):
+                Step_Size, Cut_N, Cut_Pow, Is_Frame=False):
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
@@ -115,21 +115,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
                                     Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                    Is_Frame=True,Last_Frame=Last_Frame)
-
-
-                        final_frame_dir_name = f"{base_out}_final_frames"
-                        final_dir = path.join(base_dir, final_frame_dir_name)
-                        print(f"Copying last frame to {final_dir}")
-                        if not exists(final_dir):
-                            mkdir(final_dir)
-
-                        files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
-                        seq_num = int(len(files))+1
-                        sequence_number_left_padded = str(seq_num).zfill(6)
-                        newname = f"{base_out}.{sequence_number_left_padded}.png"
-                        final_out = path.join(final_dir, newname)
-                        copyfile(self.final_frame_path, final_out)
+                                    Is_Frame=True)
 
                     return
 
@@ -280,12 +266,24 @@ class VQGAN_CLIP_Z_Quantize:
                 if Max_Iterations > 0:
                     j = 0
 
-                    while j < Max_Iterations-1:
-                        train_and_update(i)
+                    while j < Max_Iterations:
+                        last_frame_path = train_and_update(i)
                         i += 1
                         j += 1
 
-                    self.final_frame_path = train_and_update(i)
+                    # self.final_frame_path = train_and_update(i)
+                    final_frame_dir_name = f"{base_out}_final_frames"
+                    final_dir = path.join(base_dir, final_frame_dir_name)
+                    print(f"Copying last frame to {final_dir}")
+                    if not exists(final_dir):
+                        mkdir(final_dir)
+
+                    files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
+                    seq_num = int(len(files))+1
+                    sequence_number_left_padded = str(seq_num).zfill(6)
+                    newname = f"{base_out}.{sequence_number_left_padded}.png"
+                    final_out = path.join(final_dir, newname)
+                    copyfile(last_frame_path, final_out)
 
                 else:
                     while True:
@@ -470,7 +468,7 @@ from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
 
         end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
 Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,CutN,Cut_Pow)"""
+Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
