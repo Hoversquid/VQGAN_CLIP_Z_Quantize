@@ -81,11 +81,12 @@ class VQGAN_CLIP_Z_Quantize:
         imgpath = None
 
         base_out = path.basename(outpath)
-        base_type = path.splitext(Base_Image)[1]
-
 
         if not Base_Image in (None, ""):
-            if base_type in ('.mp4', '.gif'):
+            if isdir(Base_Image):
+                imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
+                sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
+            elif path.splitext(Base_Image)[1] in ('.mp4', '.gif'):
                 base_dir = join(Output_directory, base_out)
                 base_name = path.basename(path.splitext(Base_Image)[0])
                 split_frames_dirname = f"{base_name}_split_frames"
@@ -98,42 +99,41 @@ class VQGAN_CLIP_Z_Quantize:
                 subprocess.call(cmdargs)
                 imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
+            else:
+                print("Failed to get frames from animated file.\nCheck to make sure the file is valid.")
+                return
 
-                if len(sorted_imgs) > 0 and Max_Iterations > 0:
-                    j = 1
-                    self.write_args_file(Output_directory, base_out, prompts)
+            if len(sorted_imgs) > 0 and Max_Iterations > 0:
+                j = 1
+                self.write_args_file(Output_directory, base_out, prompts)
 
-                    for img in sorted_imgs:
-                        dir_name = f"{base_out}_frame_{j}"
-                        j += 1
-                        new_frame_dir = path.join(base_dir, dir_name)
-                        mkdir(new_frame_dir)
-                        vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
-                                    Other_noise_seeds,Other_noise_weights,new_frame_dir,
-                                    img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-                                    Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
-                                    Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                    Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                    Is_Frame=True)
+                for img in sorted_imgs:
+                    dir_name = f"{base_out}_frame_{j}"
+                    j += 1
+                    new_frame_dir = path.join(base_dir, dir_name)
+                    mkdir(new_frame_dir)
+                    vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                                Other_noise_seeds,Other_noise_weights,new_frame_dir,
+                                img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+                                Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
+                                Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
+                                Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,
+                                Is_Frame=True)
 
-                        final_frame_dir_name = f"{base_out}_final_frames"
-                        final_dir = path.join(base_dir, final_frame_dir_name)
-                        print(f"Copying last frame to {final_dir}")
-                        if not exists(final_dir):
-                            mkdir(final_dir)
+                    final_frame_dir_name = f"{base_out}_final_frames"
+                    final_dir = path.join(base_dir, final_frame_dir_name)
+                    print(f"Copying last frame to {final_dir}")
+                    if not exists(final_dir):
+                        mkdir(final_dir)
 
-                        files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
-                        seq_num = int(len(files))+1
-                        sequence_number_left_padded = str(seq_num).zfill(6)
-                        newname = f"{base_out}.{sequence_number_left_padded}.png"
-                        final_out = path.join(final_dir, newname)
-                        copyfile(vqgan.final_frame_path, final_out)
+                    files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
+                    seq_num = int(len(files))+1
+                    sequence_number_left_padded = str(seq_num).zfill(6)
+                    newname = f"{base_out}.{sequence_number_left_padded}.png"
+                    final_out = path.join(final_dir, newname)
+                    copyfile(vqgan.final_frame_path, final_out)
 
-                    return
-
-                else:
-                    print("Failed to get frames from animated file.\nCheck to make sure the file is valid.")
-                    return
+                return
 
             else:
                 if not Is_Frame:
