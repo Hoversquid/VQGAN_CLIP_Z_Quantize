@@ -248,7 +248,7 @@ class VQGAN_CLIP_Z_Quantize:
                         i += 1
                         j += 1
 
-                    self.final_frame_path = train_and_update(i)
+                    self.final_frame_path = train_and_update(i, last_image=True)
 
 
                 else:
