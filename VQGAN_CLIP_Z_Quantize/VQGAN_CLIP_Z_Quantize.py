@@ -84,7 +84,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         if not Base_Image in (None, ""):
             if isdir(Base_Image):
-                imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
+                imgs = [join(Base_Image, f) for f in listdir(Base_Image) if isfile(join(Base_Image, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
             elif path.splitext(Base_Image)[1] in ('.mp4', '.gif'):
                 base_dir = join(Output_directory, base_out)
