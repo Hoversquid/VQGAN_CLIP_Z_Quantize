@@ -118,19 +118,19 @@ class VQGAN_CLIP_Z_Quantize:
                                     Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,
                                     Is_Frame=True,Last_Frame=Last_Frame)
 
-                        if Last_Frame:
-                            final_frame_dir_name = f"{base_out}_final_frames"
-                            final_dir = path.join(base_dir, final_frame_dir_name)
-                            print(f"Copying last frame to {final_dir}")
-                            if not exists(final_dir):
-                                mkdir(final_dir)
 
-                            files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
-                            seq_num = int(len(files))+1
-                            sequence_number_left_padded = str(seq_num).zfill(6)
-                            newname = f"{base_out}.{sequence_number_left_padded}.png"
-                            final_out = path.join(final_dir, newname)
-                            copyfile(copied_path, final_out)
+                        final_frame_dir_name = f"{base_out}_final_frames"
+                        final_dir = path.join(base_dir, final_frame_dir_name)
+                        print(f"Copying last frame to {final_dir}")
+                        if not exists(final_dir):
+                            mkdir(final_dir)
+
+                        files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
+                        seq_num = int(len(files))+1
+                        sequence_number_left_padded = str(seq_num).zfill(6)
+                        newname = f"{base_out}.{sequence_number_left_padded}.png"
+                        final_out = path.join(final_dir, newname)
+                        copyfile(copied_path, final_out)
 
                     return
 
@@ -281,12 +281,12 @@ class VQGAN_CLIP_Z_Quantize:
                 if Max_Iterations > 0:
                     j = 0
 
-                    while j < Max_Iterations:
+                    while j < Max_Iterations-1:
                         train_and_update(i)
                         i += 1
                         j += 1
 
-                    return
+                    return train_and_update(i)
 
                 else:
                     while True:
