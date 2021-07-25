@@ -104,7 +104,6 @@ class VQGAN_CLIP_Z_Quantize:
                     self.write_args_file(Output_directory, base_out, prompts)
                     Last_Frame = False
                     for img in sorted_imgs:
-                        print(f"Iteration: {j}, Max: {Max_Iterations}")
                         dir_name = f"{base_out}_frame_{j}"
                         if j == Max_Iterations: Last_Frame = True
                         j += 1
@@ -286,7 +285,7 @@ class VQGAN_CLIP_Z_Quantize:
                         i += 1
                         j += 1
 
-                    return train_and_update(i)
+                    return str(train_and_update(i))
 
                 else:
                     while True:
