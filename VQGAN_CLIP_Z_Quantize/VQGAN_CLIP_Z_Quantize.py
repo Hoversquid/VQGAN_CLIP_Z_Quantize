@@ -249,7 +249,7 @@ class VQGAN_CLIP_Z_Quantize:
                         j += 1
 
                     self.final_frame_path = train_and_update(i, last_image=True)
-
+                    torch.cuda.empty_cache()
 
                 else:
                     while True:
@@ -364,25 +364,6 @@ class VQGAN_CLIP_Z_Quantize:
             newname = base
         output_path = path.join(split, newname)
         return Path(f"{output_path}.png")
-
-    # def set_valid_filename(self, basename, i):
-    #     if i > 0:
-    #         newname = "%s(%d)" % (basename, i)
-    #     else:
-    #         newname = basename
-    #
-    #     unique_name = True
-    #     for root, dir, files in walk(self.args.outdir):
-    #         for f in files:
-    #           if path.splitext(f)[0] == newname:
-    #             unique_name = False
-    #             break
-    #         if not unique_name: break
-    #
-    #     if unique_name:
-    #       return path.join(self.args.outdir, newname)
-    #
-    #     return self.set_valid_filename(self.args.outdir, basename, i + 1)
 
     def write_args_file(self, out, base, prompts):
         saved_prompts_dir = path.join(out, "Saved_Prompts/")
