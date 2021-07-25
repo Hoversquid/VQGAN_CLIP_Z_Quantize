@@ -84,7 +84,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         if not Base_Image in (None, ""):
             base_dir = join(Output_directory, base_out)
-            print(f"Base_Image: {Base_Image}")
+            sorted_imgs = []
             if isdir(Base_Image):
                 base_name = path.basename(Base_Image)
                 imgs = [join(Base_Image, f) for f in listdir(Base_Image) if isfile(join(Base_Image, f))]
