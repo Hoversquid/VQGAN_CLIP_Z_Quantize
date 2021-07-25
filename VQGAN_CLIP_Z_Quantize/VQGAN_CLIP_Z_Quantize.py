@@ -99,29 +99,33 @@ class VQGAN_CLIP_Z_Quantize:
                 if len(sorted_imgs) > 0 and Max_Iterations > 0:
                     j = 1
                     self.write_args_file(Output_directory, base_out, prompts)
+                    Last_Frame = False
                     for img in sorted_imgs:
                         dir_name = f"{base_out}_frame_{j}"
+                        if j == Max_Iterations: Last_Frame = True
                         j += 1
                         new_frame_dir = path.join(base_dir, dir_name)
                         mkdir(new_frame_dir)
-                        VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                        copied_path = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
                                     Other_noise_seeds,Other_noise_weights,new_frame_dir,
                                     img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                    Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,Is_Frame=True)
+                                    Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,
+                                    Is_Frame=True,Last_Frame=Last_Frame)
 
-                        final_frame_dir_name = f"{base_out}_final_frames"
-                        final_dir = path.join(base_dir, final_frame_dir_name)
-                        if not exists(final_dir):
-                            mkdir(final_dir)
+                        if Last_Frame:
+                            final_frame_dir_name = f"{base_out}_final_frames"
+                            final_dir = path.join(base_dir, final_frame_dir_name)
+                            if not exists(final_dir):
+                                mkdir(final_dir)
 
-                        files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
-                        seq_num = int(len(files))+1
-                        sequence_number_left_padded = str(seq_num).zfill(6)
-                        newname = f"{base_out}.{sequence_number_left_padded}.png"
-                        final_out = path.join(final_dir, newname)
-                        copyfile(frame_path, final_out)
+                            files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
+                            seq_num = int(len(files))+1
+                            sequence_number_left_padded = str(seq_num).zfill(6)
+                            newname = f"{base_out}.{sequence_number_left_padded}.png"
+                            final_out = path.join(final_dir, newname)
+                            copyfile(copied_path, final_out)
 
                     return
 
