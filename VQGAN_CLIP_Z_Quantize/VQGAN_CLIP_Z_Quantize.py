@@ -83,20 +83,21 @@ class VQGAN_CLIP_Z_Quantize:
         base_out = path.basename(outpath)
 
         if not Base_Image in (None, ""):
+            base_dir = join(Output_directory, base_out)
             if isdir(Base_Image):
+                base_name = path.basename(Base_Image)
                 imgs = [join(Base_Image, f) for f in listdir(Base_Image) if isfile(join(Base_Image, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
             elif path.splitext(Base_Image)[1] in ('.mp4', '.gif'):
-                base_dir = join(Output_directory, base_out)
                 base_name = path.basename(path.splitext(Base_Image)[0])
                 split_frames_dirname = f"{base_name}_split_frames"
                 frames_dir = join(base_dir, split_frames_dirname)
                 if not exists(frames_dir):
                     mkdir(frames_dir)
-                imgname = f"{base_name}.%06d.png"
-                frames_dir_arg = path.join(frames_dir, imgname)
-                cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
-                subprocess.call(cmdargs)
+                    imgname = f"{base_name}.%06d.png"
+                    frames_dir_arg = path.join(frames_dir, imgname)
+                    cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
+                    subprocess.call(cmdargs)
                 imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
             else:
