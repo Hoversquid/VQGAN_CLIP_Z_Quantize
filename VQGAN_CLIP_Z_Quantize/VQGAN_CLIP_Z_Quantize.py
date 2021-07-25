@@ -120,6 +120,7 @@ class VQGAN_CLIP_Z_Quantize:
                         if Last_Frame:
                             final_frame_dir_name = f"{base_out}_final_frames"
                             final_dir = path.join(base_dir, final_frame_dir_name)
+                            print(f"Coping last frame to {final_dir}")
                             if not exists(final_dir):
                                 mkdir(final_dir)
 
