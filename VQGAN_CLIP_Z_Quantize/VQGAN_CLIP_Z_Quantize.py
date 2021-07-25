@@ -273,7 +273,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                     # self.final_frame_path = train_and_update(i)
                     final_frame_dir_name = f"{base_out}_final_frames"
-                    final_dir = path.join(base_dir, final_frame_dir_name)
+                    final_dir = path.join(Output_directory, final_frame_dir_name)
                     print(f"Copying last frame to {final_dir}")
                     if not exists(final_dir):
                         mkdir(final_dir)
