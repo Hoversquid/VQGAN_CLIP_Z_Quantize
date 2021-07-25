@@ -109,7 +109,7 @@ class VQGAN_CLIP_Z_Quantize:
                         j += 1
                         new_frame_dir = path.join(base_dir, dir_name)
                         mkdir(new_frame_dir)
-                        copied_path = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                        VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
                                     Other_noise_seeds,Other_noise_weights,new_frame_dir,
                                     img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
@@ -129,7 +129,7 @@ class VQGAN_CLIP_Z_Quantize:
                         sequence_number_left_padded = str(seq_num).zfill(6)
                         newname = f"{base_out}.{sequence_number_left_padded}.png"
                         final_out = path.join(final_dir, newname)
-                        copyfile(copied_path, final_out)
+                        copyfile(self.final_frame_path, final_out)
 
                     return
 
@@ -285,7 +285,7 @@ class VQGAN_CLIP_Z_Quantize:
                         i += 1
                         j += 1
 
-                    return str(train_and_update(i))
+                    self.final_frame_path = train_and_update(i))
 
                 else:
                     while True:
