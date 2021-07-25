@@ -104,6 +104,7 @@ class VQGAN_CLIP_Z_Quantize:
                     self.write_args_file(Output_directory, base_out, prompts)
                     Last_Frame = False
                     for img in sorted_imgs:
+                        print(f"Iteration: {j}, Max: {Max_Iterations}")
                         dir_name = f"{base_out}_frame_{j}"
                         if j == Max_Iterations: Last_Frame = True
                         j += 1
@@ -120,7 +121,7 @@ class VQGAN_CLIP_Z_Quantize:
                         if Last_Frame:
                             final_frame_dir_name = f"{base_out}_final_frames"
                             final_dir = path.join(base_dir, final_frame_dir_name)
-                            print(f"Coping last frame to {final_dir}")
+                            print(f"Copying last frame to {final_dir}")
                             if not exists(final_dir):
                                 mkdir(final_dir)
 
