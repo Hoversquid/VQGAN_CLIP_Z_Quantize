@@ -74,7 +74,10 @@ class VQGAN_CLIP_Z_Quantize:
 
         filename = filename.replace(" ", "_")
         dirs = [x[0] for x in walk(Output_directory)]
-        outpath = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+        if Is_Frame:
+            outpath = Output_directory
+        else:
+            outpath = self.set_valid_dirname(dirs, Output_directory, filename, 0)
         imgpath = None
 
         base_out = path.basename(outpath)
