@@ -102,20 +102,32 @@ class VQGAN_CLIP_Z_Quantize:
                 if len(sorted_imgs) > 0 and Max_Iterations > 0:
                     j = 1
                     self.write_args_file(Output_directory, base_out, prompts)
-                    Last_Frame = False
+
                     for img in sorted_imgs:
                         dir_name = f"{base_out}_frame_{j}"
-                        if j == Max_Iterations: Last_Frame = True
                         j += 1
                         new_frame_dir = path.join(base_dir, dir_name)
                         mkdir(new_frame_dir)
-                        VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                        vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
                                     Other_noise_seeds,Other_noise_weights,new_frame_dir,
                                     img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
                                     Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,
                                     Is_Frame=True)
+
+                        final_frame_dir_name = f"{base_out}_final_frames"
+                        final_dir = path.join(Output_directory, final_frame_dir_name)
+                        print(f"Copying last frame to {final_dir}")
+                        if not exists(final_dir):
+                            mkdir(final_dir)
+
+                        files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
+                        seq_num = int(len(files))+1
+                        sequence_number_left_padded = str(seq_num).zfill(6)
+                        newname = f"{base_out}.{sequence_number_left_padded}.png"
+                        final_out = path.join(final_dir, newname)
+                        copyfile(self.final_frame_path, final_out)
 
                     return
 
@@ -227,63 +239,17 @@ class VQGAN_CLIP_Z_Quantize:
                     pbar.update()
                     return new_filepath
 
-                # splits an animated file into frames and runs each one separately
-                # if base_type in ('.mp4', '.gif'):
-                #     j = 1
-                #
-                #     for img in sorted_imgs:
-                #         # using an animated file requires a max amount per frame
-                #         if Max_Iterations > 0:
-                #             i = 0
-                #             dir_name = f"{base_out}_frame_{j}"
-                #             j += 1
-                #             new_frame_dir = path.join(base_dir, dir_name)
-                #             mkdir(new_frame_dir)
-                #             # self.args.outdir = new_frame_dir
-                #             while i <= Max_Iterations:
-                #
-                #                 if i == Max_Iterations:
-                #                     frame_path = train_and_update(i, outpath=new_frame_dir, last_image=True)
-                #                     break
-                #
-                #                 train_and_update(i, outpath=new_frame_dir, last_image=False)
-                #                 i += 1
-                #
-                #             final_frame_dir_name = f"{base_out}_final_frames"
-                #             final_dir = path.join(base_dir, final_frame_dir_name)
-                #             if not exists(final_dir):
-                #                 mkdir(final_dir)
-                #             files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
-                #             seq_num = int(len(files))+1
-                #             sequence_number_left_padded = str(seq_num).zfill(6)
-                #             newname = f"{base_out}.{sequence_number_left_padded}.png"
-                #             final_out = path.join(final_dir, newname)
-                #             copyfile(frame_path, final_out)
-                #
-                #     return
-
                 # Set to -1 to run forever
                 if Max_Iterations > 0:
                     j = 0
 
-                    while j < Max_Iterations:
+                    while j < Max_Iterations - 1:
                         last_frame_path = train_and_update(i)
                         i += 1
                         j += 1
 
-                    # self.final_frame_path = train_and_update(i)
-                    final_frame_dir_name = f"{base_out}_final_frames"
-                    final_dir = path.join(Output_directory, final_frame_dir_name)
-                    print(f"Copying last frame to {final_dir}")
-                    if not exists(final_dir):
-                        mkdir(final_dir)
+                    self.final_frame_path = train_and_update(i)
 
-                    files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
-                    seq_num = int(len(files))+1
-                    sequence_number_left_padded = str(seq_num).zfill(6)
-                    newname = f"{base_out}.{sequence_number_left_padded}.png"
-                    final_out = path.join(final_dir, newname)
-                    copyfile(last_frame_path, final_out)
 
                 else:
                     while True:
