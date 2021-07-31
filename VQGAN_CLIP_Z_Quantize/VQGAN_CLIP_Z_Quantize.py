@@ -37,7 +37,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
                 Display_Frequency, Clear_Interval, Max_Iterations,
-                Step_Size, Cut_N, Cut_Pow, Is_Frame=False):
+                Step_Size, Cut_N, Cut_Pow, Starting_Frame, Ending_Frame, Overwrite, Only_Save, Is_Frame=False):
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
@@ -55,7 +55,7 @@ class VQGAN_CLIP_Z_Quantize:
                     "Noise_Weight":Noise_Weight,"Seed":Seed,
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
                     "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow}
-
+        test_args = {"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save}
         prompts.update(arg_list)
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
@@ -74,7 +74,8 @@ class VQGAN_CLIP_Z_Quantize:
 
         filename = filename.replace(" ", "_")
         dirs = [x[0] for x in walk(Output_directory)]
-        if Is_Frame:
+        #TODO: add overwrite param
+        if Is_Frame or Overwrite:
             outpath = Output_directory
         else:
             outpath = self.set_valid_dirname(dirs, Output_directory, filename, 0)
@@ -85,11 +86,18 @@ class VQGAN_CLIP_Z_Quantize:
         if not Base_Image in (None, ""):
             base_dir = join(Output_directory, base_out)
             sorted_imgs = []
+            # base_is_dir = False
+
             if isdir(Base_Image):
-                base_name = path.basename(Base_Image)
-                imgs = [join(Base_Image, f) for f in listdir(Base_Image) if isfile(join(Base_Image, f))]
+                files = [join(Base_Image, f) for f in listdir(Base_Image) if isfile(join(Base_Image, f))]
+                imgs = [f for f in files if path.splitext(f)[1] in ('.png', '.jpg')]
+                txt_files = [f for f in files if path.splitext(f)[1] == '.txt']
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
+                # base_is_dir = True
+                base_name = path.basename(Base_Image)
+                    
             elif path.splitext(Base_Image)[1] in ('.mp4', '.gif'):
+                # base_is_dir = True
                 base_name = path.basename(path.splitext(Base_Image)[0])
                 split_frames_dirname = f"{base_name}_split_frames"
                 frames_dir = join(base_dir, split_frames_dirname)
@@ -101,26 +109,42 @@ class VQGAN_CLIP_Z_Quantize:
                     subprocess.call(cmdargs)
                 imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
-            # else:
-            #     print("Failed to get frames from animated file.\nCheck to make sure the file is valid.")
-            #     return
+
+            imgLen = len(sorted_imgs)
+            start, end = 1, imgLen
+            # if base_is_dir:
+            try:
+                if Starting_Frame > 1 and Starting_Frame <= imgLen:
+                    start = Starting_Frame
+                if Ending_Frame > 1 and Ending_Frame <= imgLen:
+                    end = Ending_Frame
+                if end - start < 1:
+                    start, end = 1, imgLen
+
+            except:
+                print("Invalid frame selection")
+                start, end = 1, imgLen
+
 
             if len(sorted_imgs) > 0 and Max_Iterations > 0:
-                j = 1
-                self.write_args_file(Output_directory, base_out, prompts)
+                self.write_args_file(Output_directory, base_out, prompts, test_args)
+                if Only_Save:
+                    return
+                j = start
 
-                for img in sorted_imgs:
+                for img in sorted_imgs[start-1:end-1]:
                     dir_name = f"{base_out}_frame_{j}"
                     j += 1
                     new_frame_dir = path.join(base_dir, dir_name)
-                    mkdir(new_frame_dir)
+                    if not exists(new_frame_dir):
+                        mkdir(new_frame_dir)
                     vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
                                 Other_noise_seeds,Other_noise_weights,new_frame_dir,
                                 img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
                                 Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                 Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
                                 Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                Is_Frame=True)
+                                Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True)
 
                     final_frame_dir_name = f"{base_out}_final_frames"
                     final_dir = path.join(base_dir, final_frame_dir_name)
@@ -135,13 +159,26 @@ class VQGAN_CLIP_Z_Quantize:
                     final_out = path.join(final_dir, newname)
                     copyfile(vqgan.final_frame_path, final_out)
 
+            if len(txt_files) > 0:
+                for f in txt_files:
+                    txt = open(f, "r")
+                    code= txt.read()
+                    txt.close()
+                    newfile = join(Output_directory, base_out, path.basename(f) + ".py")
+                    py = open(newfile, "w")
+                    py.write(code)
+                    py.close()
+                    subprocess.call(["python", newfile])
+                    os.remove(newfile)
+
+            return
+        else:
+            if not Is_Frame:
+                self.write_args_file(Output_directory, base_out, prompts)
+            if Only_Save:
                 return
 
-            else:
-                if not Is_Frame:
-                    self.write_args_file(Output_directory, base_out, prompts)
-
-                imgpath = self.get_pil_imagepath(Base_Image)
+            imgpath = self.get_pil_imagepath(Base_Image)
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -236,10 +273,18 @@ class VQGAN_CLIP_Z_Quantize:
         try:
             with tqdm() as pbar:
 
-                def train_and_update(i, outpath=outpath, last_image=False):
-                    new_filepath = self.train(i, outpath, last_image)
-                    pbar.update()
-                    return new_filepath
+                def train_and_update(i, outpath=outpath, last_image=False, retryTime=0):
+                    try:
+                        new_filepath = self.train(i, outpath, last_image)
+                        pbar.update()
+                        return new_filepath
+
+                    except RuntimeError:
+                        print("RuntimeError: " + sys.exc_info()[0])
+                        torch.cuda.empty_cache()
+                        time.sleep(retryTime)
+                        train_and_update(i, output_path=output_path, last_image=last_image, retryTime+3)
+
 
                 # Set to -1 to run forever
                 if Max_Iterations > 0:
@@ -259,6 +304,7 @@ class VQGAN_CLIP_Z_Quantize:
                         i += 1
 
         except KeyboardInterrupt:
+            # torch.cuda.empty_cache()
             pass
 
     def set_sorted_folder(self, diroutname, filetype):
@@ -367,12 +413,12 @@ class VQGAN_CLIP_Z_Quantize:
         output_path = path.join(split, newname)
         return Path(f"{output_path}.png")
 
-    def write_args_file(self, out, base, prompts):
+    def write_args_file(self, out, base, prompts, test_args):
         saved_prompts_dir = path.join(out, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
         self.filelistpath = saved_prompts_dir + base + ".txt"
-        self.write_arg_list(prompts)
+        self.write_arg_list(prompts, test_args)
 
 
     def set_valid_dirname(self, dirs, out, basename, i):
@@ -406,7 +452,7 @@ class VQGAN_CLIP_Z_Quantize:
       prompt_list = param_list + rest
       return prompt_list
 
-    def write_arg_list(self,args):
+    def write_arg_list(self,args,test_args):
         start = """# Running this cell will generate images based on the form inputs ->
 # It will also copy the contents of this cell and save it as a text file
 # Copy the text from the file and paste it here to reuse the form inputs
@@ -417,7 +463,7 @@ from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
 
         end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
 Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow)"""
+Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,Starting_Frame,Ending_Frame)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
@@ -449,12 +495,15 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
             for argname, argval in args.items():
-                if comments[i] == "#@param {type:'string'}":
+                if comments[i].startswith("#@param {type:'string'}", "#@param ["):
                     txt += f"{str(argname)}=\"{str(argval)}\" {comments[i]}"
                 else:
                     txt += f"{str(argname)}={str(argval)} {comments[i]}"
                 txt += "\n"
                 i+=1
+
+            for argname, argval in test_args.items():
+                txt += f"{str(argname)}={str(argval)}\n"
             print(f"writing settings to {self.filelistpath}")
             txtfile.write(start + txt + end)
 
