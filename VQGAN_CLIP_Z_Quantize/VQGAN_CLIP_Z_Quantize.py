@@ -37,7 +37,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
                 Display_Frequency, Clear_Interval, Max_Iterations,
-                Step_Size, Cut_N, Cut_Pow, Starting_Frame, Ending_Frame, Overwrite, Only_Save, Is_Frame=False):
+                Step_Size, Cut_N, Cut_Pow, Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False, Is_Frame=False):
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
@@ -95,7 +95,7 @@ class VQGAN_CLIP_Z_Quantize:
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
                 # base_is_dir = True
                 base_name = path.basename(Base_Image)
-                    
+
             elif path.splitext(Base_Image)[1] in ('.mp4', '.gif'):
                 # base_is_dir = True
                 base_name = path.basename(path.splitext(Base_Image)[0])
