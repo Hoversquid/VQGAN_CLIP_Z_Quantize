@@ -281,9 +281,11 @@ class VQGAN_CLIP_Z_Quantize:
 
                     except RuntimeError:
                         print("RuntimeError: " + sys.exc_info()[0])
+                        if retryTime>0:
+                            print(f"Retrtying in {retryTime}.\nYou may need to lower your size settings or change models.")
                         torch.cuda.empty_cache()
                         time.sleep(retryTime)
-                        train_and_update(i, output_path=output_path, last_image=last_image, retryTime+3)
+                        train_and_update(i, output_path=output_path, last_image=last_image, retryTime=retryTime+3)
 
 
                 # Set to -1 to run forever
