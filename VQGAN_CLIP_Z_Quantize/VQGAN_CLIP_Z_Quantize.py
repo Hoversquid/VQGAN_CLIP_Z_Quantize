@@ -99,6 +99,7 @@ class VQGAN_CLIP_Z_Quantize:
             elif path.splitext(Base_Image)[1] in ('.mp4', '.gif'):
                 # base_is_dir = True
                 base_name = path.basename(path.splitext(Base_Image)[0])
+                print(base_name)
                 split_frames_dirname = f"{base_name}_split_frames"
                 frames_dir = join(base_dir, split_frames_dirname)
                 if not exists(frames_dir):
