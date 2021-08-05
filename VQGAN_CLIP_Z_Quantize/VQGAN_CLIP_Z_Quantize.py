@@ -139,11 +139,11 @@ class VQGAN_CLIP_Z_Quantize:
                     frameAmt = end - start
                     if frameAmt < 1:
                         start, end = 1, imgLen
-                        print(f"Out of bounds frame selection, running through all {frameAmt} frames.")
+                        print(f"Out of bounds frame selection, running through all {imgLen} frames.")
 
                 except:
-                    print(f"Invalid frame selection, running through all {frameAmt} frames.")
                     start, end = 1, imgLen
+                    print(f"Invalid frame selection, running through all {imgLen} frames.")
 
                 self.write_args_file(Output_directory, base_dir_name, prompts, test_args)
                 if Only_Save:
