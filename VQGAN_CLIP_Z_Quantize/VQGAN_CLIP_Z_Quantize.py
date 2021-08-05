@@ -532,7 +532,7 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
                 i+=1
 
             for argname, argval in test_args.items():
-                if argname = "Overwritten_Dir":
+                if argname == "Overwritten_Dir":
                     txt += f"{str(argname)}='{str(argval)}'\n"
                 else:
                     txt += f"{str(argname)}={str(argval)}\n"
