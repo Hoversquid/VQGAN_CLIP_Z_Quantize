@@ -30,13 +30,13 @@ class VQGAN_CLIP_Z_Quantize:
                 Other_noise_seeds,
                 Other_noise_weights,
                 Output_directory,
-                Base_Image, Base_Image_Weight,
+                Base_Option, Base_Option_Weight,
                 Image_Prompt1, Image_Prompt2, Image_Prompt3,
                 Text_Prompt1,Text_Prompt2,Text_Prompt3,
                 SizeX, SizeY,
                 Noise_Seed_Number, Noise_Weight, Seed,
                 Image_Model, CLIP_Model,
-                Display_Frequency, Clear_Interval, Max_Iterations,
+                Display_Frequency, Clear_Interval, Train_Iterations,
                 Step_Size, Cut_N, Cut_Pow,
                 Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False, Is_Frame=False,
                 Overwritten_Dir=None):
@@ -49,19 +49,20 @@ class VQGAN_CLIP_Z_Quantize:
         prompts["Other_noise_seeds"] = Other_noise_seeds
         prompts["Other_noise_weights"] = Other_noise_weights
 
-        arg_list = {"Output_directory":Output_directory,"Base_Image":Base_Image,
-                    "Base_Image_Weight":Base_Image_Weight,
+        arg_list = {"Output_directory":Output_directory,"Base_Option":Base_Option,
+                    "Base_Option_Weight":Base_Option_Weight,
                     "Image_Prompt1":Image_Prompt1,"Image_Prompt2":Image_Prompt2,"Image_Prompt3":Image_Prompt3,
                     "Text_Prompt1":Text_Prompt1,"Text_Prompt2":Text_Prompt2,"Text_Prompt3":Text_Prompt3,
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
                     "Noise_Weight":Noise_Weight,"Seed":Seed,
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
-                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Max_Iterations":Max_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow}
+                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Train_Iterations":Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow}
         test_args = {"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save}
         prompts.update(arg_list)
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
 
+        # Sets the filename based on the collection of Text_Prompts
         filename = ""
         name_limit = 42
         for i, prompt in enumerate(txt_prompts):
@@ -75,119 +76,122 @@ class VQGAN_CLIP_Z_Quantize:
           filename = "No_Prompts"
 
         filename = filename.replace(" ", "_")
-        dirs = [x[0] for x in walk(Output_directory)]
-
-        # if Is_Frame:
-        #     outpath = Output_directory
-        # elif Overwrite:
-        #     if Overwritten_Dir:
-        #         outpath = Overwritten_Dir
-        #         base_dir = path.basename(Overwritten_Dir)
-        #     else:
-        #         outpath = Output_directory
-        #         base_dir = path.basename(Overwritten_Dir)
-        # else:
-        #     outpath = self.set_valid_dirname(dirs, Output_directory, filename, 0)
         imgpath = None
 
-
-        base_out = path.basename(outpath)
-
-        if not Base_Image in (None, ""):
+        # if Base_Option exists, set the base directory to its final target or targets.
+        if not Base_Option in (None, ""):
             sorted_imgs = []
 
-            if isdir(Base_Image):
-                if Overwrite:
-                    if Overwritten_Dir:
-                        base_dir = join(Output_directory, path.basename(Overwritten_Dir))
-                    else:
-                        base_dir = join(Output_directory, filename)
+            # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
+            if Overwrite:
+                if Overwritten_Dir:
+                    base_dir = join(Output_directory, path.basename(Overwritten_Dir))
                 else:
-                    base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+                    base_dir = join(Output_directory, filename)
 
-                files = [join(Base_Image, f) for f in listdir(Base_Image) if isfile(join(Base_Image, f))]
+            # Not overwriting will make the filename unique and make a new directory for its files.
+            else:
+                dirs = [x[0] for x in walk(Output_directory)]
+                base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+
+            base_dir_name = path.basename(base_dir)
+
+            # Setting the Base_Option to a directory will run each image and saved prompt text file in order. Skips animated files but will run prompts that contain animated file parameters.
+            is_frames = False
+            if isdir(Base_Option):
+                files = [join(Base_Option, f) for f in listdir(Base_Option) if isfile(join(Base_Option, f))]
+
+                # Separates images and text files to be run (will currently combine different image sets)
+                # TODO: Separate sets of sorted images like in MLAnimator
                 imgs = [f for f in files if path.splitext(f)[1] in ('.png', '.jpg')]
                 txt_files = [f for f in files if path.splitext(f)[1] == '.txt']
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
-                # base_name = path.basename(Base_Image)
 
-            elif path.splitext(Base_Image)[1] in ('.mp4', '.gif'):
-                base_name = path.basename(path.splitext(Base_Image)[0])
-                if Overwrite:
-                    if Overwritten_Dir:
-                        base_dir = join(Output_directory, path.basename(Overwritten_Dir))
-                    else:
-                        base_dir = join(Output_directory, filename)
-                else:
-                    base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
-                    
-                split_frames_dirname = f"{base_name}_split_frames"
+            # Base_Options that are a path/URL to an animated file are separated into frames and ran individually. Images are trained based on the amount of Train_Iterations.
+            elif path.splitext(Base_Option)[1] in ('.mp4', '.gif'):
+                is_frames = True
+                base_file_name = path.basename(path.splitext(Base_Option)[0])
+                split_frames_dirname = f"{base_file_name}_split_frames"
                 frames_dir = join(base_dir, split_frames_dirname)
                 if not exists(frames_dir):
                     mkdir(frames_dir)
-                    imgname = f"{base_name}.%06d.png"
+                    imgname = f"{base_file_name}.%06d.png"
                     frames_dir_arg = path.join(frames_dir, imgname)
-                    cmdargs = ['ffmpeg', '-i', Base_Image, frames_dir_arg]
+                    cmdargs = ['ffmpeg', '-i', Base_Option, frames_dir_arg]
                     subprocess.call(cmdargs)
 
                 imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
 
             imgLen = len(sorted_imgs)
-            start, end = 1, imgLen
 
-            try:
-                if Starting_Frame > 1 and Starting_Frame <= imgLen:
-                    start = Starting_Frame
-                if Ending_Frame > 1 and Ending_Frame <= imgLen:
-                    end = Ending_Frame
-                if end - start < 1:
+            if imgLen > 0 and Train_Iterations > 0:
+
+                start, end = 1, imgLen
+                # If the option is an animated file, setting the Starting_Frame and Ending_Frame can limit from which frames to train.
+                # Be sure to use the Overwrite option to make frames if they are going in the same directory as other frame directories.
+                try:
+                    if Starting_Frame > 1 and Starting_Frame <= imgLen:
+                        start = Starting_Frame
+                    if Ending_Frame > 1 and Ending_Frame <= imgLen:
+                        end = Ending_Frame
+
+                    frameAmt = end - start
+                    if frameAmt < 1:
+                        start, end = 1, imgLen
+                        print(f"Out of bounds frame selection, running through all {frameAmt} frames.")
+
+                except:
+                    print(f"Invalid frame selection, running through all {frameAmt} frames.")
                     start, end = 1, imgLen
 
-            except:
-                print("Invalid frame selection")
-                start, end = 1, imgLen
-
-
-            if len(sorted_imgs) > 0 and Max_Iterations > 0:
-                self.write_args_file(Output_directory, base_out, prompts, test_args)
+                self.write_args_file(Output_directory, base_dir_name, prompts, test_args)
                 if Only_Save:
                     return
                 j = start
 
-                for img in sorted_imgs[start-1:end-1]:
-                    dir_name = f"{base_out}_frame_{j}"
-                    j += 1
-                    new_frame_dir = path.join(base_dir, dir_name)
-                    if not exists(new_frame_dir):
-                        mkdir(new_frame_dir)
-                    vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
-                                Other_noise_seeds,Other_noise_weights,new_frame_dir,
-                                img, Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+                target_dir = ""
+                def run_VQGAN():
+                    return VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                                Other_noise_seeds,Other_noise_weights,target_dir,
+                                img, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
                                 Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                 Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,
+                                Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
                                 Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True)
 
-                    final_frame_dir_name = f"{base_out}_final_frames"
-                    final_dir = path.join(base_dir, final_frame_dir_name)
-                    print(f"Copying last frame to {final_dir}")
-                    if not exists(final_dir):
-                        mkdir(final_dir)
+                for img in sorted_imgs[start-1:end-1]:
+                    if is_frames:
+                        target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
+                    else:
+                        target_dir = path.join(base_dir, filename)
+                    j += 1
+                    if not exists(target_dir):
+                        mkdir(target_dir)
 
-                    files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
-                    seq_num = int(len(files))+1
-                    sequence_number_left_padded = str(seq_num).zfill(6)
-                    newname = f"{base_out}.{sequence_number_left_padded}.png"
-                    final_out = path.join(final_dir, newname)
-                    copyfile(vqgan.final_frame_path, final_out)
+
+                    vqgan = run_VQGAN();
+
+                    if is_frames:
+                        final_dir = path.join(base_dir, f"{base_dir_name}_final_frames")
+                        print(f"Copying last frame to {final_dir}")
+                        if not exists(final_dir):
+                            mkdir(final_dir)
+
+                        files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
+                        seq_num = int(len(files))+1
+                        sequence_number_left_padded = str(seq_num).zfill(6)
+                        newname = f"{base_dir_name}.{sequence_number_left_padded}.png"
+                        final_out = path.join(final_dir, newname)
+                        copyfile(vqgan.final_frame_path, final_out)
+
 
             if len(txt_files) > 0:
                 for f in txt_files:
                     txt = open(f, "r")
                     code= txt.read()
                     txt.close()
-                    newfile = join(Output_directory, base_out, path.basename(f) + ".py")
+                    newfile = join(Output_directory, base_dir_name, path.basename(f) + ".py")
                     py = open(newfile, "w")
                     py.write(code)
                     py.close()
@@ -197,11 +201,11 @@ class VQGAN_CLIP_Z_Quantize:
             return
         else:
             if not Is_Frame:
-                self.write_args_file(Output_directory, base_out, prompts)
+                self.write_args_file(Output_directory, filename, prompts)
             if Only_Save:
                 return
 
-            imgpath = self.get_pil_imagepath(Base_Image)
+            imgpath = self.get_pil_imagepath(Base_Option)
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -219,8 +223,8 @@ class VQGAN_CLIP_Z_Quantize:
 
         self.args = argparse.Namespace(
             outdir=Output_directory, # this is the name of where your output will go
-            init_image=Base_Image,
-            init_weight=Base_Image_Weight,
+            init_image=Base_Option,
+            init_weight=Base_Option_Weight,
             prompts=txt_prompts,
             image_prompts=img_prompts,
             noise_prompt_seeds=noise_prompt_seeds,
@@ -312,10 +316,10 @@ class VQGAN_CLIP_Z_Quantize:
 
 
                 # Set to -1 to run forever
-                if Max_Iterations > 0:
+                if Train_Iterations > 0:
                     j = 0
 
-                    while j < Max_Iterations - 1:
+                    while j < Train_Iterations - 1:
                         last_frame_path = train_and_update(i)
                         i += 1
                         j += 1
@@ -487,8 +491,8 @@ from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
 """
 
         end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
-Output_directory,Base_Image,Base_Image_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Max_Iterations,Step_Size,Cut_N,Cut_Pow,Starting_Frame,Ending_Frame)"""
+Output_directory,Base_Option,Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,Starting_Frame,Ending_Frame)"""
 
         comments = ["# (strings)",
           "# (strings of links or paths)",
