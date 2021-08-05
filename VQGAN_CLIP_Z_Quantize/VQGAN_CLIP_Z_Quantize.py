@@ -525,7 +525,7 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
             i, txt = 0, ""
             for argname, argval in args.items():
                 print("comments @ i: ", comments[i])
-                if comments[i].startswith("#@param {type:'string'}", "#@param ["):
+                if comments[i].startswith(("#@param {type:'string'}", "#@param [")):
                     txt += f"{str(argname)}=\"{str(argval)}\" {comments[i]}"
                 else:
                     txt += f"{str(argname)}={str(argval)} {comments[i]}"
