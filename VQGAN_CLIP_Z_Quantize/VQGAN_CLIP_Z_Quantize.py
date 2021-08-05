@@ -151,14 +151,14 @@ class VQGAN_CLIP_Z_Quantize:
                 j = start
 
                 target_dir = ""
-                def run_VQGAN():
-                    return VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
-                                Other_noise_seeds,Other_noise_weights,target_dir,
-                                img, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-                                Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
-                                Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True)
+                # def run_VQGAN():
+                #     return VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                #                 Other_noise_seeds,Other_noise_weights,target_dir,
+                #                 img, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+                #                 Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
+                #                 Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
+                #                 Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
+                #                 Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True)
 
                 for img in sorted_imgs[start-1:end-1]:
                     if is_frames:
@@ -170,7 +170,13 @@ class VQGAN_CLIP_Z_Quantize:
                         mkdir(target_dir)
 
 
-                    vqgan = run_VQGAN();
+                    vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                                Other_noise_seeds,Other_noise_weights,target_dir,
+                                img, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+                                Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
+                                Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
+                                Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
+                                Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True)
 
                     if is_frames:
                         final_dir = path.join(base_dir, f"{base_dir_name}_final_frames")
