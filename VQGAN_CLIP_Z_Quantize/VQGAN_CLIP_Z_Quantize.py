@@ -81,7 +81,7 @@ class VQGAN_CLIP_Z_Quantize:
         # if Base_Option exists, set the base directory to its final target or targets.
         if not Base_Option in (None, ""):
             sorted_imgs = []
-
+            txt_files = []
             # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
             if Overwrite:
                 if Overwritten_Dir:
@@ -524,7 +524,6 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
             i, txt = 0, ""
             for argname, argval in args.items():
-                print("comments @ i: ", comments[i])
                 if comments[i].startswith(("#@param {type:'string'}", "#@param [")):
                     txt += f"{str(argname)}=\"{str(argval)}\" {comments[i]}"
                 else:
