@@ -317,6 +317,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                 # Set to -1 to run forever
                 if Train_Iterations > 0:
+                    print(f"Begining training over {Train_Iterations} iterations.")
                     j = 0
 
                     while j < Train_Iterations - 1:
