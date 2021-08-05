@@ -77,19 +77,18 @@ class VQGAN_CLIP_Z_Quantize:
         filename = filename.replace(" ", "_")
         dirs = [x[0] for x in walk(Output_directory)]
 
-        # if Is_Frame:
-        #     outpath = Output_directory
-        # elif Overwrite:
-        #     if Overwritten_Dir:
-        #         outpath = Overwritten_Dir
-        #         base_dir = path.basename(Overwritten_Dir)
-        #     else:
-        #         outpath = Output_directory
-        #         base_dir = path.basename(Overwritten_Dir)
-        # else:
-        #     outpath = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+        if Is_Frame:
+            outpath = Output_directory
+        elif Overwrite:
+            if Overwritten_Dir:
+                outpath = Overwritten_Dir
+                base_dir = path.basename(Overwritten_Dir)
+            else:
+                outpath = Output_directory
+                base_dir = path.basename(Overwritten_Dir)
+        else:
+            outpath = self.set_valid_dirname(dirs, Output_directory, filename, 0)
         imgpath = None
-
 
         base_out = path.basename(outpath)
 
@@ -97,30 +96,14 @@ class VQGAN_CLIP_Z_Quantize:
             sorted_imgs = []
 
             if isdir(Base_Image):
-                if Overwrite:
-                    if Overwritten_Dir:
-                        base_dir = join(Output_directory, path.basename(Overwritten_Dir))
-                    else:
-                        base_dir = join(Output_directory, filename)
-                else:
-                    base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
-
                 files = [join(Base_Image, f) for f in listdir(Base_Image) if isfile(join(Base_Image, f))]
                 imgs = [f for f in files if path.splitext(f)[1] in ('.png', '.jpg')]
                 txt_files = [f for f in files if path.splitext(f)[1] == '.txt']
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
-                # base_name = path.basename(Base_Image)
+                base_name = path.basename(Base_Image)
 
             elif path.splitext(Base_Image)[1] in ('.mp4', '.gif'):
                 base_name = path.basename(path.splitext(Base_Image)[0])
-                if Overwrite:
-                    if Overwritten_Dir:
-                        base_dir = join(Output_directory, path.basename(Overwritten_Dir))
-                    else:
-                        base_dir = join(Output_directory, filename)
-                else:
-                    base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
-                    
                 split_frames_dirname = f"{base_name}_split_frames"
                 frames_dir = join(base_dir, split_frames_dirname)
                 if not exists(frames_dir):
@@ -296,9 +279,9 @@ class VQGAN_CLIP_Z_Quantize:
         try:
             with tqdm() as pbar:
 
-                def train_and_update(i, last_image=False, retryTime=0):
+                def train_and_update(i, outpath=outpath, last_image=False, retryTime=0):
                     try:
-                        new_filepath = self.train(i, Output_directory, last_image)
+                        new_filepath = self.train(i, outpath, last_image)
                         pbar.update()
                         return new_filepath
 
