@@ -98,7 +98,9 @@ class VQGAN_CLIP_Z_Quantize:
 
             # Setting the Base_Option to a directory will run each image and saved prompt text file in order. Skips animated files but will run prompts that contain animated file parameters.
             is_frames = False
+            file_batch = False
             if isdir(Base_Option):
+                file_batch = True
                 files = [join(Base_Option, f) for f in listdir(Base_Option) if isfile(join(Base_Option, f))]
 
                 # Separates images and text files to be run (will currently combine different image sets)
@@ -110,6 +112,8 @@ class VQGAN_CLIP_Z_Quantize:
             # Base_Options that are a path/URL to an animated file are separated into frames and ran individually. Images are trained based on the amount of Train_Iterations.
             elif path.splitext(Base_Option)[1] in ('.mp4', '.gif'):
                 is_frames = True
+                file_batch = True
+
                 base_file_name = path.basename(path.splitext(Base_Option)[0])
                 split_frames_dirname = f"{base_file_name}_split_frames"
                 frames_dir = join(base_dir, split_frames_dirname)
@@ -125,82 +129,82 @@ class VQGAN_CLIP_Z_Quantize:
 
             imgLen = len(sorted_imgs)
 
-            if imgLen > 0 and Train_Iterations > 0:
+            if file_batch:
+                if imgLen > 0 and Train_Iterations > 0:
 
-                start, end = 1, imgLen
-                # If the option is an animated file, setting the Starting_Frame and Ending_Frame can limit from which frames to train.
-                # Be sure to use the Overwrite option to make frames if they are going in the same directory as other frame directories.
-                try:
-                    if Starting_Frame > 1 and Starting_Frame <= imgLen:
-                        start = Starting_Frame
-                    if Ending_Frame > 1 and Ending_Frame <= imgLen:
-                        end = Ending_Frame
-
-                    frameAmt = end - start
-                    if frameAmt < 1:
-                        start, end = 1, imgLen
-                        print(f"Out of bounds frame selection, running through all {imgLen} frames.")
-
-                except:
                     start, end = 1, imgLen
-                    print(f"Invalid frame selection, running through all {imgLen} frames.")
+                    # If the option is an animated file, setting the Starting_Frame and Ending_Frame can limit from which frames to train.
+                    # Be sure to use the Overwrite option to make frames if they are going in the same directory as other frame directories.
+                    try:
+                        if Starting_Frame > 1 and Starting_Frame <= imgLen:
+                            start = Starting_Frame
+                        if Ending_Frame > 1 and Ending_Frame <= imgLen:
+                            end = Ending_Frame
 
-                self.write_args_file(Output_directory, base_dir_name, prompts, test_args)
+                        frameAmt = end - start
+                        if frameAmt < 1:
+                            start, end = 1, imgLen
+                            print(f"Out of bounds frame selection, running through all {imgLen} frames.")
+
+                    except:
+                        start, end = 1, imgLen
+                        print(f"Invalid frame selection, running through all {imgLen} frames.")
+
+                    self.write_args_file(Output_directory, base_dir_name, prompts, test_args)
+                    if Only_Save:
+                        return
+                    j = start
+
+                    print(f"start: {start}, end: {end}")
+                    for img in sorted_imgs[start-1:end-1]:
+                        if is_frames:
+                            target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
+                        else:
+                            target_dir = path.join(base_dir, filename)
+                        j += 1
+                        if not exists(target_dir):
+                            mkdir(target_dir)
+
+
+                        vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
+                                    Other_noise_seeds,Other_noise_weights,target_dir,
+                                    img, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+                                    Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
+                                    Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
+                                    Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
+                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True)
+
+                        if is_frames:
+                            final_dir = path.join(base_dir, f"{base_dir_name}_final_frames")
+                            print(f"Copying last frame to {final_dir}")
+                            if not exists(final_dir):
+                                mkdir(final_dir)
+
+                            files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
+                            seq_num = int(len(files))+1
+                            sequence_number_left_padded = str(seq_num).zfill(6)
+                            newname = f"{base_dir_name}.{sequence_number_left_padded}.png"
+                            final_out = path.join(final_dir, newname)
+                            copyfile(vqgan.final_frame_path, final_out)
+                if len(txt_files) > 0:
+                    for f in txt_files:
+                        txt = open(f, "r")
+                        code= txt.read()
+                        txt.close()
+                        newfile = join(Output_directory, base_dir_name, path.basename(f) + ".py")
+                        py = open(newfile, "w")
+                        py.write(code)
+                        py.close()
+                        subprocess.call(["python", newfile])
+                        os.remove(newfile)
+                return
+            else:
+                if not Is_Frame:
+                    self.write_args_file(Output_directory, filename, prompts)
                 if Only_Save:
                     return
-                j = start
 
-                print(f"start: {start}, end: {end}")
-                for img in sorted_imgs[start-1:end-1]:
-                    if is_frames:
-                        target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
-                    else:
-                        target_dir = path.join(base_dir, filename)
-                    j += 1
-                    if not exists(target_dir):
-                        mkdir(target_dir)
-
-
-                    vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
-                                Other_noise_seeds,Other_noise_weights,target_dir,
-                                img, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-                                Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
-                                Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True)
-
-                    if is_frames:
-                        final_dir = path.join(base_dir, f"{base_dir_name}_final_frames")
-                        print(f"Copying last frame to {final_dir}")
-                        if not exists(final_dir):
-                            mkdir(final_dir)
-
-                        files = [f for f in listdir(final_dir) if isfile(join(final_dir, f))]
-                        seq_num = int(len(files))+1
-                        sequence_number_left_padded = str(seq_num).zfill(6)
-                        newname = f"{base_dir_name}.{sequence_number_left_padded}.png"
-                        final_out = path.join(final_dir, newname)
-                        copyfile(vqgan.final_frame_path, final_out)
-            if len(txt_files) > 0:
-                for f in txt_files:
-                    txt = open(f, "r")
-                    code= txt.read()
-                    txt.close()
-                    newfile = join(Output_directory, base_dir_name, path.basename(f) + ".py")
-                    py = open(newfile, "w")
-                    py.write(code)
-                    py.close()
-                    subprocess.call(["python", newfile])
-                    os.remove(newfile)
-
-            return
-        else:
-            if not Is_Frame:
-                self.write_args_file(Output_directory, filename, prompts)
-            if Only_Save:
-                return
-
-            imgpath = self.get_pil_imagepath(Base_Option)
+        imgpath = self.get_pil_imagepath(Base_Option)
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
