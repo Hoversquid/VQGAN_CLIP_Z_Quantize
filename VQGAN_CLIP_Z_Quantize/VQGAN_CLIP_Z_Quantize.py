@@ -57,7 +57,7 @@ class VQGAN_CLIP_Z_Quantize:
                     "Noise_Weight":Noise_Weight,"Seed":Seed,
                     "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
                     "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Train_Iterations":Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow}
-        test_args = {"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save}
+        test_args = {"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
         prompts.update(arg_list)
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
@@ -532,7 +532,10 @@ Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weigh
                 i+=1
 
             for argname, argval in test_args.items():
-                txt += f"{str(argname)}={str(argval)}\n"
+                if argname = "Overwritten_Dir":
+                    txt += f"{str(argname)}='{str(argval)}'\n"
+                else:
+                    txt += f"{str(argname)}={str(argval)}\n"
             print(f"writing settings to {self.filelistpath}")
             txtfile.write(start + txt + end)
 
