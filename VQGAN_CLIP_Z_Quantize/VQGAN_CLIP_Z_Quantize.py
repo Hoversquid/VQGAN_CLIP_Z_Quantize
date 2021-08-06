@@ -136,9 +136,9 @@ class VQGAN_CLIP_Z_Quantize:
                     # If the option is an animated file, setting the Starting_Frame and Ending_Frame can limit from which frames to train.
                     # Be sure to use the Overwrite option to make frames if they are going in the same directory as other frame directories.
                     try:
-                        if Starting_Frame > 1 and Starting_Frame <= imgLen:
+                        if Starting_Frame and Starting_Frame > 1 and Starting_Frame <= imgLen:
                             start = Starting_Frame
-                        if Ending_Frame > 1 and Ending_Frame <= imgLen:
+                        if Ending_Frame and Ending_Frame > 1 and Ending_Frame <= imgLen:
                             end = Ending_Frame
 
                         frameAmt = end - start
