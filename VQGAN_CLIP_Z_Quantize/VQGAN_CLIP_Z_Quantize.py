@@ -200,7 +200,8 @@ class VQGAN_CLIP_Z_Quantize:
                 return
             else:
                 if not Is_Frame:
-                    self.write_args_file(Output_directory, filename, prompts)
+
+                    self.write_args_file(Output_directory, filename, prompts, test_args)
                 if Only_Save:
                     return
 
