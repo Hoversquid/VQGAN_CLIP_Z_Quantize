@@ -200,8 +200,8 @@ class VQGAN_CLIP_Z_Quantize:
                 return
             else:
                 if not Is_Frame:
-
                     self.write_args_file(Output_directory, filename, prompts, test_args)
+
                 if Only_Save:
                     return
 
@@ -302,7 +302,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                 def train_and_update(i, last_image=False, retryTime=0):
                     try:
-                        new_filepath = self.train(i, Output_directory, last_image)
+                        new_filepath = self.train(i, base_dir, last_image)
                         pbar.update()
                         return new_filepath
 
