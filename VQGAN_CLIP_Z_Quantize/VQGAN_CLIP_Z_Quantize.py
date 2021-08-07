@@ -172,8 +172,7 @@ class VQGAN_CLIP_Z_Quantize:
                         if is_frames:
                             target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
                         else:
-                            target_dir = path.join(base_dir, filename)
-                            print(f"Targeting {filename}")
+                            target_dir = path.join(base_dir)
                         j += 1
                         if not exists(target_dir):
                             mkdir(target_dir)
