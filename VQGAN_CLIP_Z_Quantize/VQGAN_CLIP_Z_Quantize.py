@@ -47,6 +47,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         # This saves all the parameters to create a text file of this run.
         # TODO: Make these saved text files selectable as targets to train.
+        # TODO: Make a batched file run in a provided directory rather than building off Output_directory.
         prompts = OrderedDict()
         prompts["Other_txt_prompts"] = Other_txt_prompts
         prompts["Other_img_prompts"] = Other_img_prompts
@@ -176,7 +177,6 @@ class VQGAN_CLIP_Z_Quantize:
                         j += 1
                         if not exists(target_dir):
                             mkdir(target_dir)
-
 
                         vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
                                     Other_noise_seeds,Other_noise_weights,target_dir,
