@@ -41,8 +41,12 @@ class VQGAN_CLIP_Z_Quantize:
                 Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False, Is_Frame=False,
                 Overwritten_Dir=None):
 
+        # Makes the initial main output directory.
         if not path.exists(Output_directory):
             mkdir(Output_directory)
+
+        # This saves all the parameters to create a text file of this run.
+        # TODO: Make these saved text files selectable as targets to train.
         prompts = OrderedDict()
         prompts["Other_txt_prompts"] = Other_txt_prompts
         prompts["Other_img_prompts"] = Other_img_prompts
@@ -82,12 +86,20 @@ class VQGAN_CLIP_Z_Quantize:
         if not Base_Option in (None, ""):
             sorted_imgs = []
             txt_files = []
+
             # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
             if Overwrite:
                 if Overwritten_Dir:
-                    base_dir = join(Output_directory, path.basename(Overwritten_Dir))
+                    if not exists(Overwritten_Dir):
+                        dirs = [x[0] for x in walk(Output_directory)]
+                        base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+                        print(f"Directory to overwrite does not exist.\nSetting to unique dirname to prevent unintended overwrite.\nNew directory: {base_dir}.")
+                    else:
+                        base_dir = join(Output_directory, path.basename(Overwritten_Dir))
+                        print(f"OVERWRITING: {base_dir}")
                 else:
                     base_dir = join(Output_directory, filename)
+                    print(f"OVERWRITING: {base_dir}")
 
             # Not overwriting will make the filename unique and make a new directory for its files.
             else:
