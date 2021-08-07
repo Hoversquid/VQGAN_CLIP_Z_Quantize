@@ -143,24 +143,24 @@ class VQGAN_CLIP_Z_Quantize:
 
             if file_batch:
                 if imgLen > 0 and Train_Iterations > 0:
-
                     start, end = 1, imgLen
-                    # If the option is an animated file, setting the Starting_Frame and Ending_Frame can limit from which frames to train.
-                    # Be sure to use the Overwrite option to make frames if they are going in the same directory as other frame directories.
-                    try:
-                        if Starting_Frame and Starting_Frame > 1 and Starting_Frame <= imgLen:
-                            start = Starting_Frame
-                        if Ending_Frame and Ending_Frame > 1 and Ending_Frame <= imgLen:
-                            end = Ending_Frame
+                    if is_frames:
+                        # If the option is an animated file, setting the Starting_Frame and Ending_Frame can limit from which frames to train.
+                        # Be sure to use the Overwrite option to make frames if they are going in the same directory as other frame directories.
+                        try:
+                            if Starting_Frame and Starting_Frame > 1 and Starting_Frame <= imgLen:
+                                start = Starting_Frame
+                            if Ending_Frame and Ending_Frame > 1 and Ending_Frame <= imgLen:
+                                end = Ending_Frame
 
-                        frameAmt = end - start
-                        if frameAmt < 1:
+                            frameAmt = end - start
+                            if frameAmt < 1:
+                                start, end = 1, imgLen
+                                print(f"Out of bounds frame selection, running through all {imgLen} frames.")
+
+                        except:
                             start, end = 1, imgLen
-                            print(f"Out of bounds frame selection, running through all {imgLen} frames.")
-
-                    except:
-                        start, end = 1, imgLen
-                        print(f"Invalid frame selection, running through all {imgLen} frames.")
+                            print(f"Invalid frame selection, running through all {imgLen} frames.")
 
                     self.write_args_file(Output_directory, base_dir_name, prompts, test_args)
                     if Only_Save:
@@ -173,6 +173,7 @@ class VQGAN_CLIP_Z_Quantize:
                             target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
                         else:
                             target_dir = path.join(base_dir, filename)
+                            print(f"Targeting {filename}")
                         j += 1
                         if not exists(target_dir):
                             mkdir(target_dir)
@@ -198,6 +199,7 @@ class VQGAN_CLIP_Z_Quantize:
                             newname = f"{base_dir_name}.{sequence_number_left_padded}.png"
                             final_out = path.join(final_dir, newname)
                             copyfile(vqgan.final_frame_path, final_out)
+
                 if len(txt_files) > 0:
                     for f in txt_files:
                         txt = open(f, "r")
