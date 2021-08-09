@@ -39,7 +39,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Display_Frequency, Clear_Interval, Train_Iterations,
                 Step_Size, Cut_N, Cut_Pow,
                 Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False, Is_Frame=False,
-                Overwritten_Dir=None, Batched_File_Dir=None):
+                Overwritten_Dir=None, Batched_File_Dir=False):
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
@@ -85,7 +85,7 @@ class VQGAN_CLIP_Z_Quantize:
 
             # If the rendered file is part of a batch of runs, place file in provided path
             if Batched_File_Dir:
-                base_dir = Batched_File_Dir
+                base_dir = Output_directory
 
             # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
             elif Overwrite:
@@ -163,9 +163,9 @@ class VQGAN_CLIP_Z_Quantize:
                     print(f"start: {start}, end: {end}")
                     for img in sorted_imgs[start-1:end-1]:
                         if is_frames:
-                            Batched_File_Dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
+                            target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
                         else:
-                            Batched_File_Dir = path.join(base_dir, filename)
+                            target_dir = path.join(base_dir, filename)
                         j += 1
                         if not exists(target_dir):
                             mkdir(target_dir)
@@ -177,7 +177,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
                                     Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True,Batched_File_Dir=Batched_File_Dir)
+                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True,Batched_File_Dir=True)
 
                         if is_frames:
                             final_dir = path.join(base_dir, f"{base_dir_name}_final_frames")
@@ -307,7 +307,9 @@ class VQGAN_CLIP_Z_Quantize:
                 # Main helper function for the training loop
                 def train_and_update(i, last_image=False, retryTime=0):
                     try:
-                        new_filepath = self.train(i, Output_directory, last_image)
+                        # new_filepath = self.train(i, Output_directory, last_image)
+                        new_filepath = self.train(i, base_dir, last_image)
+
                         pbar.update()
                         return new_filepath
 
