@@ -39,7 +39,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Display_Frequency, Clear_Interval, Train_Iterations,
                 Step_Size, Cut_N, Cut_Pow,
                 Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False, Is_Frame=False,
-                Overwritten_Dir=None):
+                Overwritten_Dir=None, Batched_File_Dir=None):
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
@@ -82,8 +82,13 @@ class VQGAN_CLIP_Z_Quantize:
         if not Base_Option in (None, ""):
             sorted_imgs = []
             txt_files = []
+
+            # If the rendered file is part of a batch of runs, place file in provided path
+            if Batched_File_Dir:
+                base_dir = Batched_File_Dir
+
             # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
-            if Overwrite:
+            elif Overwrite:
                 if Overwritten_Dir:
                     base_dir = join(Output_directory, path.basename(Overwritten_Dir))
                 else:
@@ -158,9 +163,9 @@ class VQGAN_CLIP_Z_Quantize:
                     print(f"start: {start}, end: {end}")
                     for img in sorted_imgs[start-1:end-1]:
                         if is_frames:
-                            target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
+                            Batched_File_Dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
                         else:
-                            target_dir = path.join(base_dir, filename)
+                            Batched_File_Dir = path.join(base_dir, filename)
                         j += 1
                         if not exists(target_dir):
                             mkdir(target_dir)
@@ -172,7 +177,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
                                     Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True)
+                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True,Batched_File_Dir=Batched_File_Dir)
 
                         if is_frames:
                             final_dir = path.join(base_dir, f"{base_dir_name}_final_frames")
@@ -200,12 +205,9 @@ class VQGAN_CLIP_Z_Quantize:
                 return
             else:
                 if not Is_Frame:
-
                     self.write_args_file(Output_directory, filename, prompts, test_args)
                 if Only_Save:
                     return
-
-        imgpath = self.get_pil_imagepath(Base_Option)
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -222,7 +224,7 @@ class VQGAN_CLIP_Z_Quantize:
             Seed = 0
 
         self.args = argparse.Namespace(
-            outdir=Output_directory, # this is the name of where your output will go
+            outdir=Output_directory,
             init_image=Base_Option,
             init_weight=Base_Option_Weight,
             prompts=txt_prompts,
@@ -239,6 +241,7 @@ class VQGAN_CLIP_Z_Quantize:
             display_freq=Display_Frequency,
             seed=Seed)
 
+        # This code belongs to the original VQGAN+CLIP (Z Quantize Method) notebook
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print('Using device:', device)
 
@@ -261,6 +264,7 @@ class VQGAN_CLIP_Z_Quantize:
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
 
+        imgpath = self.get_pil_imagepath(Base_Option)
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
             pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
@@ -300,6 +304,7 @@ class VQGAN_CLIP_Z_Quantize:
         try:
             with tqdm() as pbar:
 
+                # Main helper function for the training loop
                 def train_and_update(i, last_image=False, retryTime=0):
                     try:
                         new_filepath = self.train(i, Output_directory, last_image)
