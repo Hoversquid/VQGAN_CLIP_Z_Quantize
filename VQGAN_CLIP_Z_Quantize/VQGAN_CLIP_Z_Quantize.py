@@ -82,24 +82,27 @@ class VQGAN_CLIP_Z_Quantize:
         if not Base_Option in (None, ""):
             sorted_imgs = []
             txt_files = []
+            make_unique_dir = False
 
             # If the rendered file is part of a batch of runs, place file in provided path
             if Batched_File_Dir:
                 base_dir = Output_directory
+                make_unique_dir = False
 
             # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
             elif Overwrite:
                 if Overwritten_Dir:
                     if not path.exists(Overwritten_Dir):
                         print("Directory to overwrite doesn't exist, creating new directory to avoid overwriting unintended directory.")
-                        base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+                        make_unique_dir = True
+                        # base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
                     else:
                         base_dir = join(Output_directory, path.basename(Overwritten_Dir))
                 else:
                     base_dir = join(Output_directory, filename)
 
             # Not overwriting will make the filename unique and make a new directory for its files.
-            else:
+            if make_unique_dir:
                 dirs = [x[0] for x in walk(Output_directory)]
                 base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
 
