@@ -381,6 +381,7 @@ class VQGAN_CLIP_Z_Quantize:
         namestr = f.split(".")
         if namestr[-2].isnumeric():
             return int(namestr[-2])
+        return 0
 
     @torch.no_grad()
     def checkin(self, i, losses, outpath):
