@@ -158,6 +158,7 @@ class VQGAN_CLIP_Z_Quantize:
                     self.write_args_file(Output_directory, base_dir_name, prompts, test_args)
                     if Only_Save:
                         return
+
                     j = start
 
                     print(f"start: {start}, end: {end}")
