@@ -90,7 +90,11 @@ class VQGAN_CLIP_Z_Quantize:
             # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
             elif Overwrite:
                 if Overwritten_Dir:
-                    base_dir = join(Output_directory, path.basename(Overwritten_Dir))
+                    if not path.exists(Overwritten_Dir):
+                        print("Directory to overwrite doesn't exist, creating new directory to avoid overwriting unintended directory.")
+                        base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+                    else:
+                        base_dir = join(Output_directory, path.basename(Overwritten_Dir))
                 else:
                     base_dir = join(Output_directory, filename)
 
