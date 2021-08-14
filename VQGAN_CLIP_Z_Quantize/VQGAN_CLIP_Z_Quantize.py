@@ -374,7 +374,7 @@ class VQGAN_CLIP_Z_Quantize:
             # torch.cuda.empty_cache()
             pass
 
-    def get_base_dir(Output_directory, filename, Frame_Image=False, Overwritten_Dir=None):
+    def get_base_dir(self, Output_directory, filename, Frame_Image=False, Overwritten_Dir=None):
         make_unique_dir = True
 
         # If the rendered file is part of a batch of runs, place file in provided path
@@ -395,7 +395,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         return base_dir
 
-    def make_unique_dir(Output_directory, filename):
+    def make_unique_dir(self, Output_directory, filename):
         dirs = [x[0] for x in walk(Output_directory)]
         return self.set_valid_dirname(dirs, Output_directory, filename)
 
