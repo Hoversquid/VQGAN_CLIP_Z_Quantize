@@ -39,7 +39,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Display_Frequency, Clear_Interval, Train_Iterations,
                 Step_Size, Cut_N, Cut_Pow,
                 Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False, Is_Frame=False,
-                Overwritten_Dir=None, Batched_File_Dir=False):
+                Overwritten_Dir=None, Frame_Image=False):
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
@@ -82,37 +82,44 @@ class VQGAN_CLIP_Z_Quantize:
         if not Base_Option in (None, ""):
             sorted_imgs = []
             txt_files = []
-            make_unique_dir = True
 
-            # If the rendered file is part of a batch of runs, place file in provided path
-            if Batched_File_Dir:
-                make_unique_dir = False
-                base_dir = Output_directory
+            # make_unique_dir = True
+            #
+            # # If the rendered file is part of a batch of runs, place file in provided path
+            # if Batched_File_Dir:
+            #     make_unique_dir = False
+            #     base_dir = Output_directory
+            #
+            # # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
+            # elif Overwrite:
+            #     make_unique_dir = False
+            #     if Overwritten_Dir:
+            #         if not path.exists(Overwritten_Dir):
+            #             print("Directory to overwrite doesn't exist, creating new directory to avoid overwriting unintended directory.")
+            #             make_unique_dir = True
+            #             # base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+            #         else:
+            #             # base_dir = join(Output_directory, path.basename(Overwritten_Dir))
+            #             base_dir = join(Output_directory, path.basename(Overwritten_Dir))
+            #     else:
+            #         base_dir = join(Output_directory, filename)
+            #
+            # # Not overwriting will make the filename unique and make a new directory for its files.
+            # if make_unique_dir:
+            #     dirs = [x[0] for x in walk(Output_directory)]
+            #     base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
+            #
+            # base_dir_name = path.basename(base_dir)
 
-            # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
-            elif Overwrite:
-                make_unique_dir = False
-                if Overwritten_Dir:
-                    if not path.exists(Overwritten_Dir):
-                        print("Directory to overwrite doesn't exist, creating new directory to avoid overwriting unintended directory.")
-                        make_unique_dir = True
-                        # base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
-                    else:
-                        base_dir = join(Output_directory, path.basename(Overwritten_Dir))
-                else:
-                    base_dir = join(Output_directory, filename)
-
-            # Not overwriting will make the filename unique and make a new directory for its files.
-            if make_unique_dir:
-                dirs = [x[0] for x in walk(Output_directory)]
-                base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
-
-            base_dir_name = path.basename(base_dir)
-
-            # Setting the Base_Option to a directory will run each image and saved prompt text file in order. Skips animated files but will run prompts that contain animated file parameters.
-            is_frames = False
+            is_frames  = False
             file_batch = False
+
+            # Setting the Base_Option to a directory will run each image and saved prompt text file in order.
+            # Skips animated files but will run prompts that contain animated file parameters.
             if isdir(Base_Option):
+                base_dir = make_unique_dir(Output_directory, filename)
+                base_dir_name = path.basename(base_dir)
+
                 file_batch = True
                 files = [join(Base_Option, f) for f in listdir(Base_Option) if isfile(join(Base_Option, f))]
 
@@ -122,13 +129,17 @@ class VQGAN_CLIP_Z_Quantize:
                 txt_files = [f for f in files if path.splitext(f)[1] == '.txt']
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
 
-            # Base_Options that are a path/URL to an animated file are separated into frames and ran individually. Images are trained based on the amount of Train_Iterations.
+            # Base_Options that are a path/URL to an animated file are separated into frames and ran individually.
+            # Images are trained based on the amount of Train_Iterations.
             elif path.splitext(Base_Option)[1] in ('.mp4', '.gif'):
+                base_dir = get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
+                base_file_name = path.basename(path.splitext(Base_Option)[0])
+
                 is_frames = True
                 file_batch = True
 
-                base_file_name = path.basename(path.splitext(Base_Option)[0])
                 split_frames_dirname = f"{base_file_name}_split_frames"
+
                 frames_dir = join(base_dir, split_frames_dirname)
                 if not exists(frames_dir):
                     mkdir(frames_dir)
@@ -139,6 +150,10 @@ class VQGAN_CLIP_Z_Quantize:
 
                 imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
+
+            else:
+                base_dir = get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
+                base_dir_name = path.basename(base_dir)
 
             imgLen = len(sorted_imgs)
 
@@ -171,13 +186,18 @@ class VQGAN_CLIP_Z_Quantize:
 
                     print(f"start: {start}, end: {end}")
                     for img in sorted_imgs[start-1:end-1]:
+                        imgname = path.basename(img)
+
                         if is_frames:
-                            target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
+                            img_base_dir = get_base_dir(Output_directory, imgname)
+                            target_dir = path.join(img_base_dir, f"{base_dir_name}_frame_{j}")
                         else:
-                            target_dir = path.join(base_dir, filename)
+                            # img_base_dir = get_base_dir(Output_directory, imgname)
+                            # target_dir = path.join(img_base_dir, filename)
+                            target_dir =  get_base_dir(Output_directory, imgname)
                         j += 1
-                        if not exists(target_dir):
-                            mkdir(target_dir)
+                        # if not exists(target_dir):
+                        #     mkdir(target_dir)
 
 
                         vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
@@ -186,7 +206,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
                                     Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True,Batched_File_Dir=True)
+                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True,Frame_Image=True)
 
                         if is_frames:
                             final_dir = path.join(base_dir, f"{base_dir_name}_final_frames")
@@ -200,20 +220,23 @@ class VQGAN_CLIP_Z_Quantize:
                             newname = f"{base_dir_name}.{sequence_number_left_padded}.png"
                             final_out = path.join(final_dir, newname)
                             copyfile(vqgan.final_frame_path, final_out)
-                if len(txt_files) > 0:
-                    for f in txt_files:
-                        txt = open(f, "r")
-                        code= txt.read()
-                        txt.close()
-                        newfile = join(Output_directory, base_dir_name, path.basename(f) + ".py")
-                        py = open(newfile, "w")
-                        py.write(code)
-                        py.close()
-                        subprocess.call(["python", newfile])
-                        os.remove(newfile)
+
+                # TODO: Change Saved_Prompts to CSV files rather than raw python code.
+                # if len(txt_files) > 0:
+                #     for f in txt_files:
+                #         txt = open(f, "r")
+                #         code= txt.read()
+                #         txt.close()
+                #         newfile = join(Output_directory, base_dir_name, path.basename(f) + ".py")
+                #         py = open(newfile, "w")
+                #         py.write(code)
+                #         py.close()
+                #         subprocess.call(["python", newfile])
+                #         os.remove(newfile)
                 return
             else:
-                if not Is_Frame:
+                # if not Is_Frame:
+                if not Frame_Image:
                     self.write_args_file(Output_directory, filename, prompts, test_args)
                 if Only_Save:
                     return
@@ -353,6 +376,31 @@ class VQGAN_CLIP_Z_Quantize:
             # torch.cuda.empty_cache()
             pass
 
+    def get_base_dir(Output_directory, filename, Frame_Image=False, Overwritten_Dir=None):
+        make_unique_dir = True
+
+        # If the rendered file is part of a batch of runs, place file in provided path
+        if Frame_Image:
+            base_dir, make_unique_dir = Output_directory, False
+
+        # Overwritten_Dir is used to place files in a directory that already exists
+        elif Overwritten_Dir:
+            if not path.exists(Overwritten_Dir):
+                print("Directory to overwrite doesn't exist, creating new directory to avoid overwriting unintended directory.")
+
+            else:
+                base_dir = join(Output_directory, path.basename(Overwritten_Dir))
+                make_unique_dir = False
+
+        # Not overwriting will make the filename unique and make a new directory for its files.
+        if make_unique_dir: base_dir = make_unique_dir(Output_directory, filename)
+
+        return base_dir
+
+    def make_unique_dir(Output_directory, filename):
+        dirs = [x[0] for x in walk(Output_directory)]
+        return self.set_valid_dirname(dirs, Output_directory, filename)
+
     def set_sorted_folder(self, diroutname, filetype):
         diroutpath = path.join(self.content_output_path, diroutname)
         if not path.exists(diroutpath):
@@ -468,7 +516,7 @@ class VQGAN_CLIP_Z_Quantize:
         self.write_arg_list(prompts, test_args)
 
 
-    def set_valid_dirname(self, dirs, out, basename, i):
+    def set_valid_dirname(self, dirs, out, basename, i=0):
         if i > 0:
             newname = "%s(%d)" % (basename, i)
         else:
@@ -480,6 +528,7 @@ class VQGAN_CLIP_Z_Quantize:
             new_path = path.join(out, newname)
             mkdir(new_path)
             return new_path
+
         for dir in dirs:
             if path.basename(dir) == newname:
                 unique_dir_name = False
