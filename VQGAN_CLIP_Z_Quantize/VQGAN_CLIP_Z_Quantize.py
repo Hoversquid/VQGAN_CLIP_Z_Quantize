@@ -391,7 +391,7 @@ class VQGAN_CLIP_Z_Quantize:
                 make_unique_dir = False
 
         # Not overwriting will make the filename unique and make a new directory for its files.
-        if make_unique_dir: base_dir = make_unique_dir(Output_directory, filename)
+        if make_unique_dir: base_dir = self.make_unique_dir(Output_directory, filename)
 
         return base_dir
 
