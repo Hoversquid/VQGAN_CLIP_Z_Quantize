@@ -153,6 +153,7 @@ class VQGAN_CLIP_Z_Quantize:
 
             else:
                 base_dir = self.get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
+                print(f"Using filename: {filename}\nUsing base_dir: {base_dir}")
                 base_dir_name = path.basename(base_dir)
 
             imgLen = len(sorted_imgs)
@@ -193,6 +194,7 @@ class VQGAN_CLIP_Z_Quantize:
                             target_dir = path.join(img_base_dir, f"{base_dir_name}_frame_{j}")
                         else:
                             target_dir = self.get_base_dir(Output_directory, imgname)
+                            print(f"Going to target_dir: {target_dir}")
                         j += 1
                         # if not exists(target_dir):
                         #     mkdir(target_dir)
