@@ -187,10 +187,10 @@ class VQGAN_CLIP_Z_Quantize:
 
                     print(f"start: {start}, end: {end}")
                     for img in sorted_imgs[start-1:end-1]:
-                        imgname = path.basename(img)
+                        imgname = path.basename(path.splitext(img}[0])
 
                         if is_frames:
-                            img_base_dir = self.get_base_dir(Output_directory, imgname)
+                            img_base_dir = self.get_base_dir(Output_directory, imgname, Frame_Image=True)
                             target_dir = path.join(img_base_dir, f"{base_dir_name}_frame_{j}")
                         else:
                             target_dir = self.get_base_dir(Output_directory, imgname)
