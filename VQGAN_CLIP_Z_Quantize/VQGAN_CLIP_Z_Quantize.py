@@ -179,6 +179,8 @@ class VQGAN_CLIP_Z_Quantize:
                         start, end = 1, imgLen
                         print(f"Invalid frame selection, running through all {imgLen} frames.")
 
+                    # TODO: Change args file to CSV
+                    ####### Make sure args file and output directory have same name
                     self.write_args_file(Output_directory, base_dir_name, prompts, test_args)
                     if Only_Save:
                         return
@@ -445,6 +447,7 @@ class VQGAN_CLIP_Z_Quantize:
         out = self.synth()
         sequence_number = i // self.args.display_freq
 
+        # TODO: change to display same name as directory
         outname = self.image_output_path(outpath, sequence_number=sequence_number)
         TF.to_pil_image(out[0].cpu()).save(outname)
         # stops the notebook file from getting too big by clearing the previous images from the output
