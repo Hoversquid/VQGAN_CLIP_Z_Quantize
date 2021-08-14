@@ -117,7 +117,7 @@ class VQGAN_CLIP_Z_Quantize:
             # Setting the Base_Option to a directory will run each image and saved prompt text file in order.
             # Skips animated files but will run prompts that contain animated file parameters.
             if isdir(Base_Option):
-                base_dir = make_unique_dir(Output_directory, filename)
+                base_dir = self.make_unique_dir(Output_directory, filename)
                 base_dir_name = path.basename(base_dir)
 
                 file_batch = True
@@ -132,7 +132,7 @@ class VQGAN_CLIP_Z_Quantize:
             # Base_Options that are a path/URL to an animated file are separated into frames and ran individually.
             # Images are trained based on the amount of Train_Iterations.
             elif path.splitext(Base_Option)[1] in ('.mp4', '.gif'):
-                base_dir = get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
+                base_dir = self.get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
                 base_file_name = path.basename(path.splitext(Base_Option)[0])
 
                 is_frames = True
@@ -152,7 +152,7 @@ class VQGAN_CLIP_Z_Quantize:
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
 
             else:
-                base_dir = get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
+                base_dir = self.get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
                 base_dir_name = path.basename(base_dir)
 
             imgLen = len(sorted_imgs)
@@ -189,12 +189,10 @@ class VQGAN_CLIP_Z_Quantize:
                         imgname = path.basename(img)
 
                         if is_frames:
-                            img_base_dir = get_base_dir(Output_directory, imgname)
+                            img_base_dir = self.get_base_dir(Output_directory, imgname)
                             target_dir = path.join(img_base_dir, f"{base_dir_name}_frame_{j}")
                         else:
-                            # img_base_dir = get_base_dir(Output_directory, imgname)
-                            # target_dir = path.join(img_base_dir, filename)
-                            target_dir =  get_base_dir(Output_directory, imgname)
+                            target_dir = self.get_base_dir(Output_directory, imgname)
                         j += 1
                         # if not exists(target_dir):
                         #     mkdir(target_dir)
