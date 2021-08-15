@@ -93,7 +93,7 @@ class VQGAN_CLIP_Z_Quantize:
                 base_dir = Output_directory
 
                 base_dir_name = path.basename(base_dir)
-                args_file_name = base_dir_name + "_directory"
+                args_file_name = path.basename(Base_Option) + "_directory"
 
                 file_batch = True
                 files = [join(Base_Option, f) for f in listdir(Base_Option) if isfile(join(Base_Option, f))]
