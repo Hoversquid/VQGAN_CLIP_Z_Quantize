@@ -140,20 +140,21 @@ class VQGAN_CLIP_Z_Quantize:
                     start, end = 1, imgLen
                     # If the option is an animated file, setting the Starting_Frame and Ending_Frame can limit from which frames to train.
                     # Be sure to use the Overwrite option to make frames if they are going in the same directory as other frame directories.
-                    try:
-                        if Starting_Frame and Starting_Frame > 1 and Starting_Frame <= imgLen:
-                            start = Starting_Frame
-                        if Ending_Frame and Ending_Frame > 1 and Ending_Frame <= imgLen:
-                            end = Ending_Frame
+                    if is_frames:
+                        try:
+                            if Starting_Frame and Starting_Frame > 1 and Starting_Frame <= imgLen:
+                                start = Starting_Frame
+                            if Ending_Frame and Ending_Frame > 1 and Ending_Frame <= imgLen:
+                                end = Ending_Frame
 
-                        frameAmt = end - start
-                        if frameAmt < 1:
+                            frameAmt = end - start
+                            if frameAmt < 1:
+                                start, end = 1, imgLen
+                                print(f"Out of bounds frame selection, running through all {imgLen} frames.")
+
+                        except:
                             start, end = 1, imgLen
-                            print(f"Out of bounds frame selection, running through all {imgLen} frames.")
-
-                    except:
-                        start, end = 1, imgLen
-                        print(f"Invalid frame selection, running through all {imgLen} frames.")
+                            print(f"Invalid frame selection, running through all {imgLen} frames.")
 
                     # TODO: Change args file to CSV
                     ####### Make sure args file and output directory have same name
