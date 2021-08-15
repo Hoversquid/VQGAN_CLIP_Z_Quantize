@@ -479,6 +479,9 @@ class VQGAN_CLIP_Z_Quantize:
         """
         split = path.splitext(output_path)[0]
         base = path.basename(output_path)
+        print(f"Main image_output_path: {output_path}\n
+                splitext of output_path: {split}\n
+                base of output_path: {base}")
         if sequence_number:
             sequence_number_left_padded = str(sequence_number).zfill(6)
             newname = f"{base}.{sequence_number_left_padded}"
