@@ -184,7 +184,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
                                     Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
-                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Is_Frame=True,Frame_Image=True)
+                                    Starting_Frame,Ending_Frame,Overwrite,Only_Save,Frame_Image=True)
 
                         if is_frames:
                             final_dir = path.join(base_dir, f"{base_dir_name}_final_frames")
