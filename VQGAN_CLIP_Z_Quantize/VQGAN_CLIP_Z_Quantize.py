@@ -93,7 +93,11 @@ class VQGAN_CLIP_Z_Quantize:
                 base_dir = Output_directory
 
                 base_dir_name = path.basename(base_dir)
-                args_file_name = path.basename(Base_Option) + "_directory"
+                saved_prompts_dir = path.join(out, "Saved_Prompts/")
+
+                files = [f for f in listdir(saved_prompts_dir) if isfile(join(saved_prompts_dir, f))]
+                args_basename = path.basename(Base_Option) + "_directory"
+                args_file_name = self.set_valid_filename(files, base_dir, args_basename)
 
                 file_batch = True
                 files = [join(Base_Option, f) for f in listdir(Base_Option) if isfile(join(Base_Option, f))]
@@ -526,6 +530,32 @@ class VQGAN_CLIP_Z_Quantize:
             return new_path
 
         return self.set_valid_dirname(dirs, out, basename, i + 1)
+
+    def set_valid_filename(self, files, out, basename, i=0):
+        if i > 0:
+            newname = "%s(%d)" % (basename, i)
+        else:
+            newname = basename
+
+        unique_file_name = True
+
+        if len(files) < 1:
+            new_path = path.join(out, newname)
+            mkdir(new_path)
+            return new_path
+
+        for file in files:
+            if path.basename(file) == newname:
+                unique_file_name = False
+                break
+
+        if unique_file_name:
+            new_path = path.join(out, newname)
+
+            mkdir(new_path)
+            return new_path
+
+        return self.set_valid_filename(files, out, basename, i + 1)
 
     def get_prompt_list(self, first, second, third, rest):
       param_list = [first, second, third]
