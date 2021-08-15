@@ -478,17 +478,16 @@ class VQGAN_CLIP_Z_Quantize:
         :rtype: Path
         """
         # split = path.splitext(output_path)[0]
-        parent = path.dirname(output_path)
+        # parent = path.dirname(output_path)
         base = path.basename(output_path)
         print(f"""Main image_output_path: {output_path}\n
-                parent of output_path: {parent}\n
                 base of output_path: {base}""")
         if sequence_number:
             sequence_number_left_padded = str(sequence_number).zfill(6)
             newname = f"{base}.{sequence_number_left_padded}"
         else:
             newname = base
-        output_path = path.join(parent, newname)
+        output_path = path.join(output_path, newname)
         return Path(f"{output_path}.png")
 
     def write_args_file(self, out, base, prompts, test_args):
