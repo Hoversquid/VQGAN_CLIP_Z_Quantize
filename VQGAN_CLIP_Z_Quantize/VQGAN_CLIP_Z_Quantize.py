@@ -93,7 +93,7 @@ class VQGAN_CLIP_Z_Quantize:
                 base_dir = Output_directory
 
                 base_dir_name = path.basename(base_dir)
-                saved_prompts_dir = path.join(out, "Saved_Prompts/")
+                saved_prompts_dir = path.join(base_dir, "Saved_Prompts/")
 
                 files = [f for f in listdir(saved_prompts_dir) if isfile(join(saved_prompts_dir, f))]
                 args_basename = path.basename(Base_Option) + "_directory"
