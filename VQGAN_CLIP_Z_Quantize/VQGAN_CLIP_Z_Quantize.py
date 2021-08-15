@@ -38,7 +38,7 @@ class VQGAN_CLIP_Z_Quantize:
                 Image_Model, CLIP_Model,
                 Display_Frequency, Clear_Interval, Train_Iterations,
                 Step_Size, Cut_N, Cut_Pow,
-                Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False, Is_Frame=False,
+                Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False,
                 Overwritten_Dir=None, Frame_Image=False):
 
         if not path.exists(Output_directory):
@@ -80,36 +80,8 @@ class VQGAN_CLIP_Z_Quantize:
 
         # if Base_Option exists, set the base directory to its final target or targets.
         if not Base_Option in (None, ""):
-            sorted_imgs = []
-            txt_files = []
 
-            # make_unique_dir = True
-            #
-            # # If the rendered file is part of a batch of runs, place file in provided path
-            # if Batched_File_Dir:
-            #     make_unique_dir = False
-            #     base_dir = Output_directory
-            #
-            # # Overwrite and Overwritten_Dir options are required to render a selection of frames from the Base_Option that is a .gif or .mp4 file.
-            # elif Overwrite:
-            #     make_unique_dir = False
-            #     if Overwritten_Dir:
-            #         if not path.exists(Overwritten_Dir):
-            #             print("Directory to overwrite doesn't exist, creating new directory to avoid overwriting unintended directory.")
-            #             make_unique_dir = True
-            #             # base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
-            #         else:
-            #             # base_dir = join(Output_directory, path.basename(Overwritten_Dir))
-            #             base_dir = join(Output_directory, path.basename(Overwritten_Dir))
-            #     else:
-            #         base_dir = join(Output_directory, filename)
-            #
-            # # Not overwriting will make the filename unique and make a new directory for its files.
-            # if make_unique_dir:
-            #     dirs = [x[0] for x in walk(Output_directory)]
-            #     base_dir = self.set_valid_dirname(dirs, Output_directory, filename, 0)
-            #
-            # base_dir_name = path.basename(base_dir)
+            sorted_imgs, txt_files = [], []
 
             is_frames  = False
             file_batch = False
@@ -117,8 +89,11 @@ class VQGAN_CLIP_Z_Quantize:
             # Setting the Base_Option to a directory will run each image and saved prompt text file in order.
             # Skips animated files but will run prompts that contain animated file parameters.
             if isdir(Base_Option):
-                base_dir = self.make_unique_dir(Output_directory, filename)
+                # base_dir = self.make_unique_dir(Output_directory, filename)
+                base_dir = Output_directory
+
                 base_dir_name = path.basename(base_dir)
+                args_file_name = base_dir_name + "_directory"
 
                 file_batch = True
                 files = [join(Base_Option, f) for f in listdir(Base_Option) if isfile(join(Base_Option, f))]
@@ -134,6 +109,7 @@ class VQGAN_CLIP_Z_Quantize:
             elif path.splitext(Base_Option)[1] in ('.mp4', '.gif'):
                 base_dir = self.get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
                 base_file_name = path.basename(path.splitext(Base_Option)[0])
+                args_file_name = base_dir_name + "_animation"
 
                 is_frames = True
                 file_batch = True
@@ -153,7 +129,7 @@ class VQGAN_CLIP_Z_Quantize:
 
             else:
                 base_dir = self.get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
-                print(f"Using filename: {filename}\nUsing base_dir: {base_dir}")
+                print(f"Selecting Base_Option: {Base_Option}\nUsing filename: {filename}\nUsing base_dir: {base_dir}")
                 base_dir_name = path.basename(base_dir)
 
             imgLen = len(sorted_imgs)
@@ -181,11 +157,11 @@ class VQGAN_CLIP_Z_Quantize:
 
                     # TODO: Change args file to CSV
                     ####### Make sure args file and output directory have same name
-                    self.write_args_file(Output_directory, base_dir_name, prompts, test_args)
+                    self.write_args_file(Output_directory, args_file_name, prompts, test_args)
                     if Only_Save:
                         return
 
-                    j = start
+                    # j = start
 
                     print(f"start: {start}, end: {end}")
                     for img in sorted_imgs[start-1:end-1]:
@@ -196,8 +172,8 @@ class VQGAN_CLIP_Z_Quantize:
                             target_dir = path.join(img_base_dir, f"{base_dir_name}_frame_{j}")
                         else:
                             target_dir = self.get_base_dir(Output_directory, imgname)
-                            print(f"Going to target_dir: {target_dir}")
-                        j += 1
+                        # j += 1
+                        print(f"Going to target_dir: {target_dir}")
                         # if not exists(target_dir):
                         #     mkdir(target_dir)
 
@@ -237,7 +213,6 @@ class VQGAN_CLIP_Z_Quantize:
                 #         os.remove(newfile)
                 return
             else:
-                # if not Is_Frame:
                 if not Frame_Image:
                     self.write_args_file(Output_directory, filename, prompts, test_args)
                 if Only_Save:
@@ -476,6 +451,7 @@ class VQGAN_CLIP_Z_Quantize:
         self.opt.zero_grad()
         lossAll = self.ascend_txt()
         if i % self.args.display_freq == 0 or override:
+            print(f"checkin on: {outpath}")
             new_filepath = self.checkin(i, lossAll, outpath)
         else: new_filepath = None
 
@@ -515,6 +491,8 @@ class VQGAN_CLIP_Z_Quantize:
         saved_prompts_dir = path.join(out, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
+
+        # TODO: change this to CSV, JSON, or XML
         self.filelistpath = saved_prompts_dir + base + ".txt"
         self.write_arg_list(prompts, test_args)
 
