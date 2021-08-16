@@ -567,7 +567,10 @@ class VQGAN_CLIP_Z_Quantize:
 
         for file in files:
             # if path.basename(file) == newname:
+            # bname = path.basename(file)
+            print(f"checking: {path.basename(file)} against: {newname}")
             if path.basename(file) == newname:
+
                 unique_file_name = False
                 break
 
