@@ -1,4 +1,4 @@
-=  import argparse
+import argparse
 import math
 from pathlib import Path
 import sys
@@ -23,6 +23,7 @@ from IPython.display import clear_output
 from collections import OrderedDict
 from shutil import copyfile
 import subprocess
+import json
 
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_txt_prompts,
