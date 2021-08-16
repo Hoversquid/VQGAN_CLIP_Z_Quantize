@@ -1,4 +1,4 @@
-import argparse
+=  import argparse
 import math
 from pathlib import Path
 import sys
@@ -43,22 +43,23 @@ class VQGAN_CLIP_Z_Quantize:
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
-        prompts = OrderedDict()
-        prompts["Other_txt_prompts"] = Other_txt_prompts
-        prompts["Other_img_prompts"] = Other_img_prompts
-        prompts["Other_noise_seeds"] = Other_noise_seeds
-        prompts["Other_noise_weights"] = Other_noise_weights
-
-        arg_list = {"Output_directory":Output_directory,"Base_Option":Base_Option,
-                    "Base_Option_Weight":Base_Option_Weight,
+        # prompts = OrderedDict()
+        # prompts["Other_txt_prompts"] = Other_txt_prompts
+        # prompts["Other_img_prompts"] = Other_img_prompts
+        # prompts["Other_noise_seeds"] = Other_noise_seeds
+        # prompts["Other_noise_weights"] = Other_noise_weights
+        prompts = {"Other_txt_prompts": Other_txt_prompts,"Other_img_prompts": Other_img_prompts, "Other_noise_seeds": Other_noise_seeds, "Other_noise_weights": Other_noise_weights,
+                    "Output_directory":Output_directory, "Base_Option":Base_Option, "Base_Option_Weight":Base_Option_Weight,
                     "Image_Prompt1":Image_Prompt1,"Image_Prompt2":Image_Prompt2,"Image_Prompt3":Image_Prompt3,
                     "Text_Prompt1":Text_Prompt1,"Text_Prompt2":Text_Prompt2,"Text_Prompt3":Text_Prompt3,
                     "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
-                    "Noise_Weight":Noise_Weight,"Seed":Seed,
-                    "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
-                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Train_Iterations":Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow}
-        test_args = {"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
-        prompts.update(arg_list)
+                    "Noise_Weight":Noise_Weight,"Seed":Seed, "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
+                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,
+                    "Train_Iterations":Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,
+                    "Ending_Frame":Ending_Frame,"Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
+        # test_args = {"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
+
+        # prompts.update(arg_list)
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
 
@@ -162,7 +163,8 @@ class VQGAN_CLIP_Z_Quantize:
 
                     # TODO: Change args file to CSV
                     ####### Make sure args file and output directory have same name
-                    self.write_args_file(Output_directory, args_file_name, prompts, test_args)
+                    # self.write_args_file(Output_directory, args_file_name, prompts, test_args)
+                    self.write_args_file(Output_directory, args_file_name, prompts)
                     if Only_Save:
                         return
 
@@ -204,7 +206,7 @@ class VQGAN_CLIP_Z_Quantize:
                             final_out = path.join(final_dir, newname)
                             copyfile(vqgan.final_frame_path, final_out)
 
-                # TODO: Change Saved_Prompts to CSV files rather than raw python code.
+                # TODO: Change Saved_Prompts to JSON files rather than raw python code.
                 # if len(txt_files) > 0:
                 #     for f in txt_files:
                 #         txt = open(f, "r")
@@ -216,6 +218,20 @@ class VQGAN_CLIP_Z_Quantize:
                 #         py.close()
                 #         subprocess.call(["python", newfile])
                 #         os.remove(newfile)
+                if len(txt_files) > 0:
+                    for f in txt_files:
+                        txt = open(f, "r")
+                        args = json.loads(txt.read())
+                        VQGAN_CLIP_Z_Quantize(
+                                    Other_txt_prompts=args.Other_txt_prompts,Other_img_prompts=args.Other_img_prompts, Other_noise_seeds=args.Other_noise_seeds, Other_noise_weights= args.Other_noise_weights,
+                                    Output_directory=args.Output_directory, Base_Option=args.Base_Option, Base_Option_Weight=args.Base_Option_Weight,
+                                    Image_Prompt1=args.Image_Prompt1,Image_Prompt2=args.Image_Prompt2,Image_Prompt3=args.Image_Prompt3,
+                                    Text_Prompt1=args.Text_Prompt1,Text_Prompt2=args.Text_Prompt2,Text_Prompt3=args.Text_Prompt3,
+                                    SizeX=args.SizeX,SizeY=args.SizeY, Noise_Seed_Number=args.Noise_Seed_Number,
+                                    Noise_Weight=args.Noise_Weight,Seed=args.Seed,Image_Model=args.Image_Model,CLIP_Model=args.CLIP_Model,
+                                    Display_Frequency=args.Display_Frequency,Clear_Interval=args.Clear_Interval,
+                                    Train_Iterations=args.Train_Iterations,Step_Size=args.Step_Size,Cut_N=args.Cut_N,Cut_Pow=args.Cut_Pow,Starting_Frame=args.Starting_Frame,
+                                    Ending_Frame=args.Ending_Frame=Only_Save=args.Only_Save,Overwritten_Dir=args.Overwritten_Dir)
                 return
             else:
                 if not Frame_Image:
@@ -495,14 +511,14 @@ class VQGAN_CLIP_Z_Quantize:
         output_path = path.join(output_path, newname)
         return Path(f"{output_path}.png")
 
-    def write_args_file(self, out, base, prompts, test_args):
+    def write_args_file(self, out, base, prompts):
         saved_prompts_dir = path.join(out, "Saved_Prompts/")
         if not path.exists(saved_prompts_dir):
             mkdir(saved_prompts_dir)
 
         # TODO: change this to CSV, JSON, or XML
         self.filelistpath = saved_prompts_dir + base + ".txt"
-        self.write_arg_list(prompts, test_args)
+        self.write_arg_list(prompts)
 
 
     def set_valid_dirname(self, dirs, out, basename, i=0):
@@ -564,63 +580,12 @@ class VQGAN_CLIP_Z_Quantize:
       prompt_list = param_list + rest
       return prompt_list
 
-    def write_arg_list(self,args,test_args):
-        start = """# Running this cell will generate images based on the form inputs ->
-# It will also copy the contents of this cell and save it as a text file
-# Copy the text from the file and paste it here to reuse the form inputs
-from VQGAN_CLIP_Z_Quantize import VQGAN_CLIP_Z_Quantize
-# If you want to add more text and image prompts,
-# add them in a comma separated list in the brackets below
-"""
-
-        end = """VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,Other_noise_seeds,Other_noise_weights,
-Output_directory,Base_Option,Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,Starting_Frame,Ending_Frame)"""
-
-        comments = ["# (strings)",
-          "# (strings of links or paths)",
-          "# (longs)",
-          "# (decimals)",
-          "#@param {type:'string'}",
-          "#@param {type:'string'}",
-          "#@param {type:'slider', min:0, max:1, step:0.01}",
-          "#@param {type:'string'}",
-          "#@param {type:'string'}",
-          "#@param {type:'string'}",
-          "#@param {type:'string'}",
-          "#@param {type:'string'}",
-          "#@param {type:'string'}",
-          "#@param {type:'number'}",
-          "#@param {type:'number'}",
-          "#@param {type:'string'}",
-          "#@param {type:'slider', min:0, max:1, step:0.01}",
-          "#@param {type:'integer'}",
-          "#@param ['drive/MyDrive/colab/coco', 'vqgan_imagenet_f16_1024', 'vqgan_imagenet_f16_16384', 'coco', 'wikiart_16384', 'wikiart_1024', 'sflickr', 'faceshq']",
-          "#@param ['RN50', 'RN101', 'RN50x4', 'ViT-B/32']",
-          "#@param {type:'integer'}",
-          "#@param {type:'string'}",
-          "#@param {type:'integer'}",
-          "#@param {type:'number'}",
-          "#@param {type:'number'}",
-          "#@param {type:'number'}",
-          ]
+    def write_arg_list(self,args):
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
-            i, txt = 0, ""
-            for argname, argval in args.items():
-                if comments[i].startswith(("#@param {type:'string'}", "#@param [")):
-                    txt += f"{str(argname)}=\"{str(argval)}\" {comments[i]}"
-                else:
-                    txt += f"{str(argname)}={str(argval)} {comments[i]}"
-                txt += "\n"
-                i+=1
 
-            for argname, argval in test_args.items():
-                if argname == "Overwritten_Dir":
-                    txt += f"{str(argname)}='{str(argval)}'\n"
-                else:
-                    txt += f"{str(argname)}={str(argval)}\n"
+            json_args = json.dumps(args)
             print(f"writing settings to {self.filelistpath}")
-            txtfile.write(start + txt + end)
+            txtfile.write(json_args)
 
     def parse_prompt(self, prompt):
         vals = prompt.rsplit('|', 2)
