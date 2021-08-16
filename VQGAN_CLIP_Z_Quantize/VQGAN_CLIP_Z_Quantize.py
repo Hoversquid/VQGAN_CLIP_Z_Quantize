@@ -133,6 +133,10 @@ class VQGAN_CLIP_Z_Quantize:
                 imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
                 sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
 
+            # Each run produces a text file of a JSON string. The file contains the settings for the run from which it was made.
+            # Running the text file through the program will use the settings saved in it.
+            elif path.splitext(Base_Option)[1] in ('.txt'):
+                txt_files = [Base_Option]
             else:
                 base_dir = self.get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
                 print(f"Selecting Base_Option: {Base_Option}\nUsing filename: {filename}\nUsing base_dir: {base_dir}")
@@ -236,7 +240,7 @@ class VQGAN_CLIP_Z_Quantize:
                 return
             else:
                 if not Frame_Image:
-                    self.write_args_file(Output_directory, filename, prompts, test_args)
+                    self.write_args_file(Output_directory, filename, prompts)
                 if Only_Save:
                     return
 
