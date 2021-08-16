@@ -145,7 +145,8 @@ class VQGAN_CLIP_Z_Quantize:
                 print(f"Selecting Base_Option: {Base_Option}\nUsing filename: {filename}\nUsing base_dir: {base_dir}")
                 base_dir_name = args_basename = path.basename(base_dir)
 
-            args_file_name = self.set_valid_filename(files, base_dir, args_basename, ".txt")
+            ## TODO: make saved prompt text files save right
+            args_file_name = self.set_valid_filename(files, saved_prompts_dir, args_basename, ".txt")
             self.write_args_file(Output_directory, args_file_name, prompts)
             if Only_Save:
                 return
