@@ -99,7 +99,6 @@ class VQGAN_CLIP_Z_Quantize:
 
                 files = [f for f in listdir(saved_prompts_dir) if isfile(join(saved_prompts_dir, f))]
                 args_basename = path.basename(Base_Option) + "_directory"
-                args_file_name = self.set_valid_filename(files, base_dir, args_basename, ".txt")
 
                 file_batch = True
                 files = [join(Base_Option, f) for f in listdir(Base_Option) if isfile(join(Base_Option, f))]
@@ -115,7 +114,9 @@ class VQGAN_CLIP_Z_Quantize:
             elif path.splitext(Base_Option)[1] in ('.mp4', '.gif'):
                 base_dir = self.get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
                 base_file_name = path.basename(path.splitext(Base_Option)[0])
-                args_file_name = base_dir_name + "_animation"
+                args_basename = path.basename(Base_Option) + "_directory"
+
+                # args_file_name = base_dir_name + "_animation"
 
                 is_frames = True
                 file_batch = True
@@ -137,11 +138,17 @@ class VQGAN_CLIP_Z_Quantize:
             # Running the text file through the program will use the settings saved in it.
             elif path.splitext(Base_Option)[1] in ('.txt'):
                 txt_files = [Base_Option]
+                files = [f for f in listdir(saved_prompts_dir) if isfile(join(saved_prompts_dir, f))]
+                args_basename = path.basename(Base_Option) + "_text"
             else:
                 base_dir = self.get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
                 print(f"Selecting Base_Option: {Base_Option}\nUsing filename: {filename}\nUsing base_dir: {base_dir}")
-                base_dir_name = path.basename(base_dir)
+                base_dir_name = args_basename = path.basename(base_dir)
 
+            args_file_name = self.set_valid_filename(files, base_dir, args_basename, ".txt")
+            self.write_args_file(Output_directory, args_file_name, prompts)
+            if Only_Save:
+                return
             imgLen = len(sorted_imgs)
 
             if file_batch:
@@ -166,12 +173,7 @@ class VQGAN_CLIP_Z_Quantize:
                             start, end = 1, imgLen
                             print(f"Invalid frame selection, running through all {imgLen} frames.")
 
-                    # TODO: Change args file to CSV
-                    ####### Make sure args file and output directory have same name
-                    # self.write_args_file(Output_directory, args_file_name, prompts, test_args)
-                    self.write_args_file(Output_directory, args_file_name, prompts)
-                    if Only_Save:
-                        return
+
 
                     # j = start
 
