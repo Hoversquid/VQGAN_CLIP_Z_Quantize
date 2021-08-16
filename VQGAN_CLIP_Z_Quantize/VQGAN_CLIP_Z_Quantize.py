@@ -97,7 +97,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                 files = [f for f in listdir(saved_prompts_dir) if isfile(join(saved_prompts_dir, f))]
                 args_basename = path.basename(Base_Option) + "_directory"
-                args_file_name = self.set_valid_filename(files, base_dir, args_basename)
+                args_file_name = self.set_valid_filename(files, base_dir, args_basename, ".txt")
 
                 file_batch = True
                 files = [join(Base_Option, f) for f in listdir(Base_Option) if isfile(join(Base_Option, f))]
@@ -531,31 +531,32 @@ class VQGAN_CLIP_Z_Quantize:
 
         return self.set_valid_dirname(dirs, out, basename, i + 1)
 
-    def set_valid_filename(self, files, out, basename, i=0):
+    def set_valid_filename(self, files, out, basename, ext, i=0):
         if i > 0:
-            newname = "%s(%d)" % (basename, i)
+            newname = "%s(%d).%s" % (basename, i, ext)
         else:
             newname = basename
 
         unique_file_name = True
 
         if len(files) < 1:
-            new_path = path.join(out, newname)
-            mkdir(new_path)
-            return new_path
+            # new_path = path.join(out, newname)
+            # mkdir(new_path)
+            return newname
 
         for file in files:
-            if path.basename(file) == newname:
+            # if path.basename(file) == newname:
+            if file == newname:
                 unique_file_name = False
                 break
 
         if unique_file_name:
-            new_path = path.join(out, newname)
+            # new_path = path.join(out, newname)
+            #
+            # mkdir(new_path)
+            return newname
 
-            mkdir(new_path)
-            return new_path
-
-        return self.set_valid_filename(files, out, basename, i + 1)
+        return self.set_valid_filename(files, out, basename, ext, i + 1)
 
     def get_prompt_list(self, first, second, third, rest):
       param_list = [first, second, third]
