@@ -232,7 +232,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     Noise_Weight=args.Noise_Weight,Seed=args.Seed,Image_Model=args.Image_Model,CLIP_Model=args.CLIP_Model,
                                     Display_Frequency=args.Display_Frequency,Clear_Interval=args.Clear_Interval,
                                     Train_Iterations=args.Train_Iterations,Step_Size=args.Step_Size,Cut_N=args.Cut_N,Cut_Pow=args.Cut_Pow,Starting_Frame=args.Starting_Frame,
-                                    Ending_Frame=args.Ending_Frame=Only_Save=args.Only_Save,Overwritten_Dir=args.Overwritten_Dir)
+                                    Ending_Frame=args.Ending_Frame,Only_Save=args.Only_Save,Overwritten_Dir=args.Overwritten_Dir)
                 return
             else:
                 if not Frame_Image:
