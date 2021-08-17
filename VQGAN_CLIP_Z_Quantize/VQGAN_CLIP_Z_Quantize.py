@@ -569,7 +569,7 @@ class VQGAN_CLIP_Z_Quantize:
         if i > 0:
             newname = "%s(%d).%s" % (basename, i, ext)
         else:
-            newname = basename
+            newname = "%s.%s" % (basename, ext)
 
         unique_file_name = True
 
