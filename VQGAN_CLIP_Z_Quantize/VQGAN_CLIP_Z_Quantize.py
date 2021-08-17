@@ -137,7 +137,7 @@ class VQGAN_CLIP_Z_Quantize:
             # Each run produces a text file of a JSON string. The file contains the settings for the run from which it was made.
             # Running the text file through the program will use the settings saved in it.
             elif path.splitext(Base_Option)[1] in ('.txt'):
-                txt_files = [Base_Option]
+
                 files = [f for f in listdir(saved_prompts_dir) if isfile(join(saved_prompts_dir, f))]
                 args_basename = path.basename(path.splitext(Base_Option)[0]) + "_text"
 
@@ -145,7 +145,7 @@ class VQGAN_CLIP_Z_Quantize:
                 args_file_name = self.set_valid_filename(files, saved_prompts_dir, args_basename, ".txt")
                 self.write_args_file(Output_directory, args_file_name, prompts)
                 if not Only_Save:
-                    self.run_saved_settings_file()
+                    self.run_saved_settings_file(Base_Option)
                 return
             else:
                 base_dir = self.get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
