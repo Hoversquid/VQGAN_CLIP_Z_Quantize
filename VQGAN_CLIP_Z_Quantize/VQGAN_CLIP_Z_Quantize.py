@@ -567,9 +567,9 @@ class VQGAN_CLIP_Z_Quantize:
 
     def set_valid_filename(self, files, out, basename, ext, i=0):
         if i > 0:
-            newname = "%s(%d).%s" % (basename, i)
+            newname = "%s(%d)%s" % (basename, i, ext)
         else:
-            newname = "%s.%s" % (basename, ext)
+            newname = "%s%s" % (basename, ext)
 
         unique_file_name = True
 
