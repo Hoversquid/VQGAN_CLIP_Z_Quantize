@@ -143,7 +143,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                 # Bad DRY
                 args_file_name = self.set_valid_filename(files, saved_prompts_dir, args_basename, ".txt")
-                self.write_args_file(Output_directory, args_file_name, prompts)
+                self.write_args_file(Output_directory, path.splitext(args_file_name)[0], prompts)
                 if not Only_Save:
                     self.run_saved_settings_file(Base_Option)
                 return
@@ -567,7 +567,7 @@ class VQGAN_CLIP_Z_Quantize:
 
     def set_valid_filename(self, files, out, basename, ext, i=0):
         if i > 0:
-            newname = "%s(%d).%s" % (basename, i, ext)
+            newname = "%s(%d).%s" % (basename, i)
         else:
             newname = "%s.%s" % (basename, ext)
 
@@ -584,9 +584,6 @@ class VQGAN_CLIP_Z_Quantize:
                 break
 
         if unique_file_name:
-            # new_path = path.join(out, newname)
-            #
-            # mkdir(new_path)
             return newname
 
         return self.set_valid_filename(files, out, basename, ext, i + 1)
