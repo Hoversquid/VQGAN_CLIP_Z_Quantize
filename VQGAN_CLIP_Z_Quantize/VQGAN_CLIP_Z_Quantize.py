@@ -186,7 +186,6 @@ class VQGAN_CLIP_Z_Quantize:
 
                         print(f"start: {start}, end: {end}")
 
-
                     j = start
 
                     for img in sorted_imgs[start-1:end-1]:
