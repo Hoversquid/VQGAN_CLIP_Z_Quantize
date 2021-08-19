@@ -184,11 +184,11 @@ class VQGAN_CLIP_Z_Quantize:
                             start, end = 1, imgLen
                             print(f"Invalid frame selection, running through all {imgLen} frames.")
 
+                        print(f"start: {start}, end: {end}")
 
 
                     j = start
 
-                    print(f"start: {start}, end: {end}")
                     for img in sorted_imgs[start-1:end-1]:
                         imgname = path.basename(path.splitext(img)[0])
 
