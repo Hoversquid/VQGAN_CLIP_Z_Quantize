@@ -221,18 +221,6 @@ class VQGAN_CLIP_Z_Quantize:
                             final_out = path.join(final_dir, newname)
                             copyfile(vqgan.final_frame_path, final_out)
 
-                # TODO: Change Saved_Prompts to JSON files rather than raw python code.
-                # if len(txt_files) > 0:
-                #     for f in txt_files:
-                #         txt = open(f, "r")
-                #         code= txt.read()
-                #         txt.close()
-                #         newfile = join(Output_directory, base_dir_name, path.basename(f) + ".py")
-                #         py = open(newfile, "w")
-                #         py.write(code)
-                #         py.close()
-                #         subprocess.call(["python", newfile])
-                #         os.remove(newfile)
                 if len(txt_files) > 0:
                     for txt_path in txt_files:
                         self.run_saved_settings_file(txt_path)
@@ -502,11 +490,7 @@ class VQGAN_CLIP_Z_Quantize:
         Sequence number left padded with 6 zeroes is appended if `save_every` is set.
         :rtype: Path
         """
-        # split = path.splitext(output_path)[0]
-        # parent = path.dirname(output_path)
         base = path.basename(output_path)
-        print(f"""Main image_output_path: {output_path}\n
-                base of output_path: {base}""")
         if sequence_number:
             sequence_number_left_padded = str(sequence_number).zfill(6)
             newname = f"{base}.{sequence_number_left_padded}"
