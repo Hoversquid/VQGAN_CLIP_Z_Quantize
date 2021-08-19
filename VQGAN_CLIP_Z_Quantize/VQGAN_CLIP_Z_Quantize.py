@@ -549,7 +549,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         return self.set_valid_dirname(dirs, out, basename, i + 1)
 
-    def run_saved_settings_file(self, txt_path, Base_Option):
+    def run_saved_settings_file(self, Base_Option):
         txt = open(txt_path, "r")
         args = json.loads(txt.read())
         if args["Base_Option"] != Base_Option:
