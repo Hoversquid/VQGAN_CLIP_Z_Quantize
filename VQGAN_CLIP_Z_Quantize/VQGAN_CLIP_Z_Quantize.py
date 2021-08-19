@@ -88,7 +88,8 @@ class VQGAN_CLIP_Z_Quantize:
             is_frames  = False
             file_batch = False
             saved_prompts_dir = path.join(Output_directory, "Saved_Prompts/")
-
+            if not saved_prompts_dir:
+                mkdir(saved_prompts_dir)
             # Setting the Base_Option to a directory will run each image and saved prompt text file in order.
             # Skips animated files but will run prompts that contain animated file parameters.
             if isdir(Base_Option):
