@@ -549,19 +549,20 @@ class VQGAN_CLIP_Z_Quantize:
 
         return self.set_valid_dirname(dirs, out, basename, i + 1)
 
-    def run_saved_settings_file(self, txt_path):
+    def run_saved_settings_file(self, txt_path, Base_Option):
         txt = open(txt_path, "r")
         args = json.loads(txt.read())
-        VQGAN_CLIP_Z_Quantize(
-                    Other_txt_prompts=args["Other_txt_prompts"],Other_img_prompts=args["Other_img_prompts"], Other_noise_seeds=args["Other_noise_seeds"], Other_noise_weights=args["Other_noise_weights"],
-                    Output_directory=args["Output_directory"], Base_Option=args["Base_Option"], Base_Option_Weight=args["Base_Option_Weight"],
-                    Image_Prompt1=args["Image_Prompt1"],Image_Prompt2=args["Image_Prompt2"],Image_Prompt3=args["Image_Prompt3"],
-                    Text_Prompt1=args["Text_Prompt1"],Text_Prompt2=args["Text_Prompt2"],Text_Prompt3=args["Text_Prompt3"],
-                    SizeX=args["SizeX"],SizeY=args["SizeY"], Noise_Seed_Number=args["Noise_Seed_Number"],
-                    Noise_Weight=args["Noise_Weight"],Seed=args["Seed"],Image_Model=args["Image_Model"],CLIP_Model=args["CLIP_Model"],
-                    Display_Frequency=args["Display_Frequency"],Clear_Interval=args["Clear_Interval"],
-                    Train_Iterations=args["Train_Iterations"],Step_Size=args["Step_Size"],Cut_N=args["Cut_N"],Cut_Pow=args["Cut_Pow"],Starting_Frame=args["Starting_Frame"],
-                    Ending_Frame=args["Ending_Frame"],Only_Save=args["Only_Save"],Overwritten_Dir=args["Overwritten_Dir"])
+        if args["Base_Option"] != Base_Option:
+            VQGAN_CLIP_Z_Quantize(
+                        Other_txt_prompts=args["Other_txt_prompts"],Other_img_prompts=args["Other_img_prompts"], Other_noise_seeds=args["Other_noise_seeds"], Other_noise_weights=args["Other_noise_weights"],
+                        Output_directory=args["Output_directory"], Base_Option=args["Base_Option"], Base_Option_Weight=args["Base_Option_Weight"],
+                        Image_Prompt1=args["Image_Prompt1"],Image_Prompt2=args["Image_Prompt2"],Image_Prompt3=args["Image_Prompt3"],
+                        Text_Prompt1=args["Text_Prompt1"],Text_Prompt2=args["Text_Prompt2"],Text_Prompt3=args["Text_Prompt3"],
+                        SizeX=args["SizeX"],SizeY=args["SizeY"], Noise_Seed_Number=args["Noise_Seed_Number"],
+                        Noise_Weight=args["Noise_Weight"],Seed=args["Seed"],Image_Model=args["Image_Model"],CLIP_Model=args["CLIP_Model"],
+                        Display_Frequency=args["Display_Frequency"],Clear_Interval=args["Clear_Interval"],
+                        Train_Iterations=args["Train_Iterations"],Step_Size=args["Step_Size"],Cut_N=args["Cut_N"],Cut_Pow=args["Cut_Pow"],Starting_Frame=args["Starting_Frame"],
+                        Ending_Frame=args["Ending_Frame"],Only_Save=args["Only_Save"],Overwritten_Dir=args["Overwritten_Dir"])
         txt.close()
 
 
