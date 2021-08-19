@@ -114,6 +114,7 @@ class VQGAN_CLIP_Z_Quantize:
             # Images are trained based on the amount of Train_Iterations.
             elif path.splitext(Base_Option)[1] in ('.mp4', '.gif'):
                 base_dir = self.get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
+                base_dir_name = path.basename(base_dir)
                 base_file_name = path.basename(path.splitext(Base_Option)[0])
                 args_basename = path.basename(Base_Option) + "_directory"
 
