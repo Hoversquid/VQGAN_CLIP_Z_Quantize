@@ -87,7 +87,8 @@ class VQGAN_CLIP_Z_Quantize:
 
             is_frames  = False
             file_batch = False
-            saved_prompts_dir = path.join(Output_directory, "Saved_Prompts/")
+            if not Frame_Image:
+                saved_prompts_dir = path.join(Output_directory, "Saved_Prompts/")
             if not path.exists(saved_prompts_dir):
                 mkdir(saved_prompts_dir)
             # Setting the Base_Option to a directory will run each image and saved prompt text file in order.
@@ -116,9 +117,7 @@ class VQGAN_CLIP_Z_Quantize:
                 base_dir = self.get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
                 base_dir_name = path.basename(base_dir)
                 base_file_name = path.basename(path.splitext(Base_Option)[0])
-                args_basename = path.basename(Base_Option) + "_directory"
-
-                # args_file_name = base_dir_name + "_animation"
+                args_basename = path.basename(Base_Option) + "_animation"
 
                 is_frames = True
                 file_batch = True
@@ -126,7 +125,7 @@ class VQGAN_CLIP_Z_Quantize:
                 split_frames_dirname = f"{base_file_name}_split_frames"
 
                 frames_dir = join(base_dir, split_frames_dirname)
-                if not exists(frames_dir):
+                if not exists(frames_dir) and not Only_Save:
                     mkdir(frames_dir)
                     imgname = f"{base_file_name}.%06d.png"
                     frames_dir_arg = path.join(frames_dir, imgname)
@@ -156,7 +155,8 @@ class VQGAN_CLIP_Z_Quantize:
 
             ## TODO: make saved prompt text files save right
             # args_file_name = path.join(saved_prompts_dir, args_basename, ".txt")
-            self.write_args_file(Output_directory, args_basename, prompts)
+            if not Frame_Image:
+                self.write_args_file(Output_directory, args_basename, prompts)
             if Only_Save:
                 return
 
