@@ -122,18 +122,19 @@ class VQGAN_CLIP_Z_Quantize:
                 is_frames = True
                 file_batch = True
 
-                split_frames_dirname = f"{base_file_name}_split_frames"
+                if not Only_Save:
 
-                frames_dir = join(base_dir, split_frames_dirname)
-                if not exists(frames_dir) and not Only_Save:
-                    mkdir(frames_dir)
-                    imgname = f"{base_file_name}.%06d.png"
-                    frames_dir_arg = path.join(frames_dir, imgname)
-                    cmdargs = ['ffmpeg', '-i', Base_Option, frames_dir_arg]
-                    subprocess.call(cmdargs)
+                    split_frames_dirname = f"{base_file_name}_split_frames"
+                    frames_dir = join(base_dir, split_frames_dirname)
+                    if not exists(frames_dir):
+                        mkdir(frames_dir)
+                        imgname = f"{base_file_name}.%06d.png"
+                        frames_dir_arg = path.join(frames_dir, imgname)
+                        cmdargs = ['ffmpeg', '-i', Base_Option, frames_dir_arg]
+                        subprocess.call(cmdargs)
 
-                imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
-                sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
+                    imgs = [join(frames_dir, f) for f in listdir(frames_dir) if isfile(join(frames_dir, f))]
+                    sorted_imgs = sorted(imgs, key=lambda f: self.get_file_num(f, len(imgs)))
 
             # Each run produces a text file of a JSON string. The file contains the settings for the run from which it was made.
             # Running the text file through the program will use the settings saved in it.
@@ -153,7 +154,6 @@ class VQGAN_CLIP_Z_Quantize:
                 print(f"Selecting Base_Option: {Base_Option}\nUsing filename: {filename}\nUsing base_dir: {base_dir}")
                 base_dir_name = args_basename = path.basename(base_dir)
 
-            ## TODO: make saved prompt text files save right
             # args_file_name = path.join(saved_prompts_dir, args_basename, ".txt")
             if not Frame_Image:
                 self.write_args_file(Output_directory, args_basename, prompts)
