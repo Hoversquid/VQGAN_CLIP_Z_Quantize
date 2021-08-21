@@ -199,6 +199,7 @@ class VQGAN_CLIP_Z_Quantize:
                         else:
                             target_dir = self.get_base_dir(Output_directory, imgname)
 
+                        j += 1
                         print(f"Going to target_dir: {target_dir}")
 
                         vqgan = VQGAN_CLIP_Z_Quantize(Other_txt_prompts,Other_img_prompts,
@@ -585,7 +586,6 @@ class VQGAN_CLIP_Z_Quantize:
 
     def write_arg_list(self,args):
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
-
             json_args = json.dumps(args)
             print(f"writing settings to {self.filelistpath}")
             txtfile.write(json_args)
@@ -599,12 +599,10 @@ class VQGAN_CLIP_Z_Quantize:
     def sinc(self, x):
         return torch.where(x != 0, torch.sin(math.pi * x) / (math.pi * x), x.new_ones([]))
 
-
     def lanczos(self, x, a):
         cond = torch.logical_and(-a < x, x < a)
         out = torch.where(cond, self.sinc(x) * self.sinc(x/a), x.new_zeros([]))
         return out / out.sum()
-
 
     def ramp(self, ratio, width):
         n = math.ceil(width / ratio + 1)
@@ -614,7 +612,6 @@ class VQGAN_CLIP_Z_Quantize:
             out[i] = cur
             cur += ratio
         return torch.cat([-out[1:].flip([0]), out])[1:-1]
-
 
     def resample(self, input, size, align_corners=True):
         n, c, h, w = input.shape
