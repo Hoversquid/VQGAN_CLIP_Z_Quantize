@@ -24,6 +24,7 @@ from collections import OrderedDict
 from shutil import copyfile
 import subprocess
 import json
+import time
 
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_txt_prompts,
