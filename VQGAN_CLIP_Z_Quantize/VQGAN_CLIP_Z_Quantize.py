@@ -344,7 +344,7 @@ class VQGAN_CLIP_Z_Quantize:
                         torch.cuda.empty_cache()
                         time.sleep(retryTime)
                         newRetryTime = retryTime + 3
-                        train_and_update(i, output_path=output_path, last_image=last_image, retryTime=newRetryTime)
+                        train_and_update(i, last_image=last_image, retryTime=newRetryTime)
 
 
                 # Set to -1 to run forever
