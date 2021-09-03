@@ -329,7 +329,7 @@ class VQGAN_CLIP_Z_Quantize:
             with tqdm() as pbar:
 
                 # Main helper function for the training loop
-                def train_and_update(i, last_image=False, retryTime=0):
+                def train_and_update(i, base_dir, last_image=False, retryTime=0):
                     try:
                         # new_filepath = self.train(i, Output_directory, last_image)
                         new_filepath = self.train(i, base_dir, last_image)
@@ -353,11 +353,11 @@ class VQGAN_CLIP_Z_Quantize:
                     j = 0
 
                     while j < Train_Iterations - 1:
-                        last_frame_path = train_and_update(i)
+                        last_frame_path = train_and_update(i, base_dir)
                         i += 1
                         j += 1
 
-                    self.final_frame_path = train_and_update(i, last_image=True)
+                    self.final_frame_path = train_and_update(i, base_dir, last_image=True)
                     torch.cuda.empty_cache()
 
                 else:
