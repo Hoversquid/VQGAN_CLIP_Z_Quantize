@@ -232,6 +232,8 @@ class VQGAN_CLIP_Z_Quantize:
                     self.write_args_file(Output_directory, filename, prompts)
                 if Only_Save:
                     return
+        else:
+            base_dir = self.get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
