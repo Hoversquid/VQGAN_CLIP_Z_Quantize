@@ -364,7 +364,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                 else:
                     while True:
-                        train_and_update(i)
+                        train_and_update(i, base_dir)
                         i += 1
 
         except KeyboardInterrupt:
