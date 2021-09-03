@@ -287,8 +287,8 @@ class VQGAN_CLIP_Z_Quantize:
 
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
-
-        imgpath = self.get_pil_imagepath(Base_Option)
+        if Base_Option:
+            imgpath = self.get_pil_imagepath(Base_Option)
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
             pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
