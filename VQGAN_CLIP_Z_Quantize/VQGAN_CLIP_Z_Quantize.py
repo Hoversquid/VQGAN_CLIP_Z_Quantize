@@ -46,6 +46,8 @@ class VQGAN_CLIP_Z_Quantize:
         if not path.exists(Output_directory):
             mkdir(Output_directory)
 
+        self.Train_Iterations = Train_Iterations
+
         prompts = {
         "Other_txt_prompts": Other_txt_prompts,"Other_img_prompts": Other_img_prompts,
         "Other_noise_seeds": Other_noise_seeds, "Other_noise_weights": Other_noise_weights,
@@ -57,7 +59,7 @@ class VQGAN_CLIP_Z_Quantize:
         "Noise_Seed_Number":Noise_Seed_Number,"Noise_Weight":Noise_Weight,
         "Seed":Seed, "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
         "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,
-        "Train_Iterations":Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,
+        "Train_Iterations":self.Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,
         "Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,
         "Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
 
@@ -165,7 +167,7 @@ class VQGAN_CLIP_Z_Quantize:
             imgLen = len(sorted_imgs)
 
             if file_batch:
-                if imgLen > 0 and Train_Iterations > 0:
+                if imgLen > 0 and self.Train_Iterations > 0:
 
                     start, end = 1, imgLen
                     # If the option is an animated file, setting the Starting_Frame and Ending_Frame can limit from which frames to train.
@@ -207,7 +209,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     img, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                    Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
+                                    Display_Frequency,Clear_Interval,self.Train_Iterations,Step_Size,Cut_N,Cut_Pow,
                                     Starting_Frame,Ending_Frame,Overwrite,Only_Save,Frame_Image=True)
 
                         if is_frames:
@@ -350,12 +352,12 @@ class VQGAN_CLIP_Z_Quantize:
                         train_and_update(i, last_image=last_image, retryTime=newRetryTime)
 
 
-                # Set to -1 to run forever
-                if Train_Iterations > 0:
-                    print(f"Begining training over {Train_Iterations} iterations.")
+                # Set Train_Iterations to -1 to run forever
+                if self.Train_Iterations > 0:
+                    print(f"Begining training over {self.Train_Iterations} iterations.")
                     j = 0
 
-                    while j < Train_Iterations - 1:
+                    while j < self.Train_Iterations - 1:
                         last_frame_path = train_and_update(i)
                         i += 1
                         j += 1
@@ -554,7 +556,7 @@ class VQGAN_CLIP_Z_Quantize:
                         SizeX=args["SizeX"],SizeY=args["SizeY"], Noise_Seed_Number=args["Noise_Seed_Number"],
                         Noise_Weight=args["Noise_Weight"],Seed=args["Seed"],Image_Model=args["Image_Model"],CLIP_Model=args["CLIP_Model"],
                         Display_Frequency=args["Display_Frequency"],Clear_Interval=args["Clear_Interval"],
-                        Train_Iterations=args["Train_Iterations"],Step_Size=args["Step_Size"],Cut_N=args["Cut_N"],Cut_Pow=args["Cut_Pow"],Starting_Frame=args["Starting_Frame"],
+                        Train_Iterations=self.Train_Iterations,Step_Size=args["Step_Size"],Cut_N=args["Cut_N"],Cut_Pow=args["Cut_Pow"],Starting_Frame=args["Starting_Frame"],
                         Ending_Frame=args["Ending_Frame"],Only_Save=False,Overwritten_Dir=args["Overwritten_Dir"])
         txt.close()
 
