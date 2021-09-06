@@ -45,29 +45,28 @@ class VQGAN_CLIP_Z_Quantize:
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
-        # prompts = OrderedDict()
-        # prompts["Other_txt_prompts"] = Other_txt_prompts
-        # prompts["Other_img_prompts"] = Other_img_prompts
-        # prompts["Other_noise_seeds"] = Other_noise_seeds
-        # prompts["Other_noise_weights"] = Other_noise_weights
-        prompts = {"Other_txt_prompts": Other_txt_prompts,"Other_img_prompts": Other_img_prompts, "Other_noise_seeds": Other_noise_seeds, "Other_noise_weights": Other_noise_weights,
-                    "Output_directory":Output_directory, "Base_Option":Base_Option, "Base_Option_Weight":Base_Option_Weight,
-                    "Image_Prompt1":Image_Prompt1,"Image_Prompt2":Image_Prompt2,"Image_Prompt3":Image_Prompt3,
-                    "Text_Prompt1":Text_Prompt1,"Text_Prompt2":Text_Prompt2,"Text_Prompt3":Text_Prompt3,
-                    "SizeX":SizeX,"SizeY":SizeY,"Noise_Seed_Number":Noise_Seed_Number,
-                    "Noise_Weight":Noise_Weight,"Seed":Seed, "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
-                    "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,
-                    "Train_Iterations":Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,
-                    "Ending_Frame":Ending_Frame,"Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
-        # test_args = {"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
 
-        # prompts.update(arg_list)
+        prompts = {
+        "Other_txt_prompts": Other_txt_prompts,"Other_img_prompts": Other_img_prompts,
+        "Other_noise_seeds": Other_noise_seeds, "Other_noise_weights": Other_noise_weights,
+        "Output_directory":Output_directory, "Base_Option":Base_Option,
+        "Base_Option_Weight":Base_Option_Weight,"Image_Prompt1":Image_Prompt1,
+        "Image_Prompt2":Image_Prompt2,"Image_Prompt3":Image_Prompt3,
+        "Text_Prompt1":Text_Prompt1,"Text_Prompt2":Text_Prompt2,
+        "Text_Prompt3":Text_Prompt3,"SizeX":SizeX,"SizeY":SizeY,
+        "Noise_Seed_Number":Noise_Seed_Number,"Noise_Weight":Noise_Weight,
+        "Seed":Seed, "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
+        "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,
+        "Train_Iterations":Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,
+        "Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,
+        "Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
+
         txt_prompts = self.get_prompt_list(Text_Prompt1, Text_Prompt2, Text_Prompt3, Other_txt_prompts)
         img_prompts = self.get_prompt_list(Image_Prompt1, Image_Prompt2, Image_Prompt3, Other_img_prompts)
 
         # Sets the filename based on the collection of Text_Prompts
         filename = ""
-        name_limit = 42
+        name_limit = 40
         for i, prompt in enumerate(txt_prompts):
             name_length = name_limit - len(filename)
             if name_length > 0:
@@ -81,7 +80,8 @@ class VQGAN_CLIP_Z_Quantize:
         filename = filename.replace(" ", "_")
         imgpath = None
 
-        # if Base_Option exists, set the base directory to its final target or targets.
+        # if Base_Option exists,
+        # set the base directory to its final target or targets.
         if not Base_Option in (None, ""):
 
             sorted_imgs, txt_files = [], []
@@ -232,7 +232,10 @@ class VQGAN_CLIP_Z_Quantize:
                     self.write_args_file(Output_directory, filename, prompts)
                 if Only_Save:
                     return
-
+        else:
+            self.write_args_file(Output_directory, filename, prompts)
+            if Only_Save:
+                return
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
           noise_prompt_seeds = [Noise_Seed_Number] + Other_noise_seeds
@@ -367,6 +370,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         except KeyboardInterrupt:
             # torch.cuda.empty_cache()
+            print(f"Interrupting {filename} rendering.")
             pass
 
     def get_base_dir(self, Output_directory, filename, Frame_Image=False, Overwritten_Dir=None):
