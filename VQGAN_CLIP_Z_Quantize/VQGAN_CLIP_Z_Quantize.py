@@ -487,7 +487,7 @@ class VQGAN_CLIP_Z_Quantize:
 
     # Used to set image path if it's a URL
     def get_pil_imagepath(self, imgpath):
-        if not path.exists(imgpath):
+        if imgpath and not path.exists(imgpath):
           imgpath = requests.get(imgpath, stream=True).raw
         return imgpath
 
