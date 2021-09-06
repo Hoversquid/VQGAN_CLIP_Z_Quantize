@@ -236,8 +236,11 @@ class VQGAN_CLIP_Z_Quantize:
                     return
         else:
             self.write_args_file(Output_directory, filename, prompts)
+            base_dir = self.get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
+
             if Only_Save:
                 return
+
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
           noise_prompt_seeds = [Noise_Seed_Number] + Other_noise_seeds
