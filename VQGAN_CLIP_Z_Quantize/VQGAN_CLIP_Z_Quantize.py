@@ -98,7 +98,6 @@ class VQGAN_CLIP_Z_Quantize:
             # Setting the Base_Option to a directory will run each image and saved prompt text file in order.
             # Skips animated files but will run prompts that contain animated file parameters.
             if isdir(Base_Option):
-                # base_dir = self.make_unique_dir(Output_directory, filename)
                 base_dir = Output_directory
 
                 base_dir_name = path.basename(base_dir)
@@ -158,7 +157,6 @@ class VQGAN_CLIP_Z_Quantize:
                 print(f"Selecting Base_Option: {Base_Option}\nUsing filename: {filename}\nUsing base_dir: {base_dir}")
                 base_dir_name = args_basename = path.basename(base_dir)
 
-            # args_file_name = path.join(saved_prompts_dir, args_basename, ".txt")
             if not Frame_Image:
                 self.write_args_file(Output_directory, args_basename, prompts)
             if Only_Save:
@@ -196,7 +194,6 @@ class VQGAN_CLIP_Z_Quantize:
                         imgname = path.basename(path.splitext(img)[0])
 
                         if is_frames:
-                            # img_base_dir = self.get_base_dir(Output_directory, imgname, Frame_Image=True)
                             target_dir = path.join(base_dir, f"{base_dir_name}_frame_{j}")
                         else:
                             target_dir = self.get_base_dir(Output_directory, imgname)
@@ -339,7 +336,6 @@ class VQGAN_CLIP_Z_Quantize:
                 # Main helper function for the training loop
                 def train_and_update(i, last_image=False, retryTime=0):
                     try:
-                        # new_filepath = self.train(i, Output_directory, last_image)
                         new_filepath = self.train(i, base_dir, last_image)
 
                         pbar.update()
@@ -374,7 +370,7 @@ class VQGAN_CLIP_Z_Quantize:
                         i += 1
 
         except KeyboardInterrupt:
-            # torch.cuda.empty_cache()
+            torch.cuda.empty_cache()
             print(f"Interrupting {filename} rendering.")
             pass
 
@@ -447,7 +443,6 @@ class VQGAN_CLIP_Z_Quantize:
         out = self.synth()
         sequence_number = i // self.args.display_freq
 
-        # TODO: change to display same name as directory
         outname = self.image_output_path(outpath, sequence_number=sequence_number)
         TF.to_pil_image(out[0].cpu()).save(outname)
         # stops the notebook file from getting too big by clearing the previous images from the output
@@ -576,7 +571,7 @@ class VQGAN_CLIP_Z_Quantize:
             return newname
 
         for file in files:
-            print(f"checking: {path.basename(file)} against: {newname}")
+            # print(f"checking: {path.basename(file)} against: {newname}")
             if path.basename(file) == newname:
 
                 unique_file_name = False
