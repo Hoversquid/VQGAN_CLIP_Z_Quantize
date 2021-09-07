@@ -46,8 +46,6 @@ class VQGAN_CLIP_Z_Quantize:
         if not path.exists(Output_directory):
             mkdir(Output_directory)
 
-        self.Train_Iterations = Train_Iterations
-
         prompts = {
         "Other_txt_prompts": Other_txt_prompts,"Other_img_prompts": Other_img_prompts,
         "Other_noise_seeds": Other_noise_seeds, "Other_noise_weights": Other_noise_weights,
@@ -232,15 +230,11 @@ class VQGAN_CLIP_Z_Quantize:
                 if Only_Save:
                     return
         else:
-<<<<<<< HEAD
-            base_dir = self.get_base_dir(Output_directory, filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
-=======
             self.write_args_file(Output_directory, filename, prompts)
             base_dir = self.get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
 
             if Only_Save:
                 return
->>>>>>> e1787dbb3c02ead19b730500e0251a77432e85db
 
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
@@ -255,6 +249,23 @@ class VQGAN_CLIP_Z_Quantize:
             Seed = int(Seed)
         except:
             Seed = 0
+
+        self.Other_txt_prompts,self.Other_img_prompts,self.Other_noise_seeds,
+        self.Other_noise_weights,self.Output_directory,self.Base_Option,self.Base_Option_Weight,self.Image_Prompt1,self.Image_Prompt2,self.Image_Prompt3,
+        self.txt_prompts,self.SizeX,self.SizeY,
+        self.Noise_Seed_Number,self.Noise_Weight,self.Seed,Image_Model,self.CLIP_Model,
+        self.Display_Frequency,self.Clear_Interval,self.Train_Iterations,self.Step_Size,self.Cut_N,self.Cut_Pow,
+        self.Starting_Frame,self.Ending_Frame,self.Overwrite,self.Only_Save,
+        self.Overwritten_Dir,self.Frame_Image,self.Train_Iterations =
+
+        Other_txt_prompts,Other_img_prompts,Other_noise_seeds,
+        Other_noise_weights,Output_directory,Base_Option, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
+        txt_prompts,SizeX, SizeY,
+        Noise_Seed_Number, Noise_Weight, Seed,Image_Model, CLIP_Model,
+        Display_Frequency, Clear_Interval, Train_Iterations,Step_Size, Cut_N, Cut_Pow,
+        Starting_Frame,Ending_Frame,Overwrite,Only_Save,
+        Overwritten_Dir,Frame_Image,Train_Iterations
+
 
         self.args = argparse.Namespace(
             outdir=Output_directory,
@@ -297,7 +308,7 @@ class VQGAN_CLIP_Z_Quantize:
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
         if Base_Option:
-            imgpath = self.get_pil_imagepath(Base_Option)
+            imgpath = self.get_pil_imagepath(self.Base_Option)
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
             pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
@@ -360,13 +371,8 @@ class VQGAN_CLIP_Z_Quantize:
                     print(f"Begining training over {self.Train_Iterations} iterations.")
                     j = 0
 
-<<<<<<< HEAD
                     while j < Train_Iterations - 1:
                         last_frame_path = train_and_update(i, base_dir)
-=======
-                    while j < self.Train_Iterations - 1:
-                        last_frame_path = train_and_update(i)
->>>>>>> e1787dbb3c02ead19b730500e0251a77432e85db
                         i += 1
                         j += 1
 
