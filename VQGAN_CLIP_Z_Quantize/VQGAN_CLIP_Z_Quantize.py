@@ -78,7 +78,6 @@ class VQGAN_CLIP_Z_Quantize:
           Filename = "No_Prompts"
 
         Filename = Filename.replace(" ", "_")
-        imgpath = None
 
         # if Base_Option exists,
         # set the base directory to its final target or targets.
@@ -267,7 +266,7 @@ class VQGAN_CLIP_Z_Quantize:
         # Overwritten_Dir,Frame_Image,Train_Iterations
 
         vqgan_args_list = {"Output_directory":Output_directory,"Base_Dir":Base_Dir,"Base_Option":Base_Option,"Base_Option_Weight":Base_Option_Weight,
-        "Img_Prompts":Img_Prompts,"Txt_Prompts":Txt_Prompts,"Filename":Filename,"Imgpath":Imgpath,"SizeX":SizeX,"SizeY":SizeY,"Noise_Prompt_Seeds":Noise_Prompt_Seeds,"Noise_Prompt_Weights":Noise_Prompt_Weights,
+        "Img_Prompts":Img_Prompts,"Txt_Prompts":Txt_Prompts,"Filename":Filename,"SizeX":SizeX,"SizeY":SizeY,"Noise_Prompt_Seeds":Noise_Prompt_Seeds,"Noise_Prompt_Weights":Noise_Prompt_Weights,
         "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,"Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Train_Iterations":Train_Iterations,
         "Seed":Seed,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,
         "Overwritten_Dir":Overwritten_Dir,"Frame_Image":Frame_Image,"Train_Iterations":Train_Iterations}
@@ -295,9 +294,9 @@ class VQGAN_CLIP_Z_Quantize:
             cutn=fileargs["Cut_N"],
             cut_pow=fileargs["Cut_Pow"],
             display_freq=fileargs["Display_Frequency"],
-            seed=fileargs["Seed"],
-            Imgpath=fileargs["Imgpath"])
+            seed=fileargs["Seed"])
 
+        Imgpath = None
         # This code belongs to the original VQGAN+CLIP (Z Quantize Method) notebook
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         print('Using device:', device)
@@ -318,9 +317,9 @@ class VQGAN_CLIP_Z_Quantize:
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
         if self.args.Base_Option:
-            self.args.Imgpath = self.get_pil_imagepath(self.args.Base_Option)
-        if self.args.Imgpath:
-            pil_image = Image.open(self.args.Imgpath).convert('RGB')
+            Imgpath = self.get_pil_imagepath(self.args.Base_Option)
+        if Imgpath:
+            pil_image = Image.open(Imgpath).convert('RGB')
             pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
             self.z, *_ = self.model.encode(TF.to_tensor(pil_image).to(device).unsqueeze(0) * 2 - 1)
         else:
@@ -345,7 +344,7 @@ class VQGAN_CLIP_Z_Quantize:
             self.args.Imgpath, weight, stop = self.parse_prompt(prompt)
             self.args.Imgpath = self.get_pil_imagepath(self.args.Imgpath)
 
-            img = self.resize_image(Image.open(self.args.Imgpath).convert('RGB'), (sideX, sideY))
+            img = self.resize_image(Image.open(Imgpath).convert('RGB'), (sideX, sideY))
             batch = self.make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
             embed = self.perceptor.encode_image(self.normalize(batch)).float()
             self.pMs.append(Prompt(embed, weight, stop).to(device))
