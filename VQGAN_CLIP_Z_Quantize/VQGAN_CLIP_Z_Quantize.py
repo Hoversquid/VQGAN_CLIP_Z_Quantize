@@ -279,7 +279,7 @@ class VQGAN_CLIP_Z_Quantize:
             self[arg.name] = arg.name
 
     def main_VQGAN_loop(self):
-        self.args = argparse.Namespace,
+        self.args = argparse.Namespace(
             outdir=self.Output_directory,
             init_image=self.Base_Option,
             init_weight=self.Base_Option_Weight,
