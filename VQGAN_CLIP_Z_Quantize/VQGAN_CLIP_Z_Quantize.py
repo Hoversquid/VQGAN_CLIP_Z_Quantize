@@ -280,22 +280,22 @@ class VQGAN_CLIP_Z_Quantize:
 
     def main_VQGAN_loop(self, fileargs):
         self.args = argparse.Namespace(
-            outdir=fileargs.Output_directory,
-            init_image=fileargs.Base_Option,
-            init_weight=fileargs.Base_Option_Weight,
-            prompts=fileargs.Txt_Prompts,
-            image_prompts=fileargs.Img_Prompts,
-            Noise_Prompt_Seeds=fileargs.Noise_Prompt_Seeds,
-            noise_prompt_weights=fileargs.noise_prompt_weights,
-            size=[fileargs.SizeX, fileargs.SizeY],
-            clip_model=fileargs.CLIP_Model,
-            vqgan_config=f'{fileargs.Image_Model}.yaml',
-            vqgan_checkpoint=f'{fileargs.Image_Model}.ckpt',
-            step_size=fileargs.Step_Size,
-            cutn=fileargs.Cut_N,
-            cut_pow=fileargs.Cut_Pow,
-            display_freq=fileargs.Display_Frequency,
-            seed=fileargs.Seed)
+            outdir=fileargs["Output_directory"],
+            init_image=fileargs["Base_Option"],
+            init_weight=fileargs["Base_Option_Weight"],
+            prompts=fileargs["Txt_Prompts"],
+            image_prompts=fileargs["Img_Prompts"],
+            Noise_Prompt_Seeds=fileargs["Noise_Prompt_Seeds"],
+            noise_prompt_weights=fileargs["noise_prompt_weights"],
+            size=[fileargs["SizeX"], fileargs["SizeY"]],
+            clip_model=fileargs["CLIP_Model"],
+            vqgan_config=f'{fileargs["Image_Model"]}.yaml',
+            vqgan_checkpoint=f'{fileargs["Image_Model"]}.ckpt',
+            step_size=fileargs["Step_Size"],
+            cutn=fileargs["Cut_N"],
+            cut_pow=fileargs["Cut_Pow"],
+            display_freq=fileargs["Display_Frequency"],
+            seed=fileargs["Seed"])
 
         # This code belongs to the original VQGAN+CLIP (Z Quantize Method) notebook
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -360,7 +360,7 @@ class VQGAN_CLIP_Z_Quantize:
                 # Main helper function for the training loop
                 def train_and_update(i, last_image=False, retryTime=0):
                     try:
-                        new_filepath = self.train(i, fileargs.Base_Dir, last_image)
+                        new_filepath = self.train(i, fileargs["Base_Dir"], last_image)
 
                         pbar.update()
                         return new_filepath
@@ -376,8 +376,8 @@ class VQGAN_CLIP_Z_Quantize:
 
 
                 # Set Train_Iterations to -1 to run forever
-                if fileargs.Train_Iterations > 0:
-                    print(f"Begining training over {fileargs.Train_Iterations} iterations.")
+                if fileargs["Train_Iterations"] > 0:
+                    print(f"Begining training over {fileargs["Train_Iterations"]} iterations.")
                     j = 0
 
                     while j < Train_Iterations - 1:
@@ -390,12 +390,12 @@ class VQGAN_CLIP_Z_Quantize:
 
                 else:
                     while True:
-                        train_and_update(i, fileargs.Base_Dir)
+                        train_and_update(i, fileargs["Base_Dir"])
                         i += 1
 
         except KeyboardInterrupt:
             torch.cuda.empty_cache()
-            print(f"Interrupting {fileargs.Filename} rendering.")
+            print(f"Interrupting {fileargs["Filename"]} rendering.")
             pass
 
     def get_base_dir(self, Output_directory, Filename, Frame_Image=False, Overwritten_Dir=None):
