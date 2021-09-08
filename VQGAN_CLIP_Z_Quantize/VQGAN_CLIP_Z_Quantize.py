@@ -376,8 +376,9 @@ class VQGAN_CLIP_Z_Quantize:
 
 
                 # Set Train_Iterations to -1 to run forever
-                if fileargs["Train_Iterations"] > 0:
-                    print(f"Begining training over {fileargs["Train_Iterations"]} iterations.")
+                iterations = fileargs["Train_Iterations"]
+                if iterations > 0:
+                    print(f"Begining training over {iterations} iterations.")
                     j = 0
 
                     while j < Train_Iterations - 1:
@@ -395,7 +396,8 @@ class VQGAN_CLIP_Z_Quantize:
 
         except KeyboardInterrupt:
             torch.cuda.empty_cache()
-            print(f"Interrupting {fileargs["Filename"]} rendering.")
+            name = fileargs["Filename"]
+            print(f"Interrupting {name} rendering.")
             pass
 
     def get_base_dir(self, Output_directory, Filename, Frame_Image=False, Overwritten_Dir=None):
