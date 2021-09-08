@@ -267,7 +267,7 @@ class VQGAN_CLIP_Z_Quantize:
         # Overwritten_Dir,Frame_Image,Train_Iterations
 
         vqgan_args_list = {"Output_directory":Output_directory,"Base_Dir":Base_Dir,"Base_Option":Base_Option,"Base_Option_Weight":Base_Option_Weight,
-        "Img_Prompts":Img_Prompts,"Txt_Prompts":Txt_Prompts,"Filename":Filename,"SizeX":SizeX,"SizeY":SizeY,"Noise_Prompt_Seeds":Noise_Prompt_Seeds,
+        "Img_Prompts":Img_Prompts,"Txt_Prompts":Txt_Prompts,"Filename":Filename,"SizeX":SizeX,"SizeY":SizeY,"Noise_Prompt_Seeds":Noise_Prompt_Seeds,"Noise_Prompt_Weights":Noise_Prompt_Weights,
         "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,"Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Train_Iterations":Train_Iterations,
         "Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,
         "Overwritten_Dir":Overwritten_Dir,"Frame_Image":Frame_Image,"Train_Iterations":Train_Iterations}
