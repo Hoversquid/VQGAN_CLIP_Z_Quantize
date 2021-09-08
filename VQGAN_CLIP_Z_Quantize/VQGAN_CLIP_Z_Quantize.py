@@ -381,7 +381,7 @@ class VQGAN_CLIP_Z_Quantize:
                     print(f"Begining training over {iterations} iterations.")
                     j = 0
 
-                    while j < Train_Iterations - 1:
+                    while j < iterations - 1:
                         last_frame_path = train_and_update(i)
                         i += 1
                         j += 1
