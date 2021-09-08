@@ -246,44 +246,47 @@ class VQGAN_CLIP_Z_Quantize:
           noise_prompt_weights = Other_noise_weights
 
         try:
-            Seed = int(Seed)
+            self.Seed = int(Seed)
         except:
-            Seed = 0
+            self.Seed = 0
 
-        self.Other_txt_prompts,self.Other_img_prompts,self.Other_noise_seeds,
-        self.Other_noise_weights,self.Output_directory,self.Base_Option,self.Base_Option_Weight,self.Image_Prompt1,self.Image_Prompt2,self.Image_Prompt3,
-        self.txt_prompts,self.SizeX,self.SizeY,
-        self.Noise_Seed_Number,self.Noise_Weight,self.Seed,Image_Model,self.CLIP_Model,
-        self.Display_Frequency,self.Clear_Interval,self.Train_Iterations,self.Step_Size,self.Cut_N,self.Cut_Pow,
+        try:
+            self.clear_interval = int(Clear_Interval)
+        except:
+            self.clear_interval = 0
+
+        self.Output_directory,self.base_dir,self.Base_Option,self.Base_Option_Weight,
+        self.img_prompts,self.txt_prompts,self.filename,self.SizeX,self.SizeY,self.noise_prompt_seeds,self.Image_Model,
+        self.CLIP_Model,self.Display_Frequency,self.Clear_Interval,self.Train_Iterations,self.Step_Size,self.Cut_N,self.Cut_Pow,
         self.Starting_Frame,self.Ending_Frame,self.Overwrite,self.Only_Save,
         self.Overwritten_Dir,self.Frame_Image,self.Train_Iterations =
 
-        Other_txt_prompts,Other_img_prompts,Other_noise_seeds,
-        Other_noise_weights,Output_directory,Base_Option, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
-        txt_prompts,SizeX, SizeY,
-        Noise_Seed_Number, Noise_Weight, Seed,Image_Model, CLIP_Model,
-        Display_Frequency, Clear_Interval, Train_Iterations,Step_Size, Cut_N, Cut_Pow,
-        Starting_Frame,Ending_Frame,Overwrite,Only_Save,
+        Output_directory,base_dir,Base_Option,Base_Option_Weight,
+        img_prompts,txt_prompts,filename,SizeX,SizeY,noise_prompt_seeds,
+        Image_Model,CLIP_Model,Display_Frequency, Clear_Interval, Train_Iterations,
+        Step_Size, Cut_N,Cut_Pow,Starting_Frame,Ending_Frame,Overwrite,Only_Save,
         Overwritten_Dir,Frame_Image,Train_Iterations
 
+        self.main_VQGAN_loop()
 
+    def main_VQGAN_loop(self):
         self.args = argparse.Namespace(
-            outdir=Output_directory,
-            init_image=Base_Option,
-            init_weight=Base_Option_Weight,
-            prompts=txt_prompts,
-            image_prompts=img_prompts,
-            noise_prompt_seeds=noise_prompt_seeds,
-            noise_prompt_weights=noise_prompt_weights,
-            size=[SizeX, SizeY],
-            clip_model=CLIP_Model,
-            vqgan_config=f'{Image_Model}.yaml',
-            vqgan_checkpoint=f'{Image_Model}.ckpt',
-            step_size=Step_Size,
-            cutn=Cut_N,
-            cut_pow=Cut_Pow,
-            display_freq=Display_Frequency,
-            seed=Seed)
+            outdir=self.Output_directory,
+            init_image=self.Base_Option,
+            init_weight=self.Base_Option_Weight,
+            prompts=self.txt_prompts,
+            image_prompts=self.img_prompts,
+            noise_prompt_seeds=self.noise_prompt_seeds,
+            noise_prompt_weights=self.noise_prompt_weights,
+            size=[self.SizeX, self.SizeY],
+            clip_model=self.CLIP_Model,
+            vqgan_config=f'{self.Image_Model}.yaml',
+            vqgan_checkpoint=f'{self.Image_Model}.ckpt',
+            step_size=self.Step_Size,
+            cutn=self.Cut_N,
+            cut_pow=self.Cut_Pow,
+            display_freq=self.Display_Frequency,
+            seed=self.Seed)
 
         # This code belongs to the original VQGAN+CLIP (Z Quantize Method) notebook
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
@@ -291,10 +294,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         self.model = self.load_vqgan_model(self.args.vqgan_config, self.args.vqgan_checkpoint).to(device)
         self.perceptor = clip.load(self.args.clip_model, jit=False)[0].eval().requires_grad_(False).to(device)
-        try:
-            self.clear_interval = int(Clear_Interval)
-        except:
-            self.clear_interval = 0
+
         cut_size = self.perceptor.visual.input_resolution
         e_dim = self.model.quantize.e_dim
         f = 2**(self.model.decoder.num_resolutions - 1)
@@ -349,9 +349,9 @@ class VQGAN_CLIP_Z_Quantize:
             with tqdm() as pbar:
 
                 # Main helper function for the training loop
-                def train_and_update(i, base_dir, last_image=False, retryTime=0):
+                def train_and_update(i, last_image=False, retryTime=0):
                     try:
-                        new_filepath = self.train(i, base_dir, last_image)
+                        new_filepath = self.train(i, self.base_dir, last_image)
 
                         pbar.update()
                         return new_filepath
@@ -363,7 +363,7 @@ class VQGAN_CLIP_Z_Quantize:
                         torch.cuda.empty_cache()
                         time.sleep(retryTime)
                         newRetryTime = retryTime + 3
-                        train_and_update(i, base_dir, last_image=last_image, retryTime=newRetryTime)
+                        train_and_update(i, last_image=last_image, retryTime=newRetryTime)
 
 
                 # Set Train_Iterations to -1 to run forever
@@ -372,11 +372,11 @@ class VQGAN_CLIP_Z_Quantize:
                     j = 0
 
                     while j < Train_Iterations - 1:
-                        last_frame_path = train_and_update(i, base_dir)
+                        last_frame_path = train_and_update(i)
                         i += 1
                         j += 1
 
-                    self.final_frame_path = train_and_update(i, base_dir, last_image=True)
+                    self.final_frame_path = train_and_update(i, last_image=True)
                     torch.cuda.empty_cache()
 
                 else:
@@ -386,7 +386,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         except KeyboardInterrupt:
             torch.cuda.empty_cache()
-            print(f"Interrupting {filename} rendering.")
+            print(f"Interrupting {self.filename} rendering.")
             pass
 
     def get_base_dir(self, Output_directory, filename, Frame_Image=False, Overwritten_Dir=None):
