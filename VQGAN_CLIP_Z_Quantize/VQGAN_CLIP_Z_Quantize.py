@@ -275,8 +275,8 @@ class VQGAN_CLIP_Z_Quantize:
         self.main_VQGAN_loop()
 
     def set_vars_to_self(self, args):
-        for arg in args:
-            self[arg.name] = arg.name
+        for key in args:
+            self[key] = args[key]
 
     def main_VQGAN_loop(self):
         self.args = argparse.Namespace(
