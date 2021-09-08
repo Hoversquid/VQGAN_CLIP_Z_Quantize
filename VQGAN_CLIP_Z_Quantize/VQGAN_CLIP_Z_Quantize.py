@@ -7,20 +7,19 @@ import requests
 sys.path.append('./taming-transformers')
 
 from IPython import display
-from omegaconf import OmegaConf
-from PIL import Image
-from taming.models import cond_transformer, vqgan
-import torch
-from torch import nn, optim
-from torch.nn import functional as F
-from torchvision import transforms
-from torchvision.transforms import functional as TF
-from tqdm.notebook import tqdm
+# from omegaconf import OmegaConf
+# from PIL import Image
+# from taming.models import cond_transformer, vqgan
+# import torch
+# from torch import nn, optim
+# from torch.nn import functional as F
+# from torchvision import transforms
+# from torchvision.transforms import functional as TF
+# from tqdm.notebook import tqdm
+# from CLIP import clip
 from os import chdir, mkdir, path, getcwd, walk, listdir
 from os.path import isfile, isdir, exists, join
-from CLIP import clip
 from IPython.display import clear_output
-from collections import OrderedDict
 from shutil import copyfile
 import subprocess
 import json
@@ -42,6 +41,19 @@ class VQGAN_CLIP_Z_Quantize:
                 Step_Size, Cut_N, Cut_Pow,
                 Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False,
                 Overwritten_Dir=None, Frame_Image=False):
+
+        if not Only_Save:
+            from omegaconf import OmegaConf
+            from PIL import Image
+            from taming.models import cond_transformer, vqgan
+            import torch
+            from torch import nn, optim
+            from torch.nn import functional as F
+            from torchvision import transforms
+            from torchvision.transforms import functional as TF
+            from tqdm.notebook import tqdm
+            from CLIP import clip
+
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
@@ -253,29 +265,12 @@ class VQGAN_CLIP_Z_Quantize:
         except:
             Clear_Interval = 0
 
-        # self.Output_directory,self.base_dir,self.Base_Option,self.Base_Option_Weight,
-        # self.Img_Prompts,self.Txt_Prompts,self.Filename,self.SizeX,self.SizeY,self.Noise_Prompt_Seeds,self.Image_Model,
-        # self.CLIP_Model,self.Display_Frequency,self.Clear_Interval,self.Train_Iterations,self.Step_Size,self.Cut_N,self.Cut_Pow,
-        # self.Starting_Frame,self.Ending_Frame,self.Overwrite,self.Only_Save,
-        # self.Overwritten_Dir,self.Frame_Image,self.Train_Iterations =
-        #
-        # Output_directory,base_dir,Base_Option,Base_Option_Weight,
-        # Img_Prompts,Txt_Prompts,Filename,SizeX,SizeY,Noise_Prompt_Seeds,
-        # Image_Model,CLIP_Model,Display_Frequency, Clear_Interval, Train_Iterations,
-        # Step_Size, Cut_N,Cut_Pow,Starting_Frame,Ending_Frame,Overwrite,Only_Save,
-        # Overwritten_Dir,Frame_Image,Train_Iterations
-
         vqgan_args_list = {"Output_directory":Output_directory,"Base_Dir":Base_Dir,"Base_Option":Base_Option,"Base_Option_Weight":Base_Option_Weight,
         "Img_Prompts":Img_Prompts,"Txt_Prompts":Txt_Prompts,"Filename":Filename,"SizeX":SizeX,"SizeY":SizeY,"Noise_Prompt_Seeds":Noise_Prompt_Seeds,"Noise_Prompt_Weights":Noise_Prompt_Weights,
         "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,"Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Train_Iterations":Train_Iterations,
         "Seed":Seed,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,
         "Overwritten_Dir":Overwritten_Dir,"Frame_Image":Frame_Image,"Train_Iterations":Train_Iterations}
-        # self.set_vars_to_self(vqgan_args_list)
         self.main_VQGAN_loop(vqgan_args_list)
-
-    # def set_vars_to_self(self, args):
-    #     for key in args:
-    #         self[key] = args[key]
 
     def main_VQGAN_loop(self, fileargs):
         self.args = argparse.Namespace(
