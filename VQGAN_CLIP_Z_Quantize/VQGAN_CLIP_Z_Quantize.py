@@ -281,7 +281,7 @@ class VQGAN_CLIP_Z_Quantize:
     def main_VQGAN_loop(self, fileargs):
         self.args = argparse.Namespace(
             outdir=fileargs["Output_directory"],
-            init_image=fileargs["Base_Option"],
+            Base_Option=fileargs["Base_Option"],
             init_weight=fileargs["Base_Option_Weight"],
             prompts=fileargs["Txt_Prompts"],
             image_prompts=fileargs["Img_Prompts"],
@@ -316,8 +316,8 @@ class VQGAN_CLIP_Z_Quantize:
 
         if self.args.seed is not None:
             torch.manual_seed(self.args.seed)
-        if Base_Option:
-            imgpath = self.get_pil_imagepath(self.Base_Option)
+        if self.args.Base_Option:
+            imgpath = self.get_pil_imagepath(self.args.Base_Option)
         if imgpath:
             pil_image = Image.open(imgpath).convert('RGB')
             pil_image = pil_image.resize((sideX, sideY), Image.LANCZOS)
