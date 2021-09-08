@@ -245,14 +245,14 @@ class VQGAN_CLIP_Z_Quantize:
           Noise_Prompt_Weights = Other_noise_weights
 
         try:
-            self.Seed = int(Seed)
+            Seed = int(Seed)
         except:
-            self.Seed = 0
+            Seed = 0
 
         try:
-            self.clear_interval = int(Clear_Interval)
+            Clear_Interval = int(Clear_Interval)
         except:
-            self.clear_interval = 0
+            Clear_Interval = 0
 
         # self.Output_directory,self.base_dir,self.Base_Option,self.Base_Option_Weight,
         # self.Img_Prompts,self.Txt_Prompts,self.Filename,self.SizeX,self.SizeY,self.Noise_Prompt_Seeds,self.Image_Model,
@@ -269,7 +269,7 @@ class VQGAN_CLIP_Z_Quantize:
         vqgan_args_list = {"Output_directory":Output_directory,"Base_Dir":Base_Dir,"Base_Option":Base_Option,"Base_Option_Weight":Base_Option_Weight,
         "Img_Prompts":Img_Prompts,"Txt_Prompts":Txt_Prompts,"Filename":Filename,"SizeX":SizeX,"SizeY":SizeY,"Noise_Prompt_Seeds":Noise_Prompt_Seeds,"Noise_Prompt_Weights":Noise_Prompt_Weights,
         "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,"Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,"Train_Iterations":Train_Iterations,
-        "Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,
+        "Seed":Seed,"Step_Size":Step_Size,"Cut_N":Cut_N,"Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,"Overwrite":Overwrite,"Only_Save":Only_Save,
         "Overwritten_Dir":Overwritten_Dir,"Frame_Image":Frame_Image,"Train_Iterations":Train_Iterations}
         # self.set_vars_to_self(vqgan_args_list)
         self.main_VQGAN_loop(vqgan_args_list)
