@@ -7,18 +7,18 @@ import requests
 sys.path.append('./taming-transformers')
 
 from IPython import display
-# from omegaconf import OmegaConf
-# from PIL import Image
-# from taming.models import cond_transformer, vqgan
-# import torch
-# from torch import nn, optim
-# from torch.nn import functional as F
-# from torchvision import transforms
-# from torchvision.transforms import functional as TF
-# from tqdm.notebook import tqdm
-# from CLIP import clip
+from omegaconf import OmegaConf
+from PIL import Image
+from taming.models import cond_transformer, vqgan
+import torch
+from torch import nn, optim
+from torch.nn import functional as F
+from torchvision import transforms
+from torchvision.transforms import functional as TF
+from tqdm.notebook import tqdm
 from os import chdir, mkdir, path, getcwd, walk, listdir
 from os.path import isfile, isdir, exists, join
+from CLIP import clip
 from IPython.display import clear_output
 from shutil import copyfile
 import subprocess
@@ -41,19 +41,6 @@ class VQGAN_CLIP_Z_Quantize:
                 Step_Size, Cut_N, Cut_Pow,
                 Starting_Frame=None, Ending_Frame=None, Overwrite=False, Only_Save=False,
                 Overwritten_Dir=None, Frame_Image=False):
-
-        if not Only_Save:
-            from omegaconf import OmegaConf
-            from PIL import Image
-            from taming.models import cond_transformer, vqgan
-            import torch
-            from torch import nn, optim
-            from torch.nn import functional as F
-            from torchvision import transforms
-            from torchvision.transforms import functional as TF
-            from tqdm.notebook import tqdm
-            from CLIP import clip
-
 
         if not path.exists(Output_directory):
             mkdir(Output_directory)
