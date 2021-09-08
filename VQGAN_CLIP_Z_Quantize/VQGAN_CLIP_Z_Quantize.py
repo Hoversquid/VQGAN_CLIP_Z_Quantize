@@ -258,9 +258,7 @@ class VQGAN_CLIP_Z_Quantize:
         self.img_prompts,self.txt_prompts,self.filename,self.SizeX,self.SizeY,self.noise_prompt_seeds,self.Image_Model,
         self.CLIP_Model,self.Display_Frequency,self.Clear_Interval,self.Train_Iterations,self.Step_Size,self.Cut_N,self.Cut_Pow,
         self.Starting_Frame,self.Ending_Frame,self.Overwrite,self.Only_Save,
-        self.Overwritten_Dir,self.Frame_Image,self.Train_Iterations =
-
-        Output_directory,base_dir,Base_Option,Base_Option_Weight,
+        self.Overwritten_Dir,self.Frame_Image,self.Train_Iterations = Output_directory,base_dir,Base_Option,Base_Option_Weight,
         img_prompts,txt_prompts,filename,SizeX,SizeY,noise_prompt_seeds,
         Image_Model,CLIP_Model,Display_Frequency, Clear_Interval, Train_Iterations,
         Step_Size, Cut_N,Cut_Pow,Starting_Frame,Ending_Frame,Overwrite,Only_Save,
