@@ -57,7 +57,7 @@ class VQGAN_CLIP_Z_Quantize:
         "Noise_Seed_Number":Noise_Seed_Number,"Noise_Weight":Noise_Weight,
         "Seed":Seed, "Image_Model":Image_Model,"CLIP_Model":CLIP_Model,
         "Display_Frequency":Display_Frequency,"Clear_Interval":Clear_Interval,
-        "Train_Iterations":self.Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,
+        "Train_Iterations":Train_Iterations,"Step_Size":Step_Size,"Cut_N":Cut_N,
         "Cut_Pow":Cut_Pow,"Starting_Frame":Starting_Frame,"Ending_Frame":Ending_Frame,
         "Only_Save":Only_Save,"Overwritten_Dir":Overwritten_Dir}
 
