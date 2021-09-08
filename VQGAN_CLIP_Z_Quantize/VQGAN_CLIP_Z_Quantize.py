@@ -232,8 +232,6 @@ class VQGAN_CLIP_Z_Quantize:
         else:
             self.write_args_file(Output_directory, filename, prompts)
             base_dir = self.get_base_dir(Output_directory, filename, Overwritten_Dir=Overwritten_Dir)
-
-            
             if Only_Save:
                 return
 
