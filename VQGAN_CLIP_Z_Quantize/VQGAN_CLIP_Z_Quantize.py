@@ -238,11 +238,11 @@ class VQGAN_CLIP_Z_Quantize:
         try:
           Noise_Seed_Number = int(Noise_Seed_Number)
           Noise_Prompt_Seeds = [Noise_Seed_Number] + Other_noise_seeds
-          noise_prompt_weights = [Noise_Weight] + Other_noise_weights
+          Noise_Prompt_Weights = [Noise_Weight] + Other_noise_weights
         except:
           print("No noise seeds used.")
           Noise_Prompt_Seeds = Other_noise_seeds
-          noise_prompt_weights = Other_noise_weights
+          Noise_Prompt_Weights = Other_noise_weights
 
         try:
             self.Seed = int(Seed)
@@ -286,7 +286,7 @@ class VQGAN_CLIP_Z_Quantize:
             prompts=fileargs["Txt_Prompts"],
             image_prompts=fileargs["Img_Prompts"],
             Noise_Prompt_Seeds=fileargs["Noise_Prompt_Seeds"],
-            noise_prompt_weights=fileargs["noise_prompt_weights"],
+            Noise_Prompt_Weights=fileargs["Noise_Prompt_Weights"],
             size=[fileargs["SizeX"], fileargs["SizeY"]],
             clip_model=fileargs["CLIP_Model"],
             vqgan_config=f'{fileargs["Image_Model"]}.yaml',
@@ -349,7 +349,7 @@ class VQGAN_CLIP_Z_Quantize:
             embed = self.perceptor.encode_image(self.normalize(batch)).float()
             self.pMs.append(Prompt(embed, weight, stop).to(device))
 
-        for seed, weight in zip(self.args.Noise_Prompt_Seeds, self.args.noise_prompt_weights):
+        for seed, weight in zip(self.args.Noise_Prompt_Seeds, self.args.Noise_Prompt_Weights):
             gen = torch.Generator().manual_seed(seed)
             embed = torch.empty([1, self.perceptor.visual.output_dim]).normal_(generator=gen)
             self.pMs.append(Prompt(embed, weight).to(device))
