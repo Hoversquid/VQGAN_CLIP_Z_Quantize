@@ -146,7 +146,7 @@ class VQGAN_CLIP_Z_Quantize:
                 args_file_name = self.set_valid_filename(files, saved_prompts_dir, args_basename, ".txt")
                 self.write_args_file(Output_directory, path.splitext(args_file_name)[0], prompts)
                 if not Only_Save:
-                    self.run_saved_settings_file(Base_Option)
+                    self.run_saved_settings_file(Base_Option, Train_Iterations)
                 return
             else:
                 Base_Dir = self.get_base_dir(Output_directory, Filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
@@ -220,7 +220,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                 if len(txt_files) > 0:
                     for txt_path in txt_files:
-                        self.run_saved_settings_file(txt_path)
+                        self.run_saved_settings_file(txt_path, Train_Iterations)
                 return
             else:
                 if not Frame_Image:
@@ -550,7 +550,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         return self.set_valid_dirname(dirs, out, basename, i + 1)
 
-    def run_saved_settings_file(self, Base_Option):
+    def run_saved_settings_file(self, Base_Option, iterations):
         txt = open(Base_Option, "r")
         args = json.loads(txt.read())
         if args["Base_Option"] != Base_Option:
@@ -562,7 +562,7 @@ class VQGAN_CLIP_Z_Quantize:
                         SizeX=args["SizeX"],SizeY=args["SizeY"], Noise_Seed_Number=args["Noise_Seed_Number"],
                         Noise_Weight=args["Noise_Weight"],Seed=args["Seed"],Image_Model=args["Image_Model"],CLIP_Model=args["CLIP_Model"],
                         Display_Frequency=args["Display_Frequency"],Clear_Interval=args["Clear_Interval"],
-                        Train_Iterations=self.Train_Iterations,Step_Size=args["Step_Size"],Cut_N=args["Cut_N"],Cut_Pow=args["Cut_Pow"],Starting_Frame=args["Starting_Frame"],
+                        Train_Iterations=iterations,Step_Size=args["Step_Size"],Cut_N=args["Cut_N"],Cut_Pow=args["Cut_Pow"],Starting_Frame=args["Starting_Frame"],
                         Ending_Frame=args["Ending_Frame"],Only_Save=False,Overwritten_Dir=args["Overwritten_Dir"])
         txt.close()
 
