@@ -202,7 +202,7 @@ class VQGAN_CLIP_Z_Quantize:
                                     img, Base_Option_Weight,Image_Prompt1,Image_Prompt2,Image_Prompt3,
                                     Text_Prompt1,Text_Prompt2,Text_Prompt3,SizeX,SizeY,
                                     Noise_Seed_Number,Noise_Weight,Seed,Image_Model,CLIP_Model,
-                                    Display_Frequency,Clear_Interval,self.Train_Iterations,Step_Size,Cut_N,Cut_Pow,
+                                    Display_Frequency,Clear_Interval,Train_Iterations,Step_Size,Cut_N,Cut_Pow,
                                     Starting_Frame,Ending_Frame,Overwrite,Only_Save,Frame_Image=True)
 
                         if is_frames:
