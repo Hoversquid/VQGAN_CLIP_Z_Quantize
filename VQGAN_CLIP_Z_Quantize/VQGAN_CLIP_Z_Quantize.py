@@ -347,8 +347,9 @@ class VQGAN_CLIP_Z_Quantize:
                         pbar.update()
                         return new_filepath
 
-                    except RuntimeError:
+                    except RuntimeError as e:
                         print("RuntimeError: " + str(sys.exc_info()[0]))
+                        print("RuntimeError: " + str(e))
                         if retryTime>0:
                             print(f"Retrtying in {retryTime}.\nYou may need to lower your size settings or change models.")
                         torch.cuda.empty_cache()
