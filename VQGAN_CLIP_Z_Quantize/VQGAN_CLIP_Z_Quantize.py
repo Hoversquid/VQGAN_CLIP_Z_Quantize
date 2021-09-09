@@ -248,9 +248,9 @@ class VQGAN_CLIP_Z_Quantize:
             Seed = 0
 
         try:
-            Clear_Interval = int(Clear_Interval)
+            self.Clear_Interval = int(Clear_Interval)
         except:
-            Clear_Interval = 0
+            self.Clear_Interval = 0
 
         vqgan_args_list = {"Output_directory":Output_directory,"Base_Dir":Base_Dir,"Base_Option":Base_Option,"Base_Option_Weight":Base_Option_Weight,
         "Img_Prompts":Img_Prompts,"Txt_Prompts":Txt_Prompts,"Filename":Filename,"SizeX":SizeX,"SizeY":SizeY,"Noise_Prompt_Seeds":Noise_Prompt_Seeds,"Noise_Prompt_Weights":Noise_Prompt_Weights,
@@ -455,7 +455,7 @@ class VQGAN_CLIP_Z_Quantize:
         TF.to_pil_image(out[0].cpu()).save(outname)
         # stops the notebook file from getting too big by clearing the previous images from the output
         # (they are still saved)
-        if i > 0 and sequence_number % self.clear_interval == 0:
+        if i > 0 and sequence_number % self.Clear_Interval == 0:
             clear_output()
         display.display(display.Image(str(outname)))
         tqdm.write(f'file: {path.basename(outpath)}, i: {i}, seq: {sequence_number}, loss: {sum(losses).item():g}, losses: {losses_str}')
