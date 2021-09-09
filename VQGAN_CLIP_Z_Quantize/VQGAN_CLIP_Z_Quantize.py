@@ -323,10 +323,10 @@ class VQGAN_CLIP_Z_Quantize:
             self.pMs.append(Prompt(embed, weight, stop).to(device))
 
         for prompt in self.args.image_prompts:
-            self.args.Imgpath, weight, stop = self.parse_prompt(prompt)
-            self.args.Imgpath = self.get_pil_imagepath(self.args.Imgpath)
+            Imgpath, weight, stop = self.parse_prompt(prompt)
+            Imgpath = self.get_pil_imagepath(Imgpath)
 
-            img = self.resize_image(Image.open(self.args.Imgpath).convert('RGB'), (sideX, sideY))
+            img = self.resize_image(Image.open(Imgpath).convert('RGB'), (sideX, sideY))
             batch = self.make_cutouts(TF.to_tensor(img).unsqueeze(0).to(device))
             embed = self.perceptor.encode_image(self.normalize(batch)).float()
             self.pMs.append(Prompt(embed, weight, stop).to(device))
@@ -342,8 +342,8 @@ class VQGAN_CLIP_Z_Quantize:
                 # Main helper function for the training loop
                 def train_and_update(i, last_image=False, retryTime=0):
                     try:
+                        reset = False
                         new_filepath = self.train(i, fileargs["Base_Dir"], last_image)
-
                         pbar.update()
                         return new_filepath
 
@@ -354,8 +354,10 @@ class VQGAN_CLIP_Z_Quantize:
                         torch.cuda.empty_cache()
                         time.sleep(retryTime)
                         newRetryTime = retryTime + 3
-                        train_and_update(i, last_image=last_image, retryTime=newRetryTime)
+                        reset = True
 
+                    if reset:
+                        train_and_update(i, last_image=last_image, retryTime=newRetryTime)
 
                 # Set Train_Iterations to -1 to run forever
                 iterations = fileargs["Train_Iterations"]
