@@ -76,7 +76,7 @@ class VQGAN_CLIP_Z_Quantize:
         if Filename == "":
           Filename = "No_Prompts"
 
-        Filename = Filename.replace(" ", "_")
+        Filename = Filename.replace(" ", "_").replace("\'", "_")
 
         # if Base_Option exists,
         # set the base directory to its final target or targets.
@@ -349,7 +349,6 @@ class VQGAN_CLIP_Z_Quantize:
 
                     except RuntimeError as e:
                         print("RuntimeError: " + str(sys.exc_info()[0]))
-                        print("RuntimeError: " + str(e))
                         if retryTime>0:
                             print(f"Retrtying in {retryTime}.\nYou may need to lower your size settings or change models.")
                         torch.cuda.empty_cache()
