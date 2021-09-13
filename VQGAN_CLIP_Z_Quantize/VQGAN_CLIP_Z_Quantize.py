@@ -342,7 +342,6 @@ class VQGAN_CLIP_Z_Quantize:
                 # Main helper function for the training loop
                 def train_and_update(i, last_image=False, retryTime=0):
                     try:
-                        reset = False
                         new_filepath = self.train(i, fileargs["Base_Dir"], last_image)
                         pbar.update()
                         return new_filepath
@@ -353,10 +352,7 @@ class VQGAN_CLIP_Z_Quantize:
                             print(f"Retrtying in {retryTime}.\nYou may need to lower your size settings or change models.")
                         torch.cuda.empty_cache()
                         time.sleep(retryTime)
-                        newRetryTime = retryTime + 3
-                        reset = True
-
-                    if reset:
+                        newRetryTime = retryTime + 2
                         train_and_update(i, last_image=last_image, retryTime=newRetryTime)
 
                 # Set Train_Iterations to -1 to run forever
