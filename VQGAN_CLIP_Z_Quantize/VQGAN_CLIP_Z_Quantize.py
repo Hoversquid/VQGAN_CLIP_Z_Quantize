@@ -596,7 +596,7 @@ class VQGAN_CLIP_Z_Quantize:
 
     def write_arg_list(self,args):
         with open(self.filelistpath, "w", encoding="utf-8") as txtfile:
-            json_args = json.dumps(args sort_keys=True, indent=4)
+            json_args = json.dumps(args, sort_keys=True, indent=4)
             print(f"writing settings to {self.filelistpath}")
             txtfile.write(json_args)
 
