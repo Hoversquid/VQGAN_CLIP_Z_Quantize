@@ -24,6 +24,7 @@ from shutil import copyfile
 import subprocess
 import json
 import time
+import gc
 
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_Txt_Prompts,
@@ -351,6 +352,8 @@ class VQGAN_CLIP_Z_Quantize:
                         if retryTime>0:
                             print(f"Retrtying in {retryTime}.\nYou may need to lower your size settings or change models.")
                         torch.cuda.empty_cache()
+                        gc.collect()
+
                         time.sleep(retryTime)
                         newRetryTime = retryTime + 2
                         train_and_update(i, last_image=last_image, retryTime=newRetryTime)
@@ -368,6 +371,7 @@ class VQGAN_CLIP_Z_Quantize:
 
                     self.final_frame_path = train_and_update(i, last_image=True)
                     torch.cuda.empty_cache()
+                    gc.collect()
 
                 else:
                     while True:
@@ -376,6 +380,7 @@ class VQGAN_CLIP_Z_Quantize:
 
         except KeyboardInterrupt:
             torch.cuda.empty_cache()
+            gc.collect()
             name = fileargs["Filename"]
             print(f"Interrupting {name} rendering.")
             pass
