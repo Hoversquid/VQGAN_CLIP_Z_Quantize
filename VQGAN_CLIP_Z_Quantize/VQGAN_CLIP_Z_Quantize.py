@@ -25,7 +25,7 @@ import subprocess
 import json
 import time
 import gc
-import
+
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_Txt_Prompts,
                 Other_Img_Prompts,
