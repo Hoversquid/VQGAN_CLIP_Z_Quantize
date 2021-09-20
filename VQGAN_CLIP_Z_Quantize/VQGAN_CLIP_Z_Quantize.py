@@ -25,7 +25,7 @@ import subprocess
 import json
 import time
 import gc
-
+import
 class VQGAN_CLIP_Z_Quantize:
     def __init__(self, Other_Txt_Prompts,
                 Other_Img_Prompts,
@@ -81,8 +81,8 @@ class VQGAN_CLIP_Z_Quantize:
 
         # if Base_Option exists,
         # set the base directory to its final target or targets.
-        if not Base_Option in (None, ""):
 
+        if not Base_Option in (None, ""):
             sorted_imgs, txt_files = [], []
 
             is_frames  = False
@@ -139,9 +139,6 @@ class VQGAN_CLIP_Z_Quantize:
             # Each run produces a text file of a JSON string. The file contains the settings for the run from which it was made.
             # Running the text file through the program will use the settings saved in it.
             elif path.splitext(Base_Option)[1] in ('.txt'):
-                one = path.splitext(Base_Option)[0]
-                two = path.splitext(Base_Option)[1]
-                print(f'{one} ::: {two}')
                 files = [f for f in listdir(saved_prompts_dir) if isfile(join(saved_prompts_dir, f))]
                 args_basename = path.basename(path.splitext(Base_Option)[0]) + "_text"
 
