@@ -94,7 +94,12 @@ class VQGAN_CLIP_Z_Quantize:
 
             # Setting the Base_Option to a directory will run each image and saved prompt text file in order.
             # Skips animated files but will run prompts that contain animated file parameters.
-            if isdir(Base_Option):
+            if not path.exists:
+                Base_Dir = self.get_base_dir(Output_directory, Filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
+                print(f"Selecting Base_Option: {Base_Option}\nUsing Filename: {Filename}\nUsing Base_Dir: {Base_Dir}")
+                Base_Dir_name = args_basename = path.basename(Base_Dir)
+
+            elif isdir(Base_Option):
                 Base_Dir = Output_directory
 
                 Base_Dir_name = path.basename(Base_Dir)
@@ -149,6 +154,7 @@ class VQGAN_CLIP_Z_Quantize:
                     self.run_saved_settings_file(Base_Option, Train_Iterations)
                 return
             else:
+                # Same as image link
                 Base_Dir = self.get_base_dir(Output_directory, Filename, Frame_Image=Frame_Image, Overwritten_Dir=Overwritten_Dir)
                 print(f"Selecting Base_Option: {Base_Option}\nUsing Filename: {Filename}\nUsing Base_Dir: {Base_Dir}")
                 Base_Dir_name = args_basename = path.basename(Base_Dir)
